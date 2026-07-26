@@ -1,0 +1,37 @@
+{
+  "@@locale": "en",
+  "appTitle": "App Usage",
+  "homeTitle": "Today's usage",
+  "permissionsTitle": "Permissions",
+  "unsupportedTitle": "Not supported",
+  "unsupportedMessage": "Live app usage tracking with a floating counter is only available on Android.",
+  "usagePermissionTitle": "Usage access",
+  "usagePermissionBody": "Allow this app to see which apps you use so we can count today's time.",
+  "overlayPermissionTitle": "Display over other apps",
+  "overlayPermissionBody": "Allow a small glassy counter to float over other apps.",
+  "grantUsageAccess": "Open usage access",
+  "grantOverlayAccess": "Open overlay settings",
+  "permissionGranted": "Granted",
+  "permissionMissing": "Required",
+  "continueToHome": "Continue",
+  "startTracking": "Start live counter",
+  "stopTracking": "Stop live counter",
+  "trackingActive": "Live counter is running",
+  "trackingInactive": "Live counter is off",
+  "noUsageYet": "No app usage recorded for today yet.",
+  "currentApp": "Current app",
+  "switchLanguage": "Language",
+  "languageEnglish": "English",
+  "languagePersian": "Persian",
+  "refresh": "Refresh",
+  "errorGeneric": "Something went wrong",
+  "permissionsRequired": "Both permissions are required to start tracking.",
+  "secondsFormat": "{time}",
+  "@secondsFormat": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
+}

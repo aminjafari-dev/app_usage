@@ -1,0 +1,37 @@
+{
+  "@@locale": "fa",
+  "appTitle": "زمان استفاده",
+  "homeTitle": "استفاده امروز",
+  "permissionsTitle": "دسترسی‌ها",
+  "unsupportedTitle": "پشتیبانی نمی‌شود",
+  "unsupportedMessage": "شمارنده زنده روی برنامه‌ها فقط روی اندروید در دسترس است.",
+  "usagePermissionTitle": "دسترسی به آمار استفاده",
+  "usagePermissionBody": "اجازه دهید ببینیم از کدام برنامه‌ها استفاده می‌کنید تا زمان امروز را بشماریم.",
+  "overlayPermissionTitle": "نمایش روی برنامه‌های دیگر",
+  "overlayPermissionBody": "اجازه دهید یک شمارنده شیشه‌ای کوچک روی برنامه‌های دیگر نمایش داده شود.",
+  "grantUsageAccess": "باز کردن دسترسی استفاده",
+  "grantOverlayAccess": "باز کردن تنظیمات روکش",
+  "permissionGranted": "داده شده",
+  "permissionMissing": "لازم است",
+  "continueToHome": "ادامه",
+  "startTracking": "شروع شمارنده زنده",
+  "stopTracking": "توقف شمارنده زنده",
+  "trackingActive": "شمارنده زنده فعال است",
+  "trackingInactive": "شمارنده زنده خاموش است",
+  "noUsageYet": "هنوز استفاده‌ای برای امروز ثبت نشده است.",
+  "currentApp": "برنامه فعلی",
+  "switchLanguage": "زبان",
+  "languageEnglish": "انگلیسی",
+  "languagePersian": "فارسی",
+  "refresh": "به‌روزرسانی",
+  "errorGeneric": "مشکلی پیش آمد",
+  "permissionsRequired": "برای شروع ردیابی هر دو دسترسی لازم است.",
+  "secondsFormat": "{time}",
+  "@secondsFormat": {
+    "placeholders": {
+      "time": {
+        "type": "String"
+      }
+    }
+  }
+}
