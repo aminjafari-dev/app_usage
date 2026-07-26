@@ -48,11 +48,10 @@ class _OverlayAppState extends State<OverlayApp> {
       color: Colors.transparent,
       child: Theme(
         data: AppTheme.light(),
-        child: Center(
-          child: UsageGlassCounter(
-            appName: _appName,
-            todaySeconds: _todaySeconds,
-          ),
+        // Fill the overlay window; the glass pill sizes itself to the window.
+        child: UsageGlassCounter(
+          appName: _appName,
+          todaySeconds: _todaySeconds,
         ),
       ),
     );

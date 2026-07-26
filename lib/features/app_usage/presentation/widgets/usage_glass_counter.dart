@@ -17,6 +17,8 @@ import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.da
 /// ```
 ///
 /// Shared by the floating overlay and the home-page preview.
+/// Keep [compact] true inside the overlay window so text stays within the
+/// floating surface; use compact false for the larger home preview.
 class UsageGlassCounter extends StatelessWidget {
   /// Creates the glass counter UI.
   const UsageGlassCounter({
@@ -34,77 +36,122 @@ class UsageGlassCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(18),
-      child: BackdropFilter(
-        filter: ImageFilter.blur(sigmaX: 16, sigmaY: 16),
-        child: Container(
-          padding: EdgeInsets.symmetric(
-            horizontal: compact ? 12 : 16,
-            vertical: compact ? 8 : 12,
-          ),
-          decoration: BoxDecoration(
-            color: AppTheme.glassFill,
-            borderRadius: BorderRadius.circular(18),
-            border: Border.all(color: AppTheme.glassBorder),
-          ),
-          child: Row(
-            mainAxisSize: MainAxisSize.min,
-            children: [
-              _IconBubble(iconBytes: iconBytes),
-              GGap.s(),
-              Flexible(
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  crossAxisAlignment: CrossAxisAlignment.start,
-                  children: [
-                    GText(
-                      appName,
-                      style: Theme.of(context).textTheme.bodySmall,
-                      color: AppTheme.overlayText,
-                      maxLines: 1,
-                      overflow: TextOverflow.ellipsis,
-                    ),
-                    GText(
-                      formatUsageDuration(todaySeconds),
-                      style: Theme.of(context).textTheme.titleMedium,
-                      color: AppTheme.overlayAccent,
-                    ),
-                  ],
+    final iconSize = compact ? 36.0 : 40.0;
+    final nameStyle = TextStyle(
+      fontSize: compact ? 13 : 14,
+      fontWeight: FontWeight.w500,
+      color: AppTheme.overlayText,
+      height: 1.1,
+    );
+    final timeStyle = TextStyle(
+      fontSize: compact ? 22 : 24,
+      fontWeight: FontWeight.w700,
+      color: AppTheme.overlayAccent,
+      height: 1.1,
+    );
+
+    return LayoutBuilder(
+      builder: (context, constraints) {
+        // Overlay window gives tight bounds; home preview does not.
+        final fillParent = constraints.hasBoundedHeight &&
+            constraints.maxHeight.isFinite &&
+            constraints.maxHeight < 200;
+
+        return ClipRRect(
+          borderRadius: BorderRadius.circular(22),
+          child: BackdropFilter(
+            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
+            child: Container(
+              width: fillParent ? double.infinity : (compact ? 260.0 : 280.0),
+              height: fillParent ? double.infinity : (compact ? 88.0 : 96.0),
+              padding: EdgeInsets.symmetric(
+                horizontal: compact ? 14 : 18,
+                vertical: compact ? 10 : 14,
+              ),
+              decoration: BoxDecoration(
+                color: AppTheme.glassFill,
+                borderRadius: BorderRadius.circular(22),
+                border: Border.all(color: AppTheme.glassBorder, width: 1.2),
+              ),
+              // Scale the whole row down when the overlay window is smaller
+              // than the design size (density quirks / resize races). Without
+              // FittedBox, a tight maxHeight makes the text Column overflow.
+              //
+              // How to use: keep children at their natural sizes; FittedBox
+              // shrinks them uniformly only when the parent is too small.
+              // Example: a 40px-tall overlay still shows icon + name + time.
+              child: FittedBox(
+                fit: BoxFit.scaleDown,
+                alignment: Alignment.centerLeft,
+                child: SizedBox(
+                  // Intrinsic design width so Expanded has a real budget when
+                  // the outer Container is unbounded (home preview path).
+                  width: compact ? 232 : 244,
+                  height: 68,
+                  child: Row(
+                    children: [
+                      _IconBubble(iconBytes: iconBytes, size: iconSize),
+                      GGap.s(),
+                      Expanded(
+                        child: Column(
+                          mainAxisAlignment: MainAxisAlignment.center,
+                          mainAxisSize: MainAxisSize.max,
+                          crossAxisAlignment: CrossAxisAlignment.start,
+                          children: [
+                            Text(
+                              appName,
+                              style: nameStyle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                            const SizedBox(height: 2),
+                            Text(
+                              formatUsageDuration(todaySeconds),
+                              style: timeStyle,
+                              maxLines: 1,
+                              overflow: TextOverflow.ellipsis,
+                            ),
+                          ],
+                        ),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            ],
+            ),
           ),
-        ),
-      ),
+        );
+      },
     );
   }
 }
 
-/// Tiny circular app-icon (or fallback glyph) inside the glass pill.
+/// Circular app-icon (or fallback glyph) inside the glass pill.
 class _IconBubble extends StatelessWidget {
-  const _IconBubble({this.iconBytes});
+  const _IconBubble({this.iconBytes, this.size = 28});
 
   final List<int>? iconBytes;
+  final double size;
 
   @override
   Widget build(BuildContext context) {
     final bytes = iconBytes;
+    final glyphSize = size * 0.55;
     return Container(
-      width: 28,
-      height: 28,
+      width: size,
+      height: size,
       decoration: const BoxDecoration(
         color: AppTheme.surface,
         shape: BoxShape.circle,
       ),
       clipBehavior: Clip.antiAlias,
       child: bytes == null
-          ? const Icon(Icons.apps, size: 16, color: AppTheme.primary)
+          ? Icon(Icons.apps, size: glyphSize, color: AppTheme.primary)
           : Image.memory(
               Uint8List.fromList(bytes),
               fit: BoxFit.cover,
               errorBuilder: (context, error, stackTrace) =>
-                  const Icon(Icons.apps, size: 16, color: AppTheme.primary),
+                  Icon(Icons.apps, size: glyphSize, color: AppTheme.primary),
             ),
     );
   }
@@ -138,7 +185,7 @@ class UsageAppTile extends StatelessWidget {
       ),
       child: Row(
         children: [
-          _IconBubble(iconBytes: entity.iconBytes),
+          _IconBubble(iconBytes: entity.iconBytes, size: 32),
           GGap.s(),
           Expanded(
             child: GText(

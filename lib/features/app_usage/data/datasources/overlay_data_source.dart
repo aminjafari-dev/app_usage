@@ -1,3 +1,5 @@
+import 'dart:ui' show PlatformDispatcher;
+
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
 /// Payload pushed from the main isolate to the overlay UI each tick.
@@ -73,9 +75,20 @@ class OverlayDataSource {
       await FlutterOverlayWindow.closeOverlay();
     }
 
+    // showOverlay applies height/width as raw WindowManager pixels (not dp).
+    // Convert logical design size → physical px so the glass pill fits on all
+    // densities (e.g. 96dp ≈ 269px at 2.8x). Without this, a 96px-tall window
+    // collapses to ~34 logical px and the Column overflows.
+    //
+    // How to use: keep [logicalHeight]/[logicalWidth] as the Flutter layout
+    // size you want; only the native call is density-scaled.
+    // Example: on a 3x device, height becomes 288 physical pixels.
+    const logicalHeight = 96.0;
+    const logicalWidth = 280.0;
+    final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
     await FlutterOverlayWindow.showOverlay(
-      height: 64,
-      width: 200,
+      height: (logicalHeight * dpr).round(),
+      width: (logicalWidth * dpr).round(),
       alignment: OverlayAlignment.topCenter,
       flag: OverlayFlag.defaultFlag,
       enableDrag: true,
@@ -83,8 +96,9 @@ class OverlayDataSource {
       overlayContent: 'Live usage counter is running',
       // Keep it near the top instead of snapping to a side edge.
       positionGravity: PositionGravity.none,
-      // Slight offset so the pill sits just under the status bar.
-      startPosition: const OverlayPosition(0, 48),
+      // Slight offset so the pill sits just under the status bar (dp → px
+      // is handled inside the plugin for startPosition).
+      startPosition: const OverlayPosition(0, 40),
     );
   }
 
