@@ -95,17 +95,30 @@ class UsageStatsDataSource {
 
   /// Detects the current foreground package from recent usage events.
   ///
-  /// Returns null when the top app is a launcher/system UI we choose to ignore.
-  Future<String?> currentForegroundPackage() async {
+  /// Android only emits ACTIVITY_RESUMED when an app becomes foreground — not
+  /// every second while it stays open. So after a short idle window there are
+  /// no new events.
+  ///
+  /// How to use:
+  /// ```dart
+  /// final pkg = await ds.currentForegroundPackage(
+  ///   keepIfNoEvent: lastActivePackage,
+  /// );
+  /// ```
+  ///
+  /// - New resumed app → that package
+  /// - Launcher / ignored → `null` (pause counting)
+  /// - No events in the window → [keepIfNoEvent] (keep counting same app)
+  Future<String?> currentForegroundPackage({String? keepIfNoEvent}) async {
     final end = DateTime.now();
-    // Look back a short window so we catch the latest ACTIVITY_RESUMED event.
-    final start = end.subtract(const Duration(seconds: 10));
+    // Long enough to catch app switches; not used alone for "still in app".
+    final start = end.subtract(const Duration(minutes: 2));
     final events = await UsageStats.queryEvents(start, end);
 
     String? lastPackage;
     for (final event in events) {
       final type = event.eventType;
-      // MOVE_TO_FOREGROUND / ACTIVITY_RESUMED are type "1" in usage_stats.
+      // MOVE_TO_FOREGROUND / ACTIVITY_RESUMED ("1") and related type "15".
       if (type == '1' || type == '15') {
         final pkg = event.packageName;
         if (pkg != null && pkg.isNotEmpty) {
@@ -114,10 +127,19 @@ class UsageStatsDataSource {
       }
     }
 
-    if (lastPackage == null) return null;
-    if (_ignoredPackages.contains(lastPackage)) return null;
-    if (lastPackage.startsWith('com.android.launcher')) return null;
+    // No resume events recently → user is almost certainly still in the same app.
+    if (lastPackage == null) return keepIfNoEvent;
+
+    // Home / system UI / our app → pause the live counter.
+    if (_isIgnoredPackage(lastPackage)) return null;
     return lastPackage;
+  }
+
+  /// Whether [packageName] should be skipped for live counting.
+  bool _isIgnoredPackage(String packageName) {
+    if (_ignoredPackages.contains(packageName)) return true;
+    if (packageName.startsWith('com.android.launcher')) return true;
+    return false;
   }
 
   /// Resolves a human-readable label for [packageName].

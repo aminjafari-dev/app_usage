@@ -213,10 +213,14 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     if (!_tracking) return;
     try {
       await _rollDayIfNeeded();
-      final package = await _usageStats.currentForegroundPackage();
+      // Pass last active package so we keep counting after the 10s event gap.
+      final package = await _usageStats.currentForegroundPackage(
+        keepIfNoEvent: _activePackage,
+      );
 
-      // No countable foreground app (launcher / own app) — keep last overlay.
+      // Launcher / our own app: pause counting and clear active target.
       if (package == null) {
+        _activePackage = null;
         _emitUsage();
         return;
       }
