@@ -25,10 +25,20 @@ abstract class AppUsageRepository {
   Future<Either<Failure, Unit>> requestOverlayPermission();
 
   /// Starts the 1s polling loop, overlay, and live increments.
+  ///
+  /// Also turns auto-tracking on so the next app launch resumes the counter.
   Future<Either<Failure, Unit>> startLiveTracking();
 
   /// Stops polling and hides the overlay.
+  ///
+  /// Also turns auto-tracking off until the user starts again.
   Future<Either<Failure, Unit>> stopLiveTracking();
+
+  /// Starts tracking when permissions are ready and auto-tracking is enabled.
+  ///
+  /// How to use: call from Home/Permissions after checking access so the
+  /// top counter appears automatically when the user opens another app.
+  Future<Either<Failure, Unit>> ensureAutoTrackingStarted();
 
   /// Whether live tracking is currently active.
   bool get isTracking;

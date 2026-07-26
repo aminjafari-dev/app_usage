@@ -51,16 +51,17 @@ class AppLocalizationsFa extends AppLocalizations {
   String get permissionMissing => 'لازم است';
 
   @override
-  String get continueToHome => 'ادامه';
+  String get continueToHome => 'ادامه — شمارنده به‌صورت خودکار شروع می‌شود';
 
   @override
-  String get startTracking => 'شروع شمارنده زنده';
+  String get startTracking => 'فعال‌سازی شمارنده زنده';
 
   @override
-  String get stopTracking => 'توقف شمارنده زنده';
+  String get stopTracking => 'غیرفعال‌سازی شمارنده زنده';
 
   @override
-  String get trackingActive => 'شمارنده زنده فعال است';
+  String get trackingActive =>
+      'شمارنده زنده روشن است — هر برنامه‌ای باز کنید تا بالای صفحه ببینید';
 
   @override
   String get trackingInactive => 'شمارنده زنده خاموش است';
@@ -87,7 +88,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get errorGeneric => 'مشکلی پیش آمد';
 
   @override
-  String get permissionsRequired => 'برای شروع ردیابی هر دو دسترسی لازم است.';
+  String get permissionsRequired => 'برای شمارنده زنده هر دو دسترسی لازم است.';
 
   @override
   String secondsFormat(String time) {

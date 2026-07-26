@@ -20,8 +20,22 @@ class UsageLocalDataSource {
 
   static const _secondsPrefix = 'usage_seconds_';
   static const _dateKey = 'usage_cache_date';
+  static const _autoTrackingKey = 'auto_tracking_enabled';
 
   final SharedPreferences _prefs;
+
+  /// Whether the live counter should auto-start when permissions are ready.
+  ///
+  /// Defaults to true so opening any app shows the top counter without a
+  /// manual Start tap. Stopping from Home turns this off until Start again.
+  bool isAutoTrackingEnabled() {
+    return _prefs.getBool(_autoTrackingKey) ?? true;
+  }
+
+  /// Persists the user's auto-tracking preference.
+  Future<void> setAutoTrackingEnabled(bool enabled) async {
+    await _prefs.setBool(_autoTrackingKey, enabled);
+  }
 
   /// Loads today's package→seconds map, clearing stale days first.
   Future<Map<String, int>> loadTodaySeconds() async {

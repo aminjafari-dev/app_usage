@@ -51,16 +51,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permissionMissing => 'Required';
 
   @override
-  String get continueToHome => 'Continue';
+  String get continueToHome => 'Continue — counter starts automatically';
 
   @override
-  String get startTracking => 'Start live counter';
+  String get startTracking => 'Enable live counter';
 
   @override
-  String get stopTracking => 'Stop live counter';
+  String get stopTracking => 'Disable live counter';
 
   @override
-  String get trackingActive => 'Live counter is running';
+  String get trackingActive =>
+      'Live counter is on — open any app to see it at the top';
 
   @override
   String get trackingInactive => 'Live counter is off';
@@ -88,7 +89,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get permissionsRequired =>
-      'Both permissions are required to start tracking.';
+      'Both permissions are required for the live counter.';
 
   @override
   String secondsFormat(String time) {

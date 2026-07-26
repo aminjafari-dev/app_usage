@@ -13,10 +13,10 @@
   "grantOverlayAccess": "باز کردن تنظیمات روکش",
   "permissionGranted": "داده شده",
   "permissionMissing": "لازم است",
-  "continueToHome": "ادامه",
-  "startTracking": "شروع شمارنده زنده",
-  "stopTracking": "توقف شمارنده زنده",
-  "trackingActive": "شمارنده زنده فعال است",
+  "continueToHome": "ادامه — شمارنده به‌صورت خودکار شروع می‌شود",
+  "startTracking": "فعال‌سازی شمارنده زنده",
+  "stopTracking": "غیرفعال‌سازی شمارنده زنده",
+  "trackingActive": "شمارنده زنده روشن است — هر برنامه‌ای باز کنید تا بالای صفحه ببینید",
   "trackingInactive": "شمارنده زنده خاموش است",
   "noUsageYet": "هنوز استفاده‌ای برای امروز ثبت نشده است.",
   "currentApp": "برنامه فعلی",
@@ -25,7 +25,7 @@
   "languagePersian": "فارسی",
   "refresh": "به‌روزرسانی",
   "errorGeneric": "مشکلی پیش آمد",
-  "permissionsRequired": "برای شروع ردیابی هر دو دسترسی لازم است.",
+  "permissionsRequired": "برای شمارنده زنده هر دو دسترسی لازم است.",
   "secondsFormat": "{time}",
   "@secondsFormat": {
     "placeholders": {

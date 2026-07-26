@@ -179,25 +179,25 @@ abstract class AppLocalizations {
   /// No description provided for @continueToHome.
   ///
   /// In en, this message translates to:
-  /// **'Continue'**
+  /// **'Continue — counter starts automatically'**
   String get continueToHome;
 
   /// No description provided for @startTracking.
   ///
   /// In en, this message translates to:
-  /// **'Start live counter'**
+  /// **'Enable live counter'**
   String get startTracking;
 
   /// No description provided for @stopTracking.
   ///
   /// In en, this message translates to:
-  /// **'Stop live counter'**
+  /// **'Disable live counter'**
   String get stopTracking;
 
   /// No description provided for @trackingActive.
   ///
   /// In en, this message translates to:
-  /// **'Live counter is running'**
+  /// **'Live counter is on — open any app to see it at the top'**
   String get trackingActive;
 
   /// No description provided for @trackingInactive.
@@ -251,7 +251,7 @@ abstract class AppLocalizations {
   /// No description provided for @permissionsRequired.
   ///
   /// In en, this message translates to:
-  /// **'Both permissions are required to start tracking.'**
+  /// **'Both permissions are required for the live counter.'**
   String get permissionsRequired;
 
   /// No description provided for @secondsFormat.

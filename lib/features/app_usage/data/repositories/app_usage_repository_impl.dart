@@ -114,8 +114,10 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
         );
       }
 
+      await _local.setAutoTrackingEnabled(true);
       await _hydrateToday();
-      await _overlay.show();
+      // Force restart so the pill lands at the top center every start.
+      await _overlay.show(forceRestart: true);
       _tracking = true;
       _timer?.cancel();
       // Poll every second for foreground changes and live increments.
@@ -137,10 +139,34 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
       _timer = null;
       _tracking = false;
       _activePackage = null;
+      await _local.setAutoTrackingEnabled(false);
       await _overlay.hide();
       _currentAppController.add(null);
       _emitUsage();
       return const Right(unit);
+    } catch (e) {
+      return Left(PlatformFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, Unit>> ensureAutoTrackingStarted() async {
+    try {
+      // Already running — nothing to do.
+      if (_tracking) return const Right(unit);
+
+      // User previously tapped Stop — respect that until they Start again.
+      if (!_local.isAutoTrackingEnabled()) return const Right(unit);
+
+      final permissions = await checkPermissions();
+      final status = permissions.fold<PermissionsStatus?>(
+        (_) => null,
+        (s) => s,
+      );
+      // Wait until both Android special permissions are granted.
+      if (status == null || !status.isReady) return const Right(unit);
+
+      return await startLiveTracking();
     } catch (e) {
       return Left(PlatformFailure(e.toString()));
     }

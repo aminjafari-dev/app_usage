@@ -13,10 +13,10 @@
   "grantOverlayAccess": "Open overlay settings",
   "permissionGranted": "Granted",
   "permissionMissing": "Required",
-  "continueToHome": "Continue",
-  "startTracking": "Start live counter",
-  "stopTracking": "Stop live counter",
-  "trackingActive": "Live counter is running",
+  "continueToHome": "Continue — counter starts automatically",
+  "startTracking": "Enable live counter",
+  "stopTracking": "Disable live counter",
+  "trackingActive": "Live counter is on — open any app to see it at the top",
   "trackingInactive": "Live counter is off",
   "noUsageYet": "No app usage recorded for today yet.",
   "currentApp": "Current app",
@@ -25,7 +25,7 @@
   "languagePersian": "Persian",
   "refresh": "Refresh",
   "errorGeneric": "Something went wrong",
-  "permissionsRequired": "Both permissions are required to start tracking.",
+  "permissionsRequired": "Both permissions are required for the live counter.",
   "secondsFormat": "{time}",
   "@secondsFormat": {
     "placeholders": {

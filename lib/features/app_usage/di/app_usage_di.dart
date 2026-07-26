@@ -6,6 +6,7 @@ import 'package:app_usage/features/app_usage/data/datasources/usage_stats_data_s
 import 'package:app_usage/features/app_usage/data/repositories/app_usage_repository_impl.dart';
 import 'package:app_usage/features/app_usage/domain/repositories/app_usage_repository.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/check_permissions_usecase.dart';
+import 'package:app_usage/features/app_usage/domain/usecases/ensure_auto_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/get_today_usage_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_overlay_permission_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_usage_permission_usecase.dart';
@@ -54,6 +55,9 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
   locator.registerLazySingleton(
     () => StopLiveTrackingUseCase(locator()),
   );
+  locator.registerLazySingleton(
+    () => EnsureAutoTrackingUseCase(locator()),
+  );
 
   // BLoC — factory so each page gets a fresh instance.
   locator.registerFactory(
@@ -64,6 +68,7 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
       getTodayUsageUseCase: locator(),
       startLiveTrackingUseCase: locator(),
       stopLiveTrackingUseCase: locator(),
+      ensureAutoTrackingUseCase: locator(),
       repository: locator(),
     ),
   );

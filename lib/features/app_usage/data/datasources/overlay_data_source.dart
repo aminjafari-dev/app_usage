@@ -58,21 +58,33 @@ class OverlayDataSource {
     return FlutterOverlayWindow.requestPermission();
   }
 
-  /// Shows the small draggable glassy counter overlay.
-  Future<void> show() async {
+  /// Shows the small draggable glassy counter overlay at the top of the screen.
+  ///
+  /// How to use: call after overlay permission is granted and tracking starts.
+  /// Example: the counter appears at the top center over Instagram/Chrome/etc.
+  ///
+  /// Pass [forceRestart] true when repositioning an already-visible overlay
+  /// (e.g. after upgrading from a corner placement to top-center).
+  Future<void> show({bool forceRestart = false}) async {
     final active = await FlutterOverlayWindow.isActive();
     // Avoid stacking multiple overlay windows if tracking restarts.
-    if (active) return;
+    if (active) {
+      if (!forceRestart) return;
+      await FlutterOverlayWindow.closeOverlay();
+    }
 
     await FlutterOverlayWindow.showOverlay(
-      height: 56,
-      width: 168,
-      alignment: OverlayAlignment.topRight,
+      height: 64,
+      width: 200,
+      alignment: OverlayAlignment.topCenter,
       flag: OverlayFlag.defaultFlag,
       enableDrag: true,
       overlayTitle: 'App Usage',
       overlayContent: 'Live usage counter is running',
-      positionGravity: PositionGravity.auto,
+      // Keep it near the top instead of snapping to a side edge.
+      positionGravity: PositionGravity.none,
+      // Slight offset so the pill sits just under the status bar.
+      startPosition: const OverlayPosition(0, 48),
     );
   }
 

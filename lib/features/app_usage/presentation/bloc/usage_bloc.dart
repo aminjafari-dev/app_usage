@@ -6,6 +6,7 @@ import 'package:app_usage/core/usecase/usecase.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
 import 'package:app_usage/features/app_usage/domain/repositories/app_usage_repository.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/check_permissions_usecase.dart';
+import 'package:app_usage/features/app_usage/domain/usecases/ensure_auto_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/get_today_usage_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_overlay_permission_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_usage_permission_usecase.dart';
@@ -32,6 +33,7 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
     required this._getTodayUsageUseCase,
     required this._startLiveTrackingUseCase,
     required this._stopLiveTrackingUseCase,
+    required this._ensureAutoTrackingUseCase,
     required this._repository,
   }) : super(UsageState.initial()) {
     on<UsageEvent>(_onEvent);
@@ -51,6 +53,7 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
   final GetTodayUsageUseCase _getTodayUsageUseCase;
   final StartLiveTrackingUseCase _startLiveTrackingUseCase;
   final StopLiveTrackingUseCase _stopLiveTrackingUseCase;
+  final EnsureAutoTrackingUseCase _ensureAutoTrackingUseCase;
   final AppUsageRepository _repository;
 
   StreamSubscription<List<AppUsageEntity>>? _usageSub;
@@ -62,6 +65,8 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
         await _onStarted(emit);
       case UsageRefreshPermissions():
         await _onRefreshPermissions(emit);
+        // After returning from settings, start the top counter automatically.
+        await _onEnsureAutoTracking(emit);
       case UsageRequestUsagePermission():
         await _onRequestUsagePermission(emit);
       case UsageRequestOverlayPermission():
@@ -83,7 +88,8 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
   Future<void> _onStarted(Emitter<UsageState> emit) async {
     await _onRefreshPermissions(emit);
     await _onRefreshUsage(emit);
-    // Reflect whether tracking is already active in this process.
+    // Auto-start the top overlay whenever permissions allow it.
+    await _onEnsureAutoTracking(emit);
     emit(
       state.copyWith(
         tracking: TrackingOpState.completed(
@@ -91,6 +97,26 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
         ),
       ),
     );
+  }
+
+  Future<void> _onEnsureAutoTracking(Emitter<UsageState> emit) async {
+    final result = await _ensureAutoTrackingUseCase(const NoParams());
+    result.fold(
+      (failure) => emit(
+        state.copyWith(tracking: TrackingOpState.error(failure.message)),
+      ),
+      (_) => emit(
+        state.copyWith(
+          tracking: TrackingOpState.completed(
+            isTracking: _repository.isTracking,
+          ),
+        ),
+      ),
+    );
+    // Refresh list so Home shows seeded totals right away.
+    if (_repository.isTracking) {
+      await _onRefreshUsage(emit);
+    }
   }
 
   Future<void> _onRefreshPermissions(Emitter<UsageState> emit) async {
@@ -113,11 +139,13 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
   Future<void> _onRequestUsagePermission(Emitter<UsageState> emit) async {
     await _requestUsagePermissionUseCase(const NoParams());
     await _onRefreshPermissions(emit);
+    await _onEnsureAutoTracking(emit);
   }
 
   Future<void> _onRequestOverlayPermission(Emitter<UsageState> emit) async {
     await _requestOverlayPermissionUseCase(const NoParams());
     await _onRefreshPermissions(emit);
+    await _onEnsureAutoTracking(emit);
   }
 
   Future<void> _onRefreshUsage(Emitter<UsageState> emit) async {
