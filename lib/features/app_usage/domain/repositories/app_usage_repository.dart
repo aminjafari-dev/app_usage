@@ -15,7 +15,7 @@ abstract class AppUsageRepository {
   /// Returns today's usage list sorted by descending seconds.
   Future<Either<Failure, List<AppUsageEntity>>> getTodayUsage();
 
-  /// Checks usage-access and overlay permissions.
+  /// Checks usage-access, overlay, and battery-unrestricted permissions.
   Future<Either<Failure, PermissionsStatus>> checkPermissions();
 
   /// Opens Android Usage Access settings.
@@ -24,12 +24,17 @@ abstract class AppUsageRepository {
   /// Opens Android Display-over-other-apps settings.
   Future<Either<Failure, Unit>> requestOverlayPermission();
 
-  /// Starts the 1s polling loop, overlay, and live increments.
+  /// Opens the Unrestricted battery dialog / settings.
+  ///
+  /// Required so OEMs do not kill the overlay when Recents is cleared.
+  Future<Either<Failure, Unit>> requestBatteryUnrestricted();
+
+  /// Starts the overlay foreground service (live counting runs in overlay).
   ///
   /// Also turns auto-tracking on so the next app launch resumes the counter.
   Future<Either<Failure, Unit>> startLiveTracking();
 
-  /// Stops polling and hides the overlay.
+  /// Stops the overlay foreground service and hides the badge.
   ///
   /// Also turns auto-tracking off until the user starts again.
   Future<Either<Failure, Unit>> stopLiveTracking();

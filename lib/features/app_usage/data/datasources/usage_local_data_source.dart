@@ -24,6 +24,13 @@ class UsageLocalDataSource {
 
   final SharedPreferences _prefs;
 
+  /// Reloads native prefs so this isolate sees writes from the overlay isolate.
+  ///
+  /// How to use: call before [loadTodaySeconds] when the main app resumes and
+  /// the overlay may have been incrementing while we were killed/backgrounded.
+  /// Example: Home refresh after returning from Recents.
+  Future<void> reload() => _prefs.reload();
+
   /// Whether the live counter should auto-start when permissions are ready.
   ///
   /// Defaults to true so opening any app shows the top counter without a

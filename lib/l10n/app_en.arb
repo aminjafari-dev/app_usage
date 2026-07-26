@@ -9,8 +9,11 @@
   "usagePermissionBody": "Allow this app to see which apps you use so we can count today's time.",
   "overlayPermissionTitle": "Display over other apps",
   "overlayPermissionBody": "Allow a small glassy counter to float over other apps.",
+  "batteryPermissionTitle": "Unrestricted battery",
+  "batteryPermissionBody": "Allow unrestricted battery so the counter keeps running after you clear apps from Recents. Without this, Android kills the overlay to save battery.",
   "grantUsageAccess": "Open usage access",
   "grantOverlayAccess": "Open overlay settings",
+  "grantBatteryUnrestricted": "Allow unrestricted battery",
   "permissionGranted": "Granted",
   "permissionMissing": "Required",
   "continueToHome": "Continue — counter starts automatically",
@@ -25,7 +28,7 @@
   "languagePersian": "Persian",
   "refresh": "Refresh",
   "errorGeneric": "Something went wrong",
-  "permissionsRequired": "Both permissions are required for the live counter.",
+  "permissionsRequired": "Usage access, overlay, and unrestricted battery are required for the live counter.",
   "secondsFormat": "{time}",
   "@secondsFormat": {
     "placeholders": {

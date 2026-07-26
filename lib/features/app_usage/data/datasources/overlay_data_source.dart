@@ -55,6 +55,15 @@ class OverlayDataSource {
     return FlutterOverlayWindow.isPermissionGranted();
   }
 
+  /// Whether the overlay foreground service / window is currently showing.
+  ///
+  /// How to use: after the main activity is recreated, check this before
+  /// calling [show] so we do not restart an already-running live tracker.
+  /// Example: `if (!await overlay.isActive()) await overlay.show();`
+  Future<bool> isActive() async {
+    return FlutterOverlayWindow.isActive();
+  }
+
   /// Opens the system overlay permission screen.
   Future<bool?> requestPermission() async {
     return FlutterOverlayWindow.requestPermission();

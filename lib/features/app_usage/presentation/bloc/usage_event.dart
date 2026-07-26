@@ -23,6 +23,10 @@ sealed class UsageEvent {
   const factory UsageEvent.requestOverlayPermission() =
       UsageRequestOverlayPermission;
 
+  /// Open Unrestricted battery dialog / settings.
+  const factory UsageEvent.requestBatteryUnrestricted() =
+      UsageRequestBatteryUnrestricted;
+
   /// Reload today's usage list from the repository.
   const factory UsageEvent.refreshUsage() = UsageRefreshUsage;
 
@@ -59,6 +63,11 @@ class UsageRequestUsagePermission extends UsageEvent {
 /// See [UsageEvent.requestOverlayPermission].
 class UsageRequestOverlayPermission extends UsageEvent {
   const UsageRequestOverlayPermission();
+}
+
+/// See [UsageEvent.requestBatteryUnrestricted].
+class UsageRequestBatteryUnrestricted extends UsageEvent {
+  const UsageRequestBatteryUnrestricted();
 }
 
 /// See [UsageEvent.refreshUsage].

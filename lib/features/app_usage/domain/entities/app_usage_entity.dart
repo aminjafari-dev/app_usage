@@ -53,21 +53,33 @@ class AppUsageEntity extends Equatable {
 ///
 /// How to use in a bloc state:
 /// ```dart
-/// PermissionsStatus(hasUsageAccess: true, hasOverlayAccess: false);
+/// PermissionsStatus(
+///   hasUsageAccess: true,
+///   hasOverlayAccess: false,
+///   hasBatteryUnrestricted: false,
+/// );
 /// ```
 class PermissionsStatus extends Equatable {
   /// Creates a permission snapshot.
   const PermissionsStatus({
     required this.hasUsageAccess,
     required this.hasOverlayAccess,
+    required this.hasBatteryUnrestricted,
   });
 
   final bool hasUsageAccess;
   final bool hasOverlayAccess;
 
-  /// True when both Android special permissions are granted.
-  bool get isReady => hasUsageAccess && hasOverlayAccess;
+  /// True when the app is exempt from OEM battery killing (Unrestricted).
+  ///
+  /// Without this, clearing Recents often kills the overlay service.
+  final bool hasBatteryUnrestricted;
+
+  /// True when usage, overlay, and battery unrestricted are all granted.
+  bool get isReady =>
+      hasUsageAccess && hasOverlayAccess && hasBatteryUnrestricted;
 
   @override
-  List<Object?> get props => [hasUsageAccess, hasOverlayAccess];
+  List<Object?> get props =>
+      [hasUsageAccess, hasOverlayAccess, hasBatteryUnrestricted];
 }

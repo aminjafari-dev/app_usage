@@ -13,6 +13,18 @@
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE" />
     <uses-permission android:name="android.permission.FOREGROUND_SERVICE_SPECIAL_USE" />
 
+    <!--
+      Unrestricted battery: without this, OEMs kill the overlay when the user
+      clears all apps from Recents (battery saver / app standby).
+    -->
+    <uses-permission android:name="android.permission.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
+    <uses-permission android:name="android.permission.WAKE_LOCK" />
+    <uses-permission android:name="android.permission.RECEIVE_BOOT_COMPLETED" />
+    <!-- AlarmManager recovery after Recents clear / process death -->
+    <uses-permission android:name="android.permission.SCHEDULE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.USE_EXACT_ALARM" />
+    <uses-permission android:name="android.permission.POST_NOTIFICATIONS" />
+
     <application
         android:label="App Usage"
         android:name="${applicationName}"
@@ -36,15 +48,32 @@
             </intent-filter>
         </activity>
 
-        <!-- flutter_overlay_window service for the live glassy counter -->
+        <!--
+          flutter_overlay_window foreground service for the live glassy counter.
+          stopWithTask=false keeps the overlay (and its Dart tracker) alive when
+          the user swipes the main app away from Recents.
+        -->
         <service
             android:name="flutter.overlay.window.flutter_overlay_window.OverlayService"
             android:exported="false"
+            android:stopWithTask="false"
             android:foregroundServiceType="specialUse">
             <property
                 android:name="android.app.PROPERTY_SPECIAL_USE_FGS_SUBTYPE"
                 android:value="Displays a live per-app usage counter overlay above other apps" />
         </service>
+
+        <!-- Restarts overlay after Clear-all / reboot when tracking was left on -->
+        <receiver
+            android:name=".RestartReceiver"
+            android:exported="true"
+            android:enabled="true">
+            <intent-filter>
+                <action android:name="android.intent.action.BOOT_COMPLETED" />
+                <action android:name="android.intent.action.LOCKED_BOOT_COMPLETED" />
+                <action android:name="android.intent.action.MY_PACKAGE_REPLACED" />
+            </intent-filter>
+        </receiver>
 
         <meta-data
             android:name="flutterEmbedding"
@@ -60,6 +89,9 @@
         <intent>
             <action android:name="android.intent.action.PROCESS_TEXT"/>
             <data android:mimeType="text/plain"/>
+        </intent>
+        <intent>
+            <action android:name="android.settings.REQUEST_IGNORE_BATTERY_OPTIMIZATIONS" />
         </intent>
     </queries>
 </manifest>

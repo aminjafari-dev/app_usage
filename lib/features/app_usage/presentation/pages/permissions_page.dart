@@ -51,6 +51,7 @@ class _PermissionsView extends StatelessWidget {
             _ => const PermissionsStatus(
                 hasUsageAccess: false,
                 hasOverlayAccess: false,
+                hasBatteryUnrestricted: false,
               ),
           };
 
@@ -78,6 +79,18 @@ class _PermissionsView extends StatelessWidget {
                   context
                       .read<UsageBloc>()
                       .add(const UsageEvent.requestOverlayPermission());
+                },
+              ),
+              GGap.m(),
+              _PermissionCard(
+                title: l10n.batteryPermissionTitle,
+                body: l10n.batteryPermissionBody,
+                granted: status.hasBatteryUnrestricted,
+                actionLabel: l10n.grantBatteryUnrestricted,
+                onPressed: () {
+                  context
+                      .read<UsageBloc>()
+                      .add(const UsageEvent.requestBatteryUnrestricted());
                 },
               ),
               GGap.l(),

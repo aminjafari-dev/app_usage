@@ -8,6 +8,7 @@ import 'package:app_usage/features/app_usage/domain/repositories/app_usage_repos
 import 'package:app_usage/features/app_usage/domain/usecases/check_permissions_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/ensure_auto_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/get_today_usage_usecase.dart';
+import 'package:app_usage/features/app_usage/domain/usecases/request_battery_unrestricted_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_overlay_permission_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_usage_permission_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/start_live_tracking_usecase.dart';
@@ -30,6 +31,7 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
     required this._checkPermissionsUseCase,
     required this._requestUsagePermissionUseCase,
     required this._requestOverlayPermissionUseCase,
+    required this._requestBatteryUnrestrictedUseCase,
     required this._getTodayUsageUseCase,
     required this._startLiveTrackingUseCase,
     required this._stopLiveTrackingUseCase,
@@ -50,6 +52,7 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
   final CheckPermissionsUseCase _checkPermissionsUseCase;
   final RequestUsagePermissionUseCase _requestUsagePermissionUseCase;
   final RequestOverlayPermissionUseCase _requestOverlayPermissionUseCase;
+  final RequestBatteryUnrestrictedUseCase _requestBatteryUnrestrictedUseCase;
   final GetTodayUsageUseCase _getTodayUsageUseCase;
   final StartLiveTrackingUseCase _startLiveTrackingUseCase;
   final StopLiveTrackingUseCase _stopLiveTrackingUseCase;
@@ -71,6 +74,8 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
         await _onRequestUsagePermission(emit);
       case UsageRequestOverlayPermission():
         await _onRequestOverlayPermission(emit);
+      case UsageRequestBatteryUnrestricted():
+        await _onRequestBatteryUnrestricted(emit);
       case UsageRefreshUsage():
         await _onRefreshUsage(emit);
       case UsageStartTracking():
@@ -144,6 +149,12 @@ class UsageBloc extends Bloc<UsageEvent, UsageState> {
 
   Future<void> _onRequestOverlayPermission(Emitter<UsageState> emit) async {
     await _requestOverlayPermissionUseCase(const NoParams());
+    await _onRefreshPermissions(emit);
+    await _onEnsureAutoTracking(emit);
+  }
+
+  Future<void> _onRequestBatteryUnrestricted(Emitter<UsageState> emit) async {
+    await _requestBatteryUnrestrictedUseCase(const NoParams());
     await _onRefreshPermissions(emit);
     await _onEnsureAutoTracking(emit);
   }

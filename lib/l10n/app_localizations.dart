@@ -152,6 +152,18 @@ abstract class AppLocalizations {
   /// **'Allow a small glassy counter to float over other apps.'**
   String get overlayPermissionBody;
 
+  /// No description provided for @batteryPermissionTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Unrestricted battery'**
+  String get batteryPermissionTitle;
+
+  /// No description provided for @batteryPermissionBody.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow unrestricted battery so the counter keeps running after you clear apps from Recents. Without this, Android kills the overlay to save battery.'**
+  String get batteryPermissionBody;
+
   /// No description provided for @grantUsageAccess.
   ///
   /// In en, this message translates to:
@@ -163,6 +175,12 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Open overlay settings'**
   String get grantOverlayAccess;
+
+  /// No description provided for @grantBatteryUnrestricted.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow unrestricted battery'**
+  String get grantBatteryUnrestricted;
 
   /// No description provided for @permissionGranted.
   ///
@@ -251,7 +269,7 @@ abstract class AppLocalizations {
   /// No description provided for @permissionsRequired.
   ///
   /// In en, this message translates to:
-  /// **'Both permissions are required for the live counter.'**
+  /// **'Usage access, overlay, and unrestricted battery are required for the live counter.'**
   String get permissionsRequired;
 
   /// No description provided for @secondsFormat.

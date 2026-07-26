@@ -3,17 +3,20 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
+import 'package:app_usage/features/app_usage/data/datasources/overlay_live_tracker.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
 
 /// Root widget living inside the overlay isolate.
 ///
 /// How to use: mounted from [overlayMain] in `main.dart` when the floating
-/// window starts. Listens to [FlutterOverlayWindow.overlayListener] ticks.
+/// window starts. Owns [OverlayLiveTracker] so the badge keeps counting even
+/// when the main application is backgrounded or removed from Recents.
 ///
 /// Example flow:
-/// 1. Main app calls showOverlay
+/// 1. Main app calls showOverlay (starts foreground service)
 /// 2. Android starts the overlay isolate with overlayMain
-/// 3. shareData ticks update the glass counter
+/// 3. [OverlayLiveTracker] polls UsageStats every second and updates the UI
+/// 4. Main isolate can die; this isolate keeps the badge growing
 class OverlayApp extends StatefulWidget {
   /// Creates the overlay root.
   const OverlayApp({super.key});
@@ -23,16 +26,33 @@ class OverlayApp extends StatefulWidget {
 }
 
 class _OverlayAppState extends State<OverlayApp> {
+  final OverlayLiveTracker _tracker = OverlayLiveTracker();
+
   String _appName = 'App';
   int _todaySeconds = 0;
 
   @override
   void initState() {
     super.initState();
-    // Listen for tick maps from the main isolate tracker.
+    // Start self-contained tracking in this isolate (survives main-app death).
+    _tracker.start(
+      onTick: (OverlayTickPayload payload) {
+        if (!mounted) return;
+        setState(() {
+          _appName = payload.appName.isEmpty ? 'App' : payload.appName;
+          _todaySeconds = payload.todaySeconds;
+        });
+      },
+    );
+
+    // Optional: still accept ticks from main for backwards compatibility,
+    // but the live source of truth is now [_tracker] above.
     FlutterOverlayWindow.overlayListener.listen((event) {
-      // Ignore malformed payloads so a bad tick cannot kill the overlay.
+      // Ignore our own outbound shareData echoes and malformed payloads.
       if (event is! Map) return;
+      // Prefer tracker-driven updates; only apply external ticks if tracker
+      // is somehow not running (should not happen in normal flow).
+      if (_tracker.isRunning) return;
       final payload = OverlayTickPayload.fromMap(event);
       if (!mounted) return;
       setState(() {
@@ -40,6 +60,13 @@ class _OverlayAppState extends State<OverlayApp> {
         _todaySeconds = payload.todaySeconds;
       });
     });
+  }
+
+  @override
+  void dispose() {
+    // Stop the 1s loop when the overlay service is torn down.
+    _tracker.dispose();
+    super.dispose();
   }
 
   @override

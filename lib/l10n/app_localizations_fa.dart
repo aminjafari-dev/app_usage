@@ -39,10 +39,20 @@ class AppLocalizationsFa extends AppLocalizations {
       'اجازه دهید یک شمارنده شیشه‌ای کوچک روی برنامه‌های دیگر نمایش داده شود.';
 
   @override
+  String get batteryPermissionTitle => 'باتری بدون محدودیت';
+
+  @override
+  String get batteryPermissionBody =>
+      'باتری را روی حالت بدون محدودیت بگذارید تا بعد از پاک‌کردن برنامه‌ها از پس‌زمینه، شمارنده زنده بماند. بدون این دسترسی اندروید برای صرفه‌جویی در باتری روکش را می‌کشد.';
+
+  @override
   String get grantUsageAccess => 'باز کردن دسترسی استفاده';
 
   @override
   String get grantOverlayAccess => 'باز کردن تنظیمات روکش';
+
+  @override
+  String get grantBatteryUnrestricted => 'اجازه باتری بدون محدودیت';
 
   @override
   String get permissionGranted => 'داده شده';
@@ -88,7 +98,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get errorGeneric => 'مشکلی پیش آمد';
 
   @override
-  String get permissionsRequired => 'برای شمارنده زنده هر دو دسترسی لازم است.';
+  String get permissionsRequired =>
+      'برای شمارنده زنده دسترسی استفاده، روکش و باتری بدون محدودیت لازم است.';
 
   @override
   String secondsFormat(String time) {

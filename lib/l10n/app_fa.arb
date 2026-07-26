@@ -9,8 +9,11 @@
   "usagePermissionBody": "اجازه دهید ببینیم از کدام برنامه‌ها استفاده می‌کنید تا زمان امروز را بشماریم.",
   "overlayPermissionTitle": "نمایش روی برنامه‌های دیگر",
   "overlayPermissionBody": "اجازه دهید یک شمارنده شیشه‌ای کوچک روی برنامه‌های دیگر نمایش داده شود.",
+  "batteryPermissionTitle": "باتری بدون محدودیت",
+  "batteryPermissionBody": "باتری را روی حالت بدون محدودیت بگذارید تا بعد از پاک‌کردن برنامه‌ها از پس‌زمینه، شمارنده زنده بماند. بدون این دسترسی اندروید برای صرفه‌جویی در باتری روکش را می‌کشد.",
   "grantUsageAccess": "باز کردن دسترسی استفاده",
   "grantOverlayAccess": "باز کردن تنظیمات روکش",
+  "grantBatteryUnrestricted": "اجازه باتری بدون محدودیت",
   "permissionGranted": "داده شده",
   "permissionMissing": "لازم است",
   "continueToHome": "ادامه — شمارنده به‌صورت خودکار شروع می‌شود",
@@ -25,7 +28,7 @@
   "languagePersian": "فارسی",
   "refresh": "به‌روزرسانی",
   "errorGeneric": "مشکلی پیش آمد",
-  "permissionsRequired": "برای شمارنده زنده هر دو دسترسی لازم است.",
+  "permissionsRequired": "برای شمارنده زنده دسترسی استفاده، روکش و باتری بدون محدودیت لازم است.",
   "secondsFormat": "{time}",
   "@secondsFormat": {
     "placeholders": {

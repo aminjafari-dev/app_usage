@@ -1,5 +1,6 @@
 import 'package:get_it/get_it.dart';
 
+import 'package:app_usage/features/app_usage/data/datasources/battery_optimization_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_local_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_stats_data_source.dart';
@@ -8,6 +9,7 @@ import 'package:app_usage/features/app_usage/domain/repositories/app_usage_repos
 import 'package:app_usage/features/app_usage/domain/usecases/check_permissions_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/ensure_auto_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/get_today_usage_usecase.dart';
+import 'package:app_usage/features/app_usage/domain/usecases/request_battery_unrestricted_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_overlay_permission_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_usage_permission_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/start_live_tracking_usecase.dart';
@@ -26,6 +28,9 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
     () => UsageLocalDataSource(locator()),
   );
   locator.registerLazySingleton<OverlayDataSource>(OverlayDataSource.new);
+  locator.registerLazySingleton<BatteryOptimizationDataSource>(
+    BatteryOptimizationDataSource.new,
+  );
 
   // Repository
   locator.registerLazySingleton<AppUsageRepository>(
@@ -33,6 +38,7 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
       usageStatsDataSource: locator(),
       localDataSource: locator(),
       overlayDataSource: locator(),
+      batteryDataSource: locator(),
     ),
   );
 
@@ -50,6 +56,9 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
     () => RequestOverlayPermissionUseCase(locator()),
   );
   locator.registerLazySingleton(
+    () => RequestBatteryUnrestrictedUseCase(locator()),
+  );
+  locator.registerLazySingleton(
     () => StartLiveTrackingUseCase(locator()),
   );
   locator.registerLazySingleton(
@@ -65,6 +74,7 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
       checkPermissionsUseCase: locator(),
       requestUsagePermissionUseCase: locator(),
       requestOverlayPermissionUseCase: locator(),
+      requestBatteryUnrestrictedUseCase: locator(),
       getTodayUsageUseCase: locator(),
       startLiveTrackingUseCase: locator(),
       stopLiveTrackingUseCase: locator(),
