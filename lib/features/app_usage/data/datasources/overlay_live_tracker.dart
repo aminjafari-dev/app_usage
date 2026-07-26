@@ -40,6 +40,13 @@ class OverlayLiveTracker {
   final Map<String, int> _todaySeconds = {};
   final Map<String, String> _appNames = {};
 
+  /// Cached PackageManager icons (PNG) keyed by package name.
+  ///
+  /// How to use: resolve once per package via [UsageStatsDataSource.resolveIcon],
+  /// then reuse on every tick so the badge shows Telegram/YouTube/etc. logos
+  /// without shipping custom assets or re-fetching every second.
+  final Map<String, List<int>?> _appIcons = {};
+
   Timer? _timer;
   String? _activePackage;
   String _cacheDate = todayDateKey();
@@ -90,6 +97,7 @@ class OverlayLiveTracker {
 
     _todaySeconds.clear();
     _appNames.clear();
+    _appIcons.clear();
 
     for (final model in aggregates) {
       final cachedSeconds = cached[model.packageName] ?? 0;
@@ -99,6 +107,8 @@ class OverlayLiveTracker {
           : cachedSeconds;
       _todaySeconds[model.packageName] = seconds;
       _appNames[model.packageName] = model.appName;
+      // Seed logos from aggregates so the first badge paint already has them.
+      _appIcons[model.packageName] = model.iconBytes;
     }
 
     // Keep packages that only exist in the live cache (rare but possible).
@@ -106,6 +116,8 @@ class OverlayLiveTracker {
       if (_todaySeconds.containsKey(entry.key)) continue;
       _todaySeconds[entry.key] = entry.value;
       _appNames[entry.key] = await _usageStats.resolveAppName(entry.key);
+      // Resolve the real launcher icon once for cache-only packages.
+      _appIcons[entry.key] = await _usageStats.resolveIcon(entry.key);
     }
   }
 
@@ -126,11 +138,18 @@ class OverlayLiveTracker {
         return;
       }
 
-      // App switch: resolve a friendly label once, then start incrementing.
-      if (package != _activePackage) {
+      // App switch: resolve label + PackageManager icon once, then increment.
+      // Useful so switching Telegram → YouTube swaps both name and real logo.
+      final switched = package != _activePackage;
+      if (switched) {
         _activePackage = package;
         if (!_appNames.containsKey(package)) {
           _appNames[package] = await _usageStats.resolveAppName(package);
+        }
+        // Fetch the installed app's launcher icon (not a custom PNG asset).
+        // Retry when a previous resolve returned null (PackageManager miss).
+        if (_appIcons[package] == null) {
+          _appIcons[package] = await _usageStats.resolveIcon(package);
         }
         _todaySeconds.putIfAbsent(package, () => 0);
       }
@@ -142,6 +161,7 @@ class OverlayLiveTracker {
         packageName: package,
         appName: _appNames[package] ?? package,
         todaySeconds: next,
+        iconBytes: _appIcons[package],
       );
 
       // Drive the overlay UI in this isolate (works even if main is dead).
@@ -152,9 +172,10 @@ class OverlayLiveTracker {
 
       // Notify the main isolate when it is alive (Home preview / list sync).
       // shareData is a no-op on the receiver side if nobody is listening.
+      // Only include icon bytes on app switch to keep the IPC light.
       try {
         await FlutterOverlayWindow.shareData({
-          ...payload.toMap(),
+          ...payload.toMap(includeIcon: switched),
           'totals': _todaySeconds,
         });
       } catch (_) {
@@ -178,6 +199,7 @@ class OverlayLiveTracker {
       _cacheDate = today;
       _todaySeconds.clear();
       _appNames.clear();
+      _appIcons.clear();
       _activePackage = null;
       final local = _local;
       if (local != null) {
@@ -187,6 +209,8 @@ class OverlayLiveTracker {
       for (final model in aggregates) {
         _todaySeconds[model.packageName] = model.todaySeconds;
         _appNames[model.packageName] = model.appName;
+        // Keep real launcher logos after the midnight reset.
+        _appIcons[model.packageName] = model.iconBytes;
       }
     }
   }

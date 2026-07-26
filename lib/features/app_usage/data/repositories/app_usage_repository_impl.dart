@@ -225,12 +225,20 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     final todaySeconds = (event['todaySeconds'] as num?)?.toInt() ?? 0;
     if (packageName.isEmpty) return;
 
+    // Icon is only sent on app switches; keep the previous logo otherwise.
+    final rawIcon = event['iconBytes'];
+    List<int>? iconFromOverlay;
+    if (rawIcon is List) {
+      iconFromOverlay = rawIcon.map((e) => (e as num).toInt()).toList();
+    }
+
     final existing = _today[packageName];
     final updated = AppUsageEntity(
       packageName: packageName,
       appName: appName.isEmpty ? (existing?.appName ?? packageName) : appName,
       todaySeconds: todaySeconds,
-      iconBytes: existing?.iconBytes,
+      // Prefer fresh PackageManager bytes from the overlay; else keep cache.
+      iconBytes: iconFromOverlay ?? existing?.iconBytes,
     );
     _today[packageName] = updated;
 

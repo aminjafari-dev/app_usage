@@ -7,36 +7,66 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 /// How to use:
 /// ```dart
 /// await overlay.sendTick(OverlayTickPayload(
-///   packageName: 'com.app',
-///   appName: 'App',
+///   packageName: 'com.telegram.messenger',
+///   appName: 'Telegram',
 ///   todaySeconds: 42,
+///   iconBytes: await usageStats.resolveIcon(package),
 /// ));
 /// ```
+///
+/// [iconBytes] is the real launcher icon from Android PackageManager (PNG),
+/// not a custom asset — so Telegram shows Telegram's icon, YouTube shows
+/// YouTube's, etc.
 class OverlayTickPayload {
   /// Creates a tick payload for the glassy counter.
   const OverlayTickPayload({
     required this.packageName,
     required this.appName,
     required this.todaySeconds,
+    this.iconBytes,
   });
 
   final String packageName;
   final String appName;
   final int todaySeconds;
 
-  /// Encodes fields for [FlutterOverlayWindow.shareData].
-  Map<String, dynamic> toMap() => {
-        'packageName': packageName,
-        'appName': appName,
-        'todaySeconds': todaySeconds,
-      };
+  /// Optional PNG bytes from [UsageStats.getAppIcon] for the active package.
+  ///
+  /// How to use: pass through to [UsageGlassCounter.iconBytes] so the overlay
+  /// badge shows the foreground app's real logo. Null → fallback apps glyph.
+  final List<int>? iconBytes;
 
-  /// Decodes a map received inside the overlay isolate.
+  /// Encodes fields for [FlutterOverlayWindow.shareData].
+  ///
+  /// Set [includeIcon] false on every-second ticks to avoid shipping large
+  /// PNG lists over the isolate bridge; send the icon only on app switches.
+  /// Example: `payload.toMap(includeIcon: packageJustChanged)`.
+  Map<String, dynamic> toMap({bool includeIcon = true}) {
+    final map = <String, dynamic>{
+      'packageName': packageName,
+      'appName': appName,
+      'todaySeconds': todaySeconds,
+    };
+    // Only attach icon bytes when the receiver needs a fresh logo.
+    if (includeIcon && iconBytes != null) {
+      map['iconBytes'] = iconBytes;
+    }
+    return map;
+  }
+
+  /// Decodes a map received inside the overlay isolate (or main via shareData).
   factory OverlayTickPayload.fromMap(Map<dynamic, dynamic> map) {
+    // MethodChannel may deliver icon bytes as List<int> or Uint8List.
+    final rawIcon = map['iconBytes'];
+    List<int>? iconBytes;
+    if (rawIcon is List) {
+      iconBytes = rawIcon.map((e) => (e as num).toInt()).toList();
+    }
     return OverlayTickPayload(
       packageName: map['packageName'] as String? ?? '',
       appName: map['appName'] as String? ?? '',
       todaySeconds: (map['todaySeconds'] as num?)?.toInt() ?? 0,
+      iconBytes: iconBytes,
     );
   }
 }

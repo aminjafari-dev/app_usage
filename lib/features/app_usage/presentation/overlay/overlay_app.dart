@@ -31,6 +31,13 @@ class _OverlayAppState extends State<OverlayApp> {
   String _appName = 'App';
   int _todaySeconds = 0;
 
+  /// Real launcher icon (PNG) for the foreground app from PackageManager.
+  ///
+  /// How to use: updated each tick via [OverlayTickPayload.iconBytes] and
+  /// passed to [UsageGlassCounter] so Telegram/YouTube/etc. show their own
+  /// logos — never custom assets from ImagePath.
+  List<int>? _iconBytes;
+
   @override
   void initState() {
     super.initState();
@@ -41,6 +48,10 @@ class _OverlayAppState extends State<OverlayApp> {
         setState(() {
           _appName = payload.appName.isEmpty ? 'App' : payload.appName;
           _todaySeconds = payload.todaySeconds;
+          // Keep previous icon if a tick omits bytes (should be rare).
+          if (payload.iconBytes != null) {
+            _iconBytes = payload.iconBytes;
+          }
         });
       },
     );
@@ -58,6 +69,9 @@ class _OverlayAppState extends State<OverlayApp> {
       setState(() {
         _appName = payload.appName.isEmpty ? 'App' : payload.appName;
         _todaySeconds = payload.todaySeconds;
+        if (payload.iconBytes != null) {
+          _iconBytes = payload.iconBytes;
+        }
       });
     });
   }
@@ -79,6 +93,8 @@ class _OverlayAppState extends State<OverlayApp> {
         child: UsageGlassCounter(
           appName: _appName,
           todaySeconds: _todaySeconds,
+          // Real app logo from the device (PackageManager), not assets.
+          iconBytes: _iconBytes,
         ),
       ),
     );
