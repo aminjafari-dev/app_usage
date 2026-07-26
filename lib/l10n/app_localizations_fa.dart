@@ -77,7 +77,11 @@ class AppLocalizationsFa extends AppLocalizations {
   String get trackingInactive => 'شمارنده زنده خاموش است';
 
   @override
-  String get noUsageYet => 'هنوز استفاده‌ای برای امروز ثبت نشده است.';
+  String get noUsageYet => 'هنوز استفاده‌ای نیست...';
+
+  @override
+  String get noUsageYetSubtitle =>
+      'برنامه‌ها را باز کنید تا زمان صفحه امروز ثبت شود.';
 
   @override
   String get currentApp => 'برنامه فعلی';
@@ -100,6 +104,47 @@ class AppLocalizationsFa extends AppLocalizations {
   @override
   String get permissionsRequired =>
       'برای شمارنده زنده دسترسی استفاده، روکش و باتری بدون محدودیت لازم است.';
+
+  @override
+  String get permissionsRequiredHint =>
+      'دسترسی‌های لازم را بدهید تا شمارنده زنده روی برنامه‌ها نمایش داده شود.';
+
+  @override
+  String get todaySectionHeader => 'امروز';
+
+  @override
+  String get trackingSectionHeader => 'شمارنده زنده';
+
+  @override
+  String get statusOnline => 'در حال ردیابی';
+
+  @override
+  String get statusOffline => 'متوقف';
+
+  @override
+  String get quickRefresh => 'تازه‌سازی';
+
+  @override
+  String get quickLanguage => 'زبان';
+
+  @override
+  String get quickPermissions => 'دسترسی';
+
+  @override
+  String get openPermissions => 'باز کردن دسترسی‌ها';
+
+  @override
+  String appsTracked(int count) {
+    return '$count برنامه';
+  }
+
+  @override
+  String get permissionsIntro =>
+      'موارد زیر را فعال کنید تا شمارنده شناور مثل نشان تلگرام کار کند.';
+
+  @override
+  String get footerHintPermissions =>
+      'فقط همین دستگاه آمار استفاده را می‌خواند. چیزی آپلود نمی‌شود.';
 
   @override
   String secondsFormat(String time) {

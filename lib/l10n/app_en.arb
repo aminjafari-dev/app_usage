@@ -21,7 +21,8 @@
   "stopTracking": "Disable live counter",
   "trackingActive": "Live counter is on — open any app to see it at the top",
   "trackingInactive": "Live counter is off",
-  "noUsageYet": "No app usage recorded for today yet.",
+  "noUsageYet": "No usage yet...",
+  "noUsageYetSubtitle": "Open apps on your phone to start tracking today's screen time.",
   "currentApp": "Current app",
   "switchLanguage": "Language",
   "languageEnglish": "English",
@@ -29,6 +30,25 @@
   "refresh": "Refresh",
   "errorGeneric": "Something went wrong",
   "permissionsRequired": "Usage access, overlay, and unrestricted battery are required for the live counter.",
+  "permissionsRequiredHint": "Grant the required access so the live counter can float over other apps.",
+  "todaySectionHeader": "Today",
+  "trackingSectionHeader": "Live counter",
+  "statusOnline": "Tracking",
+  "statusOffline": "Paused",
+  "quickRefresh": "Refresh",
+  "quickLanguage": "Language",
+  "quickPermissions": "Access",
+  "openPermissions": "Open permissions",
+  "appsTracked": "{count} apps",
+  "@appsTracked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionsIntro": "Allow the following so the floating counter can work like a Telegram overlay badge.",
+  "footerHintPermissions": "Only this device can read usage stats. Nothing is uploaded.",
   "secondsFormat": "{time}",
   "@secondsFormat": {
     "placeholders": {

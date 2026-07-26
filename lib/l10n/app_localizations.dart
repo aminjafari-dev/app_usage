@@ -227,8 +227,14 @@ abstract class AppLocalizations {
   /// No description provided for @noUsageYet.
   ///
   /// In en, this message translates to:
-  /// **'No app usage recorded for today yet.'**
+  /// **'No usage yet...'**
   String get noUsageYet;
+
+  /// No description provided for @noUsageYetSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Open apps on your phone to start tracking today\'s screen time.'**
+  String get noUsageYetSubtitle;
 
   /// No description provided for @currentApp.
   ///
@@ -271,6 +277,78 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Usage access, overlay, and unrestricted battery are required for the live counter.'**
   String get permissionsRequired;
+
+  /// No description provided for @permissionsRequiredHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant the required access so the live counter can float over other apps.'**
+  String get permissionsRequiredHint;
+
+  /// No description provided for @todaySectionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Today'**
+  String get todaySectionHeader;
+
+  /// No description provided for @trackingSectionHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Live counter'**
+  String get trackingSectionHeader;
+
+  /// No description provided for @statusOnline.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracking'**
+  String get statusOnline;
+
+  /// No description provided for @statusOffline.
+  ///
+  /// In en, this message translates to:
+  /// **'Paused'**
+  String get statusOffline;
+
+  /// No description provided for @quickRefresh.
+  ///
+  /// In en, this message translates to:
+  /// **'Refresh'**
+  String get quickRefresh;
+
+  /// No description provided for @quickLanguage.
+  ///
+  /// In en, this message translates to:
+  /// **'Language'**
+  String get quickLanguage;
+
+  /// No description provided for @quickPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Access'**
+  String get quickPermissions;
+
+  /// No description provided for @openPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Open permissions'**
+  String get openPermissions;
+
+  /// No description provided for @appsTracked.
+  ///
+  /// In en, this message translates to:
+  /// **'{count} apps'**
+  String appsTracked(int count);
+
+  /// No description provided for @permissionsIntro.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow the following so the floating counter can work like a Telegram overlay badge.'**
+  String get permissionsIntro;
+
+  /// No description provided for @footerHintPermissions.
+  ///
+  /// In en, this message translates to:
+  /// **'Only this device can read usage stats. Nothing is uploaded.'**
+  String get footerHintPermissions;
 
   /// No description provided for @secondsFormat.
   ///

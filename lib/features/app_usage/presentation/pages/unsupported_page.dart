@@ -1,5 +1,7 @@
 import 'package:flutter/material.dart';
 
+import 'package:app_usage/core/theme/app_theme.dart';
+import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
@@ -11,6 +13,8 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// ```dart
 /// Navigator.of(context).pushNamed(PageName.unsupported);
 /// ```
+///
+/// Empty-state composition matches Telegram profile “No posts yet…”.
 class UnsupportedPage extends StatelessWidget {
   /// Creates the unsupported platform message screen.
   const UnsupportedPage({super.key});
@@ -20,18 +24,45 @@ class UnsupportedPage extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return GScaffold(
-      title: l10n.unsupportedTitle,
+      title: l10n.appTitle,
       body: Padding(
-        padding: const EdgeInsets.all(24),
+        padding: const EdgeInsets.all(16),
         child: Column(
-          crossAxisAlignment: CrossAxisAlignment.start,
           children: [
-            GText(
-              l10n.unsupportedTitle,
-              style: Theme.of(context).textTheme.headlineMedium,
+            GGap.xl(),
+            Container(
+              width: 88,
+              height: 88,
+              decoration: const BoxDecoration(
+                color: AppTheme.primarySoft,
+                shape: BoxShape.circle,
+              ),
+              child: const Icon(
+                Icons.phone_android_rounded,
+                size: 40,
+                color: AppTheme.primary,
+              ),
             ),
-            GGap.m(),
-            GTextMuted(l10n.unsupportedMessage),
+            GGap.l(),
+            GCard(
+              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              child: Column(
+                children: [
+                  GText(
+                    l10n.unsupportedTitle,
+                    style: Theme.of(context).textTheme.titleLarge,
+                    textAlign: TextAlign.center,
+                  ),
+                  GGap.s(),
+                  GText(
+                    l10n.unsupportedMessage,
+                    style: Theme.of(context).textTheme.bodySmall,
+                    color: AppTheme.onSurfaceMuted,
+                    textAlign: TextAlign.center,
+                  ),
+                ],
+              ),
+            ),
           ],
         ),
       ),

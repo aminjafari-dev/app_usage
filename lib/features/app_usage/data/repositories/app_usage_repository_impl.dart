@@ -5,6 +5,7 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 
 import 'package:app_usage/core/error/failures.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
+import 'package:app_usage/core/utils/usage_time_calculator.dart';
 import 'package:app_usage/features/app_usage/data/datasources/battery_optimization_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_local_data_source.dart';
@@ -302,10 +303,12 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
 
     for (final model in aggregates) {
       final cachedSeconds = cached[model.packageName] ?? 0;
-      // Prefer the larger value so we never lose live-ticker progress.
-      final seconds = model.todaySeconds > cachedSeconds
-          ? model.todaySeconds
-          : cachedSeconds;
+      // Events are the day source of truth; only keep a slightly-ahead live cache.
+      // Useful so yesterday's inflated SharedPreferences cannot win via max().
+      final seconds = mergeTodaySeconds(
+        eventSeconds: model.todaySeconds,
+        cachedSeconds: cachedSeconds,
+      );
       final prev = _today[model.packageName];
       _today[model.packageName] = AppUsageEntity(
         packageName: model.packageName,
@@ -319,9 +322,13 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     for (final entry in cached.entries) {
       if (_today.containsKey(entry.key)) {
         final prev = _today[entry.key]!;
-        // Prefer the larger of cached vs in-memory.
-        if (entry.value > prev.todaySeconds) {
-          _today[entry.key] = prev.copyWith(todaySeconds: entry.value);
+        // Only bump from cache when it is slightly ahead of the event total.
+        final merged = mergeTodaySeconds(
+          eventSeconds: prev.todaySeconds,
+          cachedSeconds: entry.value,
+        );
+        if (merged > prev.todaySeconds) {
+          _today[entry.key] = prev.copyWith(todaySeconds: merged);
         }
         continue;
       }
@@ -334,6 +341,11 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
         iconBytes: icon,
       );
     }
+
+    // Overwrite SharedPreferences so a stale inflated day cache is corrected.
+    await _local.saveTodaySeconds({
+      for (final entry in _today.entries) entry.key: entry.value.todaySeconds,
+    });
 
     _emitUsage();
   }

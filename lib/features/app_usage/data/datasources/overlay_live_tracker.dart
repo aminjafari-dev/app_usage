@@ -4,6 +4,7 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_usage/core/utils/duration_format.dart';
+import 'package:app_usage/core/utils/usage_time_calculator.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_local_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_stats_data_source.dart';
@@ -111,10 +112,12 @@ class OverlayLiveTracker {
 
     for (final model in aggregates) {
       final cachedSeconds = cached[model.packageName] ?? 0;
-      // Prefer the larger value so we never lose live-ticker progress.
-      final seconds = model.todaySeconds > cachedSeconds
-          ? model.todaySeconds
-          : cachedSeconds;
+      // Events are the day source of truth; only keep a slightly-ahead live cache.
+      // Useful so yesterday's inflated SharedPreferences cannot win via max().
+      final seconds = mergeTodaySeconds(
+        eventSeconds: model.todaySeconds,
+        cachedSeconds: cachedSeconds,
+      );
       _todaySeconds[model.packageName] = seconds;
       _appNames[model.packageName] = model.appName;
       // Seed logos from aggregates so the first badge paint already has them.
@@ -129,6 +132,9 @@ class OverlayLiveTracker {
       // Resolve the real launcher icon once for cache-only packages.
       _appIcons[entry.key] = await _usageStats.resolveIcon(entry.key);
     }
+
+    // Persist corrected totals so a stale inflated cache is overwritten on disk.
+    await _persistCache();
   }
 
   /// One-second loop: detect foreground app, increment, persist, update badge.

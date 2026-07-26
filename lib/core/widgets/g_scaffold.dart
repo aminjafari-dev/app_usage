@@ -12,7 +12,8 @@ import 'package:app_usage/core/theme/app_theme.dart';
 /// );
 /// ```
 ///
-/// Keeps AppBar styling and background consistent across pages.
+/// Keeps Telegram-style AppBar (white bar, bold title) and light-grey canvas
+/// consistent across pages.
 class GScaffold extends StatelessWidget {
   /// Creates a themed scaffold with an optional title and actions.
   const GScaffold({
@@ -23,6 +24,10 @@ class GScaffold extends StatelessWidget {
     this.floatingActionButton,
     this.leading,
     this.showBackButton = false,
+    this.backgroundColor,
+    this.appBarBackgroundColor,
+    this.bottomNavigationBar,
+    this.extendBody = false,
   });
 
   final String? title;
@@ -31,11 +36,16 @@ class GScaffold extends StatelessWidget {
   final Widget? floatingActionButton;
   final Widget? leading;
   final bool showBackButton;
+  final Color? backgroundColor;
+  final Color? appBarBackgroundColor;
+  final Widget? bottomNavigationBar;
+  final bool extendBody;
 
   @override
   Widget build(BuildContext context) {
     return Scaffold(
-      backgroundColor: AppTheme.background,
+      backgroundColor: backgroundColor ?? AppTheme.background,
+      extendBody: extendBody,
       appBar: title == null
           ? null
           : AppBar(
@@ -43,9 +53,11 @@ class GScaffold extends StatelessWidget {
               leading: leading,
               automaticallyImplyLeading: showBackButton,
               actions: actions,
+              backgroundColor: appBarBackgroundColor ?? AppTheme.surface,
             ),
       body: SafeArea(child: body),
       floatingActionButton: floatingActionButton,
+      bottomNavigationBar: bottomNavigationBar,
     );
   }
 }

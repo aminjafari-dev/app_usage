@@ -9,7 +9,7 @@ import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
 
-/// Glassy pill that shows app name + today's formatted duration.
+/// Glassy / Telegram-blue pill that shows app name + today's formatted duration.
 ///
 /// How to use:
 /// ```dart
@@ -36,15 +36,15 @@ class UsageGlassCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = compact ? 36.0 : 40.0;
+    final iconSize = compact ? 36.0 : 44.0;
     final nameStyle = TextStyle(
-      fontSize: compact ? 13 : 14,
+      fontSize: compact ? 13 : 15,
       fontWeight: FontWeight.w500,
       color: AppTheme.overlayText,
       height: 1.1,
     );
     final timeStyle = TextStyle(
-      fontSize: compact ? 22 : 24,
+      fontSize: compact ? 22 : 26,
       fontWeight: FontWeight.w700,
       color: AppTheme.overlayAccent,
       height: 1.1,
@@ -58,11 +58,11 @@ class UsageGlassCounter extends StatelessWidget {
             constraints.maxHeight < 200;
 
         return ClipRRect(
-          borderRadius: BorderRadius.circular(22),
+          borderRadius: BorderRadius.circular(AppTheme.radiusPill),
           child: BackdropFilter(
             filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
             child: Container(
-              width: fillParent ? double.infinity : (compact ? 260.0 : 280.0),
+              width: fillParent ? double.infinity : (compact ? 260.0 : double.infinity),
               height: fillParent ? double.infinity : (compact ? 88.0 : 96.0),
               padding: EdgeInsets.symmetric(
                 horizontal: compact ? 14 : 18,
@@ -70,8 +70,9 @@ class UsageGlassCounter extends StatelessWidget {
               ),
               decoration: BoxDecoration(
                 color: AppTheme.glassFill,
-                borderRadius: BorderRadius.circular(22),
+                borderRadius: BorderRadius.circular(AppTheme.radiusPill),
                 border: Border.all(color: AppTheme.glassBorder, width: 1.2),
+                boxShadow: compact ? null : AppTheme.cardShadow,
               ),
               // Scale the whole row down when the overlay window is smaller
               // than the design size (density quirks / resize races). Without
@@ -86,7 +87,7 @@ class UsageGlassCounter extends StatelessWidget {
                 child: SizedBox(
                   // Intrinsic design width so Expanded has a real budget when
                   // the outer Container is unbounded (home preview path).
-                  width: compact ? 232 : 244,
+                  width: compact ? 232 : 280,
                   height: 68,
                   child: Row(
                     children: [
@@ -126,7 +127,7 @@ class UsageGlassCounter extends StatelessWidget {
   }
 }
 
-/// Circular app-icon (or fallback glyph) inside the glass pill.
+/// Circular app-icon (or fallback glyph) — Telegram chat-avatar style.
 class _IconBubble extends StatelessWidget {
   const _IconBubble({this.iconBytes, this.size = 28});
 
@@ -140,68 +141,111 @@ class _IconBubble extends StatelessWidget {
     return Container(
       width: size,
       height: size,
-      decoration: const BoxDecoration(
-        color: AppTheme.surface,
+      decoration: BoxDecoration(
+        color: AppTheme.primarySoft,
         shape: BoxShape.circle,
+        border: Border.all(
+          color: AppTheme.divider,
+          width: 0.5,
+        ),
       ),
       clipBehavior: Clip.antiAlias,
       child: bytes == null
-          ? Icon(Icons.apps, size: glyphSize, color: AppTheme.primary)
+          ? Icon(Icons.apps_rounded, size: glyphSize, color: AppTheme.primary)
           : Image.memory(
               Uint8List.fromList(bytes),
               fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) =>
-                  Icon(Icons.apps, size: glyphSize, color: AppTheme.primary),
+              errorBuilder: (context, error, stackTrace) => Icon(
+                Icons.apps_rounded,
+                size: glyphSize,
+                color: AppTheme.primary,
+              ),
             ),
     );
   }
 }
 
-/// List tile for one app on the home dashboard.
+/// List tile for one app — styled like a Telegram chat row.
 ///
-/// How to use inside a ListView.builder with [AppUsageEntity] items.
+/// How to use inside a ListView / card with [AppUsageEntity] items.
 class UsageAppTile extends StatelessWidget {
   /// Creates a row showing icon, name, and today's time.
-  const UsageAppTile({super.key, required this.entity, this.isActive = false});
+  const UsageAppTile({
+    super.key,
+    required this.entity,
+    this.isActive = false,
+    this.showDivider = true,
+  });
 
   final AppUsageEntity entity;
   final bool isActive;
+  final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: const EdgeInsets.only(bottom: 8),
-      padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
-      decoration: BoxDecoration(
-        color: isActive
-            ? AppTheme.primary.withValues(alpha: 0.08)
-            : AppTheme.surface,
-        borderRadius: BorderRadius.circular(14),
-        border: Border.all(
-          color: isActive
-              ? AppTheme.primary.withValues(alpha: 0.35)
-              : AppTheme.onSurfaceMuted.withValues(alpha: 0.12),
-        ),
-      ),
-      child: Row(
-        children: [
-          _IconBubble(iconBytes: entity.iconBytes, size: 32),
-          GGap.s(),
-          Expanded(
-            child: GText(
-              entity.appName,
-              style: Theme.of(context).textTheme.titleMedium,
-              maxLines: 1,
-              overflow: TextOverflow.ellipsis,
+    return Column(
+      mainAxisSize: MainAxisSize.min,
+      children: [
+        // Soft highlight when this app is the live foreground target —
+        // similar to Telegram’s selected username / active chat feel.
+        ColoredBox(
+          color: isActive ? AppTheme.primarySoft : Colors.transparent,
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            child: Row(
+              children: [
+                _IconBubble(iconBytes: entity.iconBytes, size: 48),
+                const SizedBox(width: 12),
+                Expanded(
+                  child: Column(
+                    crossAxisAlignment: CrossAxisAlignment.start,
+                    children: [
+                      GText(
+                        entity.appName,
+                        style: Theme.of(context).textTheme.titleMedium,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                      const SizedBox(height: 2),
+                      GText(
+                        entity.packageName,
+                        style: Theme.of(context).textTheme.bodySmall,
+                        color: AppTheme.onSurfaceMuted,
+                        maxLines: 1,
+                        overflow: TextOverflow.ellipsis,
+                      ),
+                    ],
+                  ),
+                ),
+                const SizedBox(width: 8),
+                // Duration sits where Telegram puts timestamps / unread pills.
+                Container(
+                  padding:
+                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+                  decoration: BoxDecoration(
+                    color: isActive
+                        ? AppTheme.primary
+                        : AppTheme.onSurfaceMuted.withValues(alpha: 0.12),
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  ),
+                  child: GText(
+                    formatUsageDuration(entity.todaySeconds),
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                        ),
+                    color: isActive ? AppTheme.surface : AppTheme.onSurfaceMuted,
+                  ),
+                ),
+              ],
             ),
           ),
-          GText(
-            formatUsageDuration(entity.todaySeconds),
-            style: Theme.of(context).textTheme.titleMedium,
-            color: AppTheme.primary,
+        ),
+        if (showDivider)
+          const Padding(
+            padding: EdgeInsetsDirectional.only(start: 76),
+            child: Divider(height: 1, thickness: 0.5, color: AppTheme.divider),
           ),
-        ],
-      ),
+      ],
     );
   }
 }

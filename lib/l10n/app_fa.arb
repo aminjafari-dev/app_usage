@@ -21,7 +21,8 @@
   "stopTracking": "غیرفعال‌سازی شمارنده زنده",
   "trackingActive": "شمارنده زنده روشن است — هر برنامه‌ای باز کنید تا بالای صفحه ببینید",
   "trackingInactive": "شمارنده زنده خاموش است",
-  "noUsageYet": "هنوز استفاده‌ای برای امروز ثبت نشده است.",
+  "noUsageYet": "هنوز استفاده‌ای نیست...",
+  "noUsageYetSubtitle": "برنامه‌ها را باز کنید تا زمان صفحه امروز ثبت شود.",
   "currentApp": "برنامه فعلی",
   "switchLanguage": "زبان",
   "languageEnglish": "انگلیسی",
@@ -29,6 +30,25 @@
   "refresh": "به‌روزرسانی",
   "errorGeneric": "مشکلی پیش آمد",
   "permissionsRequired": "برای شمارنده زنده دسترسی استفاده، روکش و باتری بدون محدودیت لازم است.",
+  "permissionsRequiredHint": "دسترسی‌های لازم را بدهید تا شمارنده زنده روی برنامه‌ها نمایش داده شود.",
+  "todaySectionHeader": "امروز",
+  "trackingSectionHeader": "شمارنده زنده",
+  "statusOnline": "در حال ردیابی",
+  "statusOffline": "متوقف",
+  "quickRefresh": "تازه‌سازی",
+  "quickLanguage": "زبان",
+  "quickPermissions": "دسترسی",
+  "openPermissions": "باز کردن دسترسی‌ها",
+  "appsTracked": "{count} برنامه",
+  "@appsTracked": {
+    "placeholders": {
+      "count": {
+        "type": "int"
+      }
+    }
+  },
+  "permissionsIntro": "موارد زیر را فعال کنید تا شمارنده شناور مثل نشان تلگرام کار کند.",
+  "footerHintPermissions": "فقط همین دستگاه آمار استفاده را می‌خواند. چیزی آپلود نمی‌شود.",
   "secondsFormat": "{time}",
   "@secondsFormat": {
     "placeholders": {

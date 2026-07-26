@@ -5,6 +5,7 @@ import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/router/page_name.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
+import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
@@ -20,6 +21,9 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// ```dart
 /// Navigator.of(context).pushNamed(PageName.permissions);
 /// ```
+///
+/// Layout follows Telegram Account / Settings: grey canvas, white rounded
+/// cards, colorful rounded-square icons, blue section headers, pill CTAs.
 class PermissionsPage extends StatelessWidget {
   /// Creates the permissions page with its own [UsageBloc] instance.
   const PermissionsPage({super.key});
@@ -56,46 +60,134 @@ class _PermissionsView extends StatelessWidget {
           };
 
           return ListView(
-            padding: const EdgeInsets.all(16),
+            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
             children: [
-              _PermissionCard(
-                title: l10n.usagePermissionTitle,
-                body: l10n.usagePermissionBody,
-                granted: status.hasUsageAccess,
-                actionLabel: l10n.grantUsageAccess,
-                onPressed: () {
-                  context
-                      .read<UsageBloc>()
-                      .add(const UsageEvent.requestUsagePermission());
-                },
+              // Intro caption under the app bar — Telegram “A few words…” style.
+              GText(
+                l10n.permissionsIntro,
+                style: Theme.of(context).textTheme.bodySmall,
+                color: AppTheme.onSurfaceMuted,
               ),
               GGap.m(),
-              _PermissionCard(
-                title: l10n.overlayPermissionTitle,
-                body: l10n.overlayPermissionBody,
-                granted: status.hasOverlayAccess,
-                actionLabel: l10n.grantOverlayAccess,
-                onPressed: () {
-                  context
-                      .read<UsageBloc>()
-                      .add(const UsageEvent.requestOverlayPermission());
-                },
+              GCard(
+                header: l10n.permissionsTitle,
+                child: Column(
+                  children: [
+                    GSettingsTile(
+                      icon: Icons.bar_chart_rounded,
+                      iconColor: AppTheme.iconBlue,
+                      title: l10n.usagePermissionTitle,
+                      subtitle: l10n.usagePermissionBody,
+                      trailing: GPillBadge(
+                        label: status.hasUsageAccess
+                            ? l10n.permissionGranted
+                            : l10n.permissionMissing,
+                        tone: status.hasUsageAccess
+                            ? GPillTone.success
+                            : GPillTone.danger,
+                      ),
+                      onTap: () {
+                        context
+                            .read<UsageBloc>()
+                            .add(const UsageEvent.requestUsagePermission());
+                      },
+                      showDivider: true,
+                    ),
+                    GSettingsTile(
+                      icon: Icons.layers_rounded,
+                      iconColor: AppTheme.iconOrange,
+                      title: l10n.overlayPermissionTitle,
+                      subtitle: l10n.overlayPermissionBody,
+                      trailing: GPillBadge(
+                        label: status.hasOverlayAccess
+                            ? l10n.permissionGranted
+                            : l10n.permissionMissing,
+                        tone: status.hasOverlayAccess
+                            ? GPillTone.success
+                            : GPillTone.danger,
+                      ),
+                      onTap: () {
+                        context
+                            .read<UsageBloc>()
+                            .add(const UsageEvent.requestOverlayPermission());
+                      },
+                      showDivider: true,
+                    ),
+                    GSettingsTile(
+                      icon: Icons.battery_charging_full_rounded,
+                      iconColor: AppTheme.iconGreen,
+                      title: l10n.batteryPermissionTitle,
+                      subtitle: l10n.batteryPermissionBody,
+                      trailing: GPillBadge(
+                        label: status.hasBatteryUnrestricted
+                            ? l10n.permissionGranted
+                            : l10n.permissionMissing,
+                        tone: status.hasBatteryUnrestricted
+                            ? GPillTone.success
+                            : GPillTone.danger,
+                      ),
+                      onTap: () {
+                        context.read<UsageBloc>().add(
+                              const UsageEvent.requestBatteryUnrestricted(),
+                            );
+                      },
+                    ),
+                  ],
+                ),
               ),
-              GGap.m(),
-              _PermissionCard(
-                title: l10n.batteryPermissionTitle,
-                body: l10n.batteryPermissionBody,
-                granted: status.hasBatteryUnrestricted,
-                actionLabel: l10n.grantBatteryUnrestricted,
-                onPressed: () {
-                  context
-                      .read<UsageBloc>()
-                      .add(const UsageEvent.requestBatteryUnrestricted());
-                },
+              GGap.s(),
+              Padding(
+                padding: const EdgeInsets.symmetric(horizontal: 4),
+                child: GText(
+                  l10n.footerHintPermissions,
+                  style: Theme.of(context).textTheme.bodySmall,
+                  color: AppTheme.onSurfaceMuted,
+                ),
+              ),
+              GGap.l(),
+              // Explicit open actions — same as Telegram “Change >” affordances.
+              GCard(
+                child: Column(
+                  children: [
+                    GSettingsTile(
+                      icon: Icons.open_in_new_rounded,
+                      iconColor: AppTheme.iconTeal,
+                      title: l10n.grantUsageAccess,
+                      onTap: () {
+                        context
+                            .read<UsageBloc>()
+                            .add(const UsageEvent.requestUsagePermission());
+                      },
+                      showDivider: true,
+                    ),
+                    GSettingsTile(
+                      icon: Icons.open_in_new_rounded,
+                      iconColor: AppTheme.iconPurple,
+                      title: l10n.grantOverlayAccess,
+                      onTap: () {
+                        context
+                            .read<UsageBloc>()
+                            .add(const UsageEvent.requestOverlayPermission());
+                      },
+                      showDivider: true,
+                    ),
+                    GSettingsTile(
+                      icon: Icons.open_in_new_rounded,
+                      iconColor: AppTheme.iconRed,
+                      title: l10n.grantBatteryUnrestricted,
+                      onTap: () {
+                        context.read<UsageBloc>().add(
+                              const UsageEvent.requestBatteryUnrestricted(),
+                            );
+                      },
+                    ),
+                  ],
+                ),
               ),
               GGap.l(),
               GButton(
                 label: l10n.continueToHome,
+                icon: Icons.arrow_forward_rounded,
                 onPressed: status.isReady
                     ? () {
                         Navigator.of(context).pushReplacementNamed(
@@ -107,6 +199,7 @@ class _PermissionsView extends StatelessWidget {
               GGap.s(),
               GOutlinedButton(
                 label: l10n.refresh,
+                icon: Icons.refresh_rounded,
                 onPressed: () {
                   context
                       .read<UsageBloc>()
@@ -116,71 +209,6 @@ class _PermissionsView extends StatelessWidget {
             ],
           );
         },
-      ),
-    );
-  }
-}
-
-/// Single permission block with status chip + CTA.
-class _PermissionCard extends StatelessWidget {
-  const _PermissionCard({
-    required this.title,
-    required this.body,
-    required this.granted,
-    required this.actionLabel,
-    required this.onPressed,
-  });
-
-  final String title;
-  final String body;
-  final bool granted;
-  final String actionLabel;
-  final VoidCallback onPressed;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return Container(
-      padding: const EdgeInsets.all(16),
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(16),
-      ),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
-        children: [
-          Row(
-            children: [
-              Expanded(
-                child: GText(
-                  title,
-                  style: Theme.of(context).textTheme.titleMedium,
-                ),
-              ),
-              Container(
-                padding:
-                    const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                decoration: BoxDecoration(
-                  color: granted
-                      ? AppTheme.success.withValues(alpha: 0.12)
-                      : AppTheme.error.withValues(alpha: 0.12),
-                  borderRadius: BorderRadius.circular(20),
-                ),
-                child: GText(
-                  granted ? l10n.permissionGranted : l10n.permissionMissing,
-                  style: Theme.of(context).textTheme.bodySmall,
-                  color: granted ? AppTheme.success : AppTheme.error,
-                ),
-              ),
-            ],
-          ),
-          GGap.s(),
-          GTextMuted(body),
-          GGap.m(),
-          // Still allow opening settings even when already granted (re-check).
-          GOutlinedButton(label: actionLabel, onPressed: onPressed),
-        ],
       ),
     );
   }

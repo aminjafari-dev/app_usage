@@ -77,7 +77,11 @@ class AppLocalizationsEn extends AppLocalizations {
   String get trackingInactive => 'Live counter is off';
 
   @override
-  String get noUsageYet => 'No app usage recorded for today yet.';
+  String get noUsageYet => 'No usage yet...';
+
+  @override
+  String get noUsageYetSubtitle =>
+      'Open apps on your phone to start tracking today\'s screen time.';
 
   @override
   String get currentApp => 'Current app';
@@ -100,6 +104,47 @@ class AppLocalizationsEn extends AppLocalizations {
   @override
   String get permissionsRequired =>
       'Usage access, overlay, and unrestricted battery are required for the live counter.';
+
+  @override
+  String get permissionsRequiredHint =>
+      'Grant the required access so the live counter can float over other apps.';
+
+  @override
+  String get todaySectionHeader => 'Today';
+
+  @override
+  String get trackingSectionHeader => 'Live counter';
+
+  @override
+  String get statusOnline => 'Tracking';
+
+  @override
+  String get statusOffline => 'Paused';
+
+  @override
+  String get quickRefresh => 'Refresh';
+
+  @override
+  String get quickLanguage => 'Language';
+
+  @override
+  String get quickPermissions => 'Access';
+
+  @override
+  String get openPermissions => 'Open permissions';
+
+  @override
+  String appsTracked(int count) {
+    return '$count apps';
+  }
+
+  @override
+  String get permissionsIntro =>
+      'Allow the following so the floating counter can work like a Telegram overlay badge.';
+
+  @override
+  String get footerHintPermissions =>
+      'Only this device can read usage stats. Nothing is uploaded.';
 
   @override
   String secondsFormat(String time) {

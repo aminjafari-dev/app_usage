@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'package:usage_stats/usage_stats.dart';
 
 import 'package:app_usage/core/utils/duration_format.dart';
+import 'package:app_usage/core/utils/usage_time_calculator.dart';
 
 /// Raw DTO for one app's usage pulled from Android UsageStatsManager.
 ///
@@ -57,25 +58,52 @@ class UsageStatsDataSource {
     await UsageStats.grantUsagePermission();
   }
 
-  /// Seeds today's totals from UsageStats aggregates (milliseconds → seconds).
+  /// Seeds today's totals from foreground **events** (not daily bucket aggregates).
   ///
-  /// Useful at tracking start to catch time spent before this process ran.
+  /// Why events: [UsageStats.queryAndAggregateUsageStats] expands the query to
+  /// whole Android intervals and often leaks yesterday into "Today" — especially
+  /// right after midnight. Digital Wellbeing-style math uses resume/pause pairs
+  /// clipped to local midnight → now instead.
+  ///
+  /// How to use: call at tracking start / Home refresh so the list matches the
+  /// system Digital Wellbeing day window.
+  ///
+  /// Example: Telegram open 10 min yesterday + 30 s today → returns ~30, not 630.
   Future<List<UsageInfoModel>> queryTodayAggregates() async {
     final end = DateTime.now();
     final start = startOfToday(end);
-    final map = await UsageStats.queryAndAggregateUsageStats(start, end);
+    // Look back before midnight so a session that crossed 00:00 is detected and
+    // then clipped — only the post-midnight slice counts toward today.
+    final lookback = start.subtract(const Duration(hours: 6));
+    final rawEvents = await UsageStats.queryEvents(lookback, end);
+
+    final points = <UsageEventPoint>[];
+    for (final event in rawEvents) {
+      final pkg = event.packageName;
+      final type = event.eventTypeValue;
+      final time = int.tryParse(event.timeStamp ?? '') ?? 0;
+      // Drop malformed plugin rows before the pure calculator runs.
+      if (pkg == null || pkg.isEmpty || type == null || time <= 0) continue;
+      points.add(
+        UsageEventPoint(
+          packageName: pkg,
+          eventType: type,
+          timeStampMs: time,
+        ),
+      );
+    }
+
+    final msByPackage = sumForegroundMsByPackage(
+      events: points,
+      rangeStartMs: start.millisecondsSinceEpoch,
+      rangeEndMs: end.millisecondsSinceEpoch,
+      isIgnoredPackage: _isIgnoredPackage,
+    );
 
     final results = <UsageInfoModel>[];
-    for (final entry in map.entries) {
-      final info = entry.value;
-      final packageName = info.packageName ?? entry.key;
-      // Skip empty or ignored system packages.
-      if (packageName.isEmpty || _ignoredPackages.contains(packageName)) {
-        continue;
-      }
-
-      final ms = int.tryParse(info.totalTimeInForeground ?? '0') ?? 0;
-      final seconds = (ms / 1000).round();
+    for (final entry in msByPackage.entries) {
+      final packageName = entry.key;
+      final seconds = entry.value ~/ 1000;
       // Skip apps with no meaningful foreground time today.
       if (seconds <= 0) continue;
 
