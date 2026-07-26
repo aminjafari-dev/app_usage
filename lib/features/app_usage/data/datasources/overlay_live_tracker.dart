@@ -8,13 +8,23 @@ import 'package:app_usage/features/app_usage/data/datasources/overlay_data_sourc
 import 'package:app_usage/features/app_usage/data/datasources/usage_local_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_stats_data_source.dart';
 
-/// Callback fired whenever the overlay badge should redraw.
+/// Callback fired whenever the overlay badge should redraw or hide.
 ///
 /// How to use inside [OverlayApp]:
 /// ```dart
-/// tracker.onTick = (payload) => setState(() { ... });
+/// tracker.onTick = (payload) {
+///   if (payload == null) {
+///     // Home / launcher — hide the glassy badge.
+///     setState(() => visible = false);
+///     return;
+///   }
+///   setState(() { visible = true; /* apply payload */ });
+/// };
 /// ```
-typedef OverlayTickCallback = void Function(OverlayTickPayload payload);
+///
+/// Pass `null` when the user is on the home screen (or any ignored package)
+/// so the top badge is not shown while no trackable app is in use.
+typedef OverlayTickCallback = void Function(OverlayTickPayload? payload);
 
 /// Runs the 1-second usage counter **inside the overlay isolate**.
 ///
@@ -132,9 +142,16 @@ class OverlayLiveTracker {
         keepIfNoEvent: _activePackage,
       );
 
-      // Launcher / our own app: pause counting; leave last badge text as-is.
+      // Launcher / home / our own app: pause counting and hide the top badge.
+      // Useful so the glassy counter does not linger over the wallpaper when
+      // the user has not opened a trackable application.
+      // Example: press Home → badge disappears; open Instagram → badge returns.
       if (package == null) {
-        _activePackage = null;
+        // Only notify once when leaving an app → home, not every idle second.
+        if (_activePackage != null) {
+          _activePackage = null;
+          _onTick?.call(null);
+        }
         return;
       }
 
