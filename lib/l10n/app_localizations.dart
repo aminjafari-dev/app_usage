@@ -137,7 +137,7 @@ abstract class AppLocalizations {
   /// No description provided for @usagePermissionBody.
   ///
   /// In en, this message translates to:
-  /// **'Allow this app to see which apps you use so we can count today\'s time.'**
+  /// **'To help you find balance, we gently monitor your app usage. No harsh locks — just awareness on this device.'**
   String get usagePermissionBody;
 
   /// No description provided for @overlayPermissionTitle.
@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @overlayPermissionBody.
   ///
   /// In en, this message translates to:
-  /// **'Allow a small glassy counter to float over other apps.'**
+  /// **'A small floating counter stays with you so you always know how much time you\'ve spent today.'**
   String get overlayPermissionBody;
 
   /// No description provided for @batteryPermissionTitle.
@@ -161,8 +161,14 @@ abstract class AppLocalizations {
   /// No description provided for @batteryPermissionBody.
   ///
   /// In en, this message translates to:
-  /// **'Allow unrestricted battery so the counter keeps running after you clear apps from Recents. Without this, Android kills the overlay to save battery.'**
+  /// **'Keep the counter alive after you clear Recents. Without this, Android may stop tracking to save battery.'**
   String get batteryPermissionBody;
+
+  /// No description provided for @grantAccess.
+  ///
+  /// In en, this message translates to:
+  /// **'Grant access'**
+  String get grantAccess;
 
   /// No description provided for @grantUsageAccess.
   ///
@@ -194,11 +200,29 @@ abstract class AppLocalizations {
   /// **'Required'**
   String get permissionMissing;
 
+  /// No description provided for @permissionStep.
+  ///
+  /// In en, this message translates to:
+  /// **'{current}/{total}'**
+  String permissionStep(int current, int total);
+
+  /// No description provided for @continueNext.
+  ///
+  /// In en, this message translates to:
+  /// **'Continue'**
+  String get continueNext;
+
   /// No description provided for @continueToHome.
   ///
   /// In en, this message translates to:
   /// **'Continue — counter starts automatically'**
   String get continueToHome;
+
+  /// No description provided for @learnMorePrivacy.
+  ///
+  /// In en, this message translates to:
+  /// **'Learn more about privacy'**
+  String get learnMorePrivacy;
 
   /// No description provided for @startTracking.
   ///

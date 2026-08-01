@@ -29,21 +29,24 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get usagePermissionBody =>
-      'Allow this app to see which apps you use so we can count today\'s time.';
+      'To help you find balance, we gently monitor your app usage. No harsh locks — just awareness on this device.';
 
   @override
   String get overlayPermissionTitle => 'Display over other apps';
 
   @override
   String get overlayPermissionBody =>
-      'Allow a small glassy counter to float over other apps.';
+      'A small floating counter stays with you so you always know how much time you\'ve spent today.';
 
   @override
   String get batteryPermissionTitle => 'Unrestricted battery';
 
   @override
   String get batteryPermissionBody =>
-      'Allow unrestricted battery so the counter keeps running after you clear apps from Recents. Without this, Android kills the overlay to save battery.';
+      'Keep the counter alive after you clear Recents. Without this, Android may stop tracking to save battery.';
+
+  @override
+  String get grantAccess => 'Grant access';
 
   @override
   String get grantUsageAccess => 'Open usage access';
@@ -61,7 +64,18 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permissionMissing => 'Required';
 
   @override
+  String permissionStep(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get continueNext => 'Continue';
+
+  @override
   String get continueToHome => 'Continue — counter starts automatically';
+
+  @override
+  String get learnMorePrivacy => 'Learn more about privacy';
 
   @override
   String get startTracking => 'Enable live counter';

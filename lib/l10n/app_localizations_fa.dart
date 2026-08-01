@@ -29,21 +29,24 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get usagePermissionBody =>
-      'اجازه دهید ببینیم از کدام برنامه‌ها استفاده می‌کنید تا زمان امروز را بشماریم.';
+      'برای کمک به تعادل دیجیتال، استفاده از برنامه‌ها را به‌آرامی دنبال می‌کنیم. بدون قفل سخت — فقط آگاهی روی همین دستگاه.';
 
   @override
   String get overlayPermissionTitle => 'نمایش روی برنامه‌های دیگر';
 
   @override
   String get overlayPermissionBody =>
-      'اجازه دهید یک شمارنده شیشه‌ای کوچک روی برنامه‌های دیگر نمایش داده شود.';
+      'یک شمارنده شناور کوچک همراه شما می‌ماند تا همیشه بدانید امروز چقدر وقت گذاشته‌اید.';
 
   @override
   String get batteryPermissionTitle => 'باتری بدون محدودیت';
 
   @override
   String get batteryPermissionBody =>
-      'باتری را روی حالت بدون محدودیت بگذارید تا بعد از پاک‌کردن برنامه‌ها از پس‌زمینه، شمارنده زنده بماند. بدون این دسترسی اندروید برای صرفه‌جویی در باتری روکش را می‌کشد.';
+      'شمارنده را بعد از پاک‌کردن برنامه‌ها از پس‌زمینه زنده نگه می‌دارد. بدون این دسترسی اندروید ممکن است ردیابی را برای صرفه‌جویی در باتری متوقف کند.';
+
+  @override
+  String get grantAccess => 'دادن دسترسی';
 
   @override
   String get grantUsageAccess => 'باز کردن دسترسی استفاده';
@@ -61,7 +64,18 @@ class AppLocalizationsFa extends AppLocalizations {
   String get permissionMissing => 'لازم است';
 
   @override
+  String permissionStep(int current, int total) {
+    return '$current/$total';
+  }
+
+  @override
+  String get continueNext => 'ادامه';
+
+  @override
   String get continueToHome => 'ادامه — شمارنده به‌صورت خودکار شروع می‌شود';
+
+  @override
+  String get learnMorePrivacy => 'درباره حریم خصوصی بیشتر بدانید';
 
   @override
   String get startTracking => 'فعال‌سازی شمارنده زنده';
