@@ -22,8 +22,8 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// Navigator.of(context).pushNamed(PageName.permissions);
 /// ```
 ///
-/// Layout follows Telegram Account / Settings: grey canvas, white rounded
-/// cards, colorful rounded-square icons, blue section headers, pill CTAs.
+/// Layout follows the settings design: soft grey canvas, 32px white cards,
+/// circular colored icons, blue section headers, capsule CTAs.
 class PermissionsPage extends StatelessWidget {
   /// Creates the permissions page with its own [UsageBloc] instance.
   const PermissionsPage({super.key});
@@ -60,15 +60,14 @@ class _PermissionsView extends StatelessWidget {
           };
 
           return ListView(
-            padding: const EdgeInsets.fromLTRB(16, 12, 16, 24),
+            padding: const EdgeInsets.fromLTRB(16, 8, 16, 28),
             children: [
-              // Intro caption under the app bar — Telegram “A few words…” style.
               GText(
                 l10n.permissionsIntro,
                 style: Theme.of(context).textTheme.bodySmall,
                 color: AppTheme.onSurfaceMuted,
               ),
-              GGap.m(),
+              GGap.l(),
               GCard(
                 header: l10n.permissionsTitle,
                 child: Column(
@@ -145,7 +144,6 @@ class _PermissionsView extends StatelessWidget {
                 ),
               ),
               GGap.l(),
-              // Explicit open actions — same as Telegram “Change >” affordances.
               GCard(
                 child: Column(
                   children: [

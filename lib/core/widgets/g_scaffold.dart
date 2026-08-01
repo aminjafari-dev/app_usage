@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:app_usage/core/theme/app_theme.dart';
 
@@ -12,8 +13,7 @@ import 'package:app_usage/core/theme/app_theme.dart';
 /// );
 /// ```
 ///
-/// Keeps Telegram-style AppBar (white bar, bold title) and light-grey canvas
-/// consistent across pages.
+/// Keeps the soft grey canvas and light app bar consistent across pages.
 class GScaffold extends StatelessWidget {
   /// Creates a themed scaffold with an optional title and actions.
   const GScaffold({
@@ -43,21 +43,29 @@ class GScaffold extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Scaffold(
-      backgroundColor: backgroundColor ?? AppTheme.background,
-      extendBody: extendBody,
-      appBar: title == null
-          ? null
-          : AppBar(
-              title: Text(title!),
-              leading: leading,
-              automaticallyImplyLeading: showBackButton,
-              actions: actions,
-              backgroundColor: appBarBackgroundColor ?? AppTheme.surface,
-            ),
-      body: SafeArea(child: body),
-      floatingActionButton: floatingActionButton,
-      bottomNavigationBar: bottomNavigationBar,
+    final bg = backgroundColor ?? AppTheme.background;
+
+    return AnnotatedRegion<SystemUiOverlayStyle>(
+      value: SystemUiOverlayStyle.dark.copyWith(
+        statusBarColor: Colors.transparent,
+        systemNavigationBarColor: bg,
+      ),
+      child: Scaffold(
+        backgroundColor: bg,
+        extendBody: extendBody,
+        appBar: title == null
+            ? null
+            : AppBar(
+                title: Text(title!),
+                leading: leading,
+                automaticallyImplyLeading: showBackButton,
+                actions: actions,
+                backgroundColor: appBarBackgroundColor ?? bg,
+              ),
+        body: SafeArea(child: body),
+        floatingActionButton: floatingActionButton,
+        bottomNavigationBar: bottomNavigationBar,
+      ),
     );
   }
 }

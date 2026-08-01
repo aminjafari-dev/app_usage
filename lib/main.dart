@@ -26,9 +26,10 @@ void main() async {
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
   runApp(
-    const MaterialApp(
+    MaterialApp(
       debugShowCheckedModeBanner: false,
-      home: OverlayApp(),
+      theme: AppTheme.light(),
+      home: const OverlayApp(),
     ),
   );
 }

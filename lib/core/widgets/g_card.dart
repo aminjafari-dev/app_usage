@@ -3,22 +3,22 @@ import 'package:flutter/material.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 
-/// Telegram-style white rounded card that groups related list/content items.
+/// Soft white card with 32px corners — groups related list/content items.
 ///
 /// How to use:
 /// ```dart
 /// GCard(
+///   header: 'Accounts',
 ///   child: Column(children: [row1, row2]),
 /// );
 /// ```
 ///
-/// Useful for recreating Telegram’s settings / contacts / account sections —
-/// white surface, soft radius, optional section header, floating on grey canvas.
+/// Section [header] sits above the white surface (blue label), matching the
+/// settings “Accounts” pattern. Cards float on the light grey canvas.
 class GCard extends StatelessWidget {
-  /// Creates a Telegram-style surface card.
+  /// Creates a soft surface card.
   ///
-  /// When [header] is set, a blue section title is drawn above [child]
-  /// (e.g. “Accounts”, “Your Info”).
+  /// When [header] is set, a blue section title is drawn above [child].
   const GCard({
     super.key,
     required this.child,
@@ -34,49 +34,50 @@ class GCard extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      margin: margin,
-      decoration: BoxDecoration(
-        color: AppTheme.surface,
-        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-        boxShadow: AppTheme.cardShadow,
-      ),
-      clipBehavior: Clip.antiAlias,
+    return Padding(
+      padding: margin ?? EdgeInsets.zero,
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.stretch,
         mainAxisSize: MainAxisSize.min,
         children: [
-          // Blue Telegram section header — useful for grouping rows like
-          // “Your Info” or “Accounts” in settings screens.
+          // Blue section label lives outside the white card.
           if (header != null)
             Padding(
-              padding: const EdgeInsets.fromLTRB(16, 14, 16, 6),
+              padding: const EdgeInsets.fromLTRB(18, 0, 18, 8),
               child: GText(
                 header!,
                 style: Theme.of(context).textTheme.labelMedium,
                 color: AppTheme.primary,
               ),
             ),
-          Padding(padding: padding, child: child),
+          Container(
+            decoration: BoxDecoration(
+              color: AppTheme.surface,
+              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+              boxShadow: AppTheme.cardShadow,
+            ),
+            clipBehavior: Clip.antiAlias,
+            child: Padding(padding: padding, child: child),
+          ),
         ],
       ),
     );
   }
 }
 
-/// Colored rounded-square icon used on Telegram settings / contacts rows.
+/// Colored circular icon used on settings / contacts rows.
 ///
 /// How to use:
 /// ```dart
 /// GColoredIcon(icon: Icons.lock, color: AppTheme.iconGreen);
 /// ```
 class GColoredIcon extends StatelessWidget {
-  /// Creates a solid-color rounded icon tile with a white glyph.
+  /// Creates a solid-color circular icon tile with a white glyph.
   const GColoredIcon({
     super.key,
     required this.icon,
     required this.color,
-    this.size = 36,
+    this.size = 32,
   });
 
   final IconData icon;
@@ -90,14 +91,14 @@ class GColoredIcon extends StatelessWidget {
       height: size,
       decoration: BoxDecoration(
         color: color,
-        borderRadius: BorderRadius.circular(AppTheme.radiusIcon),
+        shape: BoxShape.circle,
       ),
-      child: Icon(icon, color: AppTheme.surface, size: size * 0.55),
+      child: Icon(icon, color: AppTheme.surface, size: size * 0.52),
     );
   }
 }
 
-/// Telegram settings-style list row: colored icon + title + subtitle + trailing.
+/// Settings-style list row: circular icon + title + subtitle + trailing.
 ///
 /// How to use:
 /// ```dart
@@ -112,8 +113,7 @@ class GColoredIcon extends StatelessWidget {
 class GSettingsTile extends StatelessWidget {
   /// Creates one interactive settings / info row.
   ///
-  /// When [showDivider] is true a faint inset line is drawn under the row —
-  /// matching Telegram’s card-internal separators.
+  /// When [showDivider] is true a faint inset line is drawn under the row.
   const GSettingsTile({
     super.key,
     required this.icon,
@@ -143,7 +143,7 @@ class GSettingsTile extends StatelessWidget {
           child: InkWell(
             onTap: onTap,
             child: Padding(
-              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+              padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 13),
               child: Row(
                 children: [
                   GColoredIcon(icon: icon, color: iconColor),
@@ -158,7 +158,6 @@ class GSettingsTile extends StatelessWidget {
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
                         ),
-                        // Subtitle mirrors Telegram’s grey description under titles.
                         if (subtitle != null) ...[
                           const SizedBox(height: 2),
                           GText(
@@ -181,10 +180,10 @@ class GSettingsTile extends StatelessWidget {
             ),
           ),
         ),
-        // Inset divider — starts after the icon like Telegram list separators.
+        // Inset divider — starts after the icon like settings list separators.
         if (showDivider)
           const Padding(
-            padding: EdgeInsetsDirectional.only(start: 66),
+            padding: EdgeInsetsDirectional.only(start: 62),
             child: Divider(height: 1, thickness: 0.5, color: AppTheme.divider),
           ),
       ],
@@ -273,25 +272,28 @@ class GQuickAction extends StatelessWidget {
       child: Container(
         decoration: BoxDecoration(
           color: AppTheme.surface,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           boxShadow: AppTheme.cardShadow,
         ),
         child: Material(
           color: Colors.transparent,
-          borderRadius: BorderRadius.circular(14),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           child: InkWell(
             onTap: onTap,
-            borderRadius: BorderRadius.circular(14),
+            borderRadius: BorderRadius.circular(AppTheme.radiusCard),
             child: Padding(
-              padding: const EdgeInsets.symmetric(vertical: 14, horizontal: 8),
+              padding: const EdgeInsets.symmetric(vertical: 16, horizontal: 8),
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppTheme.primary, size: 22),
-                  const SizedBox(height: 6),
+                  Icon(icon, color: AppTheme.onSurface, size: 22),
+                  const SizedBox(height: 8),
                   GText(
                     label,
-                    style: Theme.of(context).textTheme.bodySmall,
+                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                          fontWeight: FontWeight.w500,
+                          fontSize: 12,
+                        ),
                     color: AppTheme.onSurface,
                     textAlign: TextAlign.center,
                     maxLines: 1,
@@ -302,6 +304,126 @@ class GQuickAction extends StatelessWidget {
             ),
           ),
         ),
+      ),
+    );
+  }
+}
+
+/// Value + muted label stack used inside profile info cards.
+///
+/// How to use:
+/// ```dart
+/// GInfoRow(value: '+98 …', label: 'Mobile', striped: true);
+/// ```
+class GInfoRow extends StatelessWidget {
+  /// Creates one value/label pair, optionally striped.
+  const GInfoRow({
+    super.key,
+    required this.value,
+    required this.label,
+    this.striped = false,
+    this.onTap,
+  });
+
+  final String value;
+  final String label;
+  final bool striped;
+  final VoidCallback? onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    return Material(
+      color: striped ? AppTheme.rowStripe : Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 20, vertical: 14),
+          child: Column(
+            crossAxisAlignment: CrossAxisAlignment.start,
+            children: [
+              GText(
+                value,
+                style: Theme.of(context).textTheme.titleMedium,
+                maxLines: 1,
+                overflow: TextOverflow.ellipsis,
+              ),
+              const SizedBox(height: 2),
+              GText(
+                label,
+                style: Theme.of(context).textTheme.bodySmall,
+                color: AppTheme.onSurfaceMuted,
+              ),
+            ],
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Capsule segmented control (e.g. Posts / Archived Posts).
+///
+/// How to use:
+/// ```dart
+/// GSegmentedTabs(
+///   tabs: ['Posts', 'Archived'],
+///   selectedIndex: 0,
+///   onChanged: (i) {},
+/// );
+/// ```
+class GSegmentedTabs extends StatelessWidget {
+  /// Creates a pill track with a soft-blue selected capsule.
+  const GSegmentedTabs({
+    super.key,
+    required this.tabs,
+    required this.selectedIndex,
+    required this.onChanged,
+  });
+
+  final List<String> tabs;
+  final int selectedIndex;
+  final ValueChanged<int> onChanged;
+
+  @override
+  Widget build(BuildContext context) {
+    return Container(
+      padding: const EdgeInsets.all(4),
+      decoration: BoxDecoration(
+        color: AppTheme.rowStripe,
+        borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+      ),
+      child: Row(
+        children: [
+          for (var i = 0; i < tabs.length; i++)
+            Expanded(
+              child: GestureDetector(
+                onTap: () => onChanged(i),
+                child: AnimatedContainer(
+                  duration: const Duration(milliseconds: 180),
+                  curve: Curves.easeOut,
+                  padding: const EdgeInsets.symmetric(vertical: 10),
+                  decoration: BoxDecoration(
+                    color: i == selectedIndex
+                        ? AppTheme.primarySoft
+                        : Colors.transparent,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  ),
+                  child: GText(
+                    tabs[i],
+                    style: Theme.of(context).textTheme.labelMedium?.copyWith(
+                          color: i == selectedIndex
+                              ? AppTheme.primary
+                              : AppTheme.onSurfaceMuted,
+                          fontWeight: FontWeight.w600,
+                        ),
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                    overflow: TextOverflow.ellipsis,
+                  ),
+                ),
+              ),
+            ),
+        ],
       ),
     );
   }

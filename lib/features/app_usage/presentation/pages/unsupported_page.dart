@@ -14,7 +14,7 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// Navigator.of(context).pushNamed(PageName.unsupported);
 /// ```
 ///
-/// Empty-state composition matches Telegram profile “No posts yet…”.
+/// Empty-state composition matches the profile “No posts yet…” layout.
 class UnsupportedPage extends StatelessWidget {
   /// Creates the unsupported platform message screen.
   const UnsupportedPage({super.key});
@@ -31,11 +31,12 @@ class UnsupportedPage extends StatelessWidget {
           children: [
             GGap.xl(),
             Container(
-              width: 88,
-              height: 88,
-              decoration: const BoxDecoration(
+              width: 96,
+              height: 96,
+              decoration: BoxDecoration(
                 color: AppTheme.primarySoft,
                 shape: BoxShape.circle,
+                boxShadow: AppTheme.cardShadow,
               ),
               child: const Icon(
                 Icons.phone_android_rounded,
@@ -45,7 +46,7 @@ class UnsupportedPage extends StatelessWidget {
             ),
             GGap.l(),
             GCard(
-              padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 32),
+              padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 36),
               child: Column(
                 children: [
                   GText(

@@ -3,14 +3,14 @@ import 'package:flutter/material.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 
-/// Primary Telegram-style pill button used across the app.
+/// Primary capsule button with a soft blue drop shadow.
 ///
 /// How to use:
 /// ```dart
 /// GButton(label: 'Start', onPressed: () {});
 /// ```
 ///
-/// Matches Telegram’s solid blue rounded-pill CTAs (e.g. “Add a post”).
+/// Matches the solid blue pill CTAs from the profile designs (e.g. “Add a post”).
 class GButton extends StatelessWidget {
   /// Creates a filled primary button.
   ///
@@ -33,6 +33,8 @@ class GButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final enabled = onPressed != null && !isLoading;
+
     final button = ElevatedButton(
       onPressed: isLoading ? null : onPressed,
       style: ElevatedButton.styleFrom(
@@ -42,8 +44,8 @@ class GButton extends StatelessWidget {
         disabledForegroundColor: AppTheme.surface,
         elevation: 0,
         shadowColor: Colors.transparent,
-        minimumSize: const Size(64, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        minimumSize: const Size(64, 50),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusPill),
         ),
@@ -61,7 +63,6 @@ class GButton extends StatelessWidget {
               mainAxisSize: expand ? MainAxisSize.max : MainAxisSize.min,
               mainAxisAlignment: MainAxisAlignment.center,
               children: [
-                // Optional leading icon (camera / play) like Telegram CTAs.
                 if (icon != null) ...[
                   Icon(icon, size: 20, color: AppTheme.surface),
                   const SizedBox(width: 8),
@@ -79,15 +80,23 @@ class GButton extends StatelessWidget {
             ),
     );
 
-    // Expand by default so forms and permission screens look balanced.
+    // Soft blue glow under enabled primary CTAs.
+    final shadowed = DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+        boxShadow: enabled ? AppTheme.primaryButtonShadow : null,
+      ),
+      child: button,
+    );
+
     if (expand) {
-      return SizedBox(width: double.infinity, child: button);
+      return SizedBox(width: double.infinity, child: shadowed);
     }
-    return button;
+    return shadowed;
   }
 }
 
-/// Secondary outlined Telegram-style pill button for less-emphasized actions.
+/// Secondary outlined capsule button for less-emphasized actions.
 ///
 /// Example: opening system settings from the permissions page.
 class GOutlinedButton extends StatelessWidget {
@@ -112,8 +121,8 @@ class GOutlinedButton extends StatelessWidget {
       style: OutlinedButton.styleFrom(
         foregroundColor: AppTheme.primary,
         side: const BorderSide(color: AppTheme.primary, width: 1.2),
-        minimumSize: const Size(64, 48),
-        padding: const EdgeInsets.symmetric(horizontal: 22, vertical: 12),
+        minimumSize: const Size(64, 50),
+        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 14),
         shape: RoundedRectangleBorder(
           borderRadius: BorderRadius.circular(AppTheme.radiusPill),
         ),

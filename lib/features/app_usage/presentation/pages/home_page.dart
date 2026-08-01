@@ -26,8 +26,8 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// Navigator.of(context).pushNamed(PageName.home);
 /// ```
 ///
-/// Visual language mirrors Telegram Settings / Chats: grey canvas, white
-/// rounded cards, blue CTAs, chat-style usage rows.
+/// Layout follows the shared profile design: soft grey canvas, 32px white
+/// cards, quick-action tiles, capsule CTAs, and a compact type scale.
 class HomePage extends StatelessWidget {
   /// Creates the home page; BLoC is provided internally via get_it.
   const HomePage({super.key});
@@ -59,12 +59,12 @@ class _HomeView extends StatelessWidget {
                 .read<UsageBloc>()
                 .add(const UsageEvent.refreshPermissions());
           },
-          icon: const Icon(Icons.search_rounded),
+          icon: const Icon(Icons.search_rounded, size: 22),
         ),
         IconButton(
           tooltip: l10n.switchLanguage,
           onPressed: () => context.read<LocaleCubit>().toggle(),
-          icon: const Icon(Icons.more_vert_rounded),
+          icon: const Icon(Icons.more_vert_rounded, size: 22),
         ),
       ],
       floatingActionButton: BlocBuilder<UsageBloc, UsageState>(
@@ -79,7 +79,6 @@ class _HomeView extends StatelessWidget {
             _ => false,
           };
 
-          // Telegram-style circular FAB — toggles live overlay tracking.
           return FloatingActionButton(
             onPressed: trackingLoading
                 ? null
@@ -116,7 +115,6 @@ class _HomeView extends StatelessWidget {
       ),
       body: BlocConsumer<UsageBloc, UsageState>(
         listener: (context, state) {
-          // Surface tracking errors as snackbars.
           if (state.tracking case TrackingOpError(:final message)) {
             ScaffoldMessenger.of(context).showSnackBar(
               SnackBar(content: Text(message)),
@@ -140,14 +138,14 @@ class _HomeView extends StatelessWidget {
               context.read<UsageBloc>().add(const UsageEvent.refreshUsage());
             },
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 12, 16, 96),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
               children: [
                 _ProfileHeader(
                   isTracking: isTracking,
                   currentApp: state.currentApp,
                 ),
-                GGap.m(),
-                // Quick actions row — same pattern as Telegram profile tiles.
+                GGap.l(),
+                // Quick actions — 32px white tiles like the profile design.
                 Row(
                   children: [
                     GQuickAction(
@@ -159,13 +157,13 @@ class _HomeView extends StatelessWidget {
                             .add(const UsageEvent.refreshUsage());
                       },
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     GQuickAction(
                       icon: Icons.language_rounded,
                       label: l10n.quickLanguage,
                       onTap: () => context.read<LocaleCubit>().toggle(),
                     ),
-                    const SizedBox(width: 10),
+                    const SizedBox(width: 12),
                     GQuickAction(
                       icon: Icons.shield_outlined,
                       label: l10n.quickPermissions,
@@ -175,21 +173,20 @@ class _HomeView extends StatelessWidget {
                     ),
                   ],
                 ),
-                GGap.m(),
+                GGap.l(),
                 if (!permissionsReady) ...[
                   _PermissionsBanner(
                     onOpen: () {
                       Navigator.of(context).pushNamed(PageName.permissions);
                     },
                   ),
-                  GGap.m(),
+                  GGap.l(),
                 ],
                 _TrackingCard(
                   isTracking: isTracking,
                   isLoading: trackingLoading,
                   currentApp: state.currentApp,
                   onToggle: () {
-                    // Block start when permissions are incomplete.
                     if (!isTracking && !permissionsReady) {
                       ScaffoldMessenger.of(context).showSnackBar(
                         SnackBar(content: Text(l10n.permissionsRequired)),
@@ -204,7 +201,7 @@ class _HomeView extends StatelessWidget {
                         );
                   },
                 ),
-                GGap.m(),
+                GGap.l(),
                 ...switch (state.todayUsage) {
                   TodayUsageOpInitial() => [const SizedBox.shrink()],
                   TodayUsageOpLoading() => [
@@ -225,7 +222,7 @@ class _HomeView extends StatelessWidget {
                     ],
                   TodayUsageOpError(:final message) => [
                       GCard(
-                        padding: const EdgeInsets.all(16),
+                        padding: const EdgeInsets.all(20),
                         child: GText(message, color: AppTheme.error),
                       ),
                     ],
@@ -239,10 +236,7 @@ class _HomeView extends StatelessWidget {
   }
 }
 
-/// Top identity block inspired by Telegram profile / settings headers.
-///
-/// How to use: place at the top of the home scroll view to show tracking status
-/// and the current foreground app avatar.
+/// Top identity block — large avatar, name, online/offline status.
 class _ProfileHeader extends StatelessWidget {
   const _ProfileHeader({
     required this.isTracking,
@@ -260,13 +254,13 @@ class _ProfileHeader extends StatelessWidget {
 
     return Column(
       children: [
-        // Large circular avatar — app icon when tracking, blue glyph otherwise.
+        GGap.s(),
         Stack(
           alignment: Alignment.bottomRight,
           children: [
             Container(
-              width: 96,
-              height: 96,
+              width: 100,
+              height: 100,
               decoration: BoxDecoration(
                 shape: BoxShape.circle,
                 color: AppTheme.primarySoft,
@@ -281,24 +275,25 @@ class _ProfileHeader extends StatelessWidget {
                     )
                   : const Icon(
                       Icons.hourglass_top_rounded,
-                      size: 42,
+                      size: 40,
                       color: AppTheme.primary,
                     ),
             ),
-            // Camera-style blue badge from Telegram profile edit affordance.
+            // Small circular status badge on the avatar corner.
             Container(
-              width: 32,
-              height: 32,
-              decoration: const BoxDecoration(
+              width: 30,
+              height: 30,
+              decoration: BoxDecoration(
                 color: AppTheme.primary,
                 shape: BoxShape.circle,
+                border: Border.all(color: AppTheme.surface, width: 2),
               ),
               child: Icon(
                 isTracking
                     ? Icons.visibility_rounded
                     : Icons.visibility_off_rounded,
                 color: AppTheme.surface,
-                size: 16,
+                size: 14,
               ),
             ),
           ],
@@ -312,7 +307,9 @@ class _ProfileHeader extends StatelessWidget {
         GGap.xs(),
         GText(
           isTracking ? l10n.statusOnline : l10n.statusOffline,
-          style: Theme.of(context).textTheme.bodySmall,
+          style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                fontWeight: FontWeight.w500,
+              ),
           color: isTracking ? AppTheme.primary : AppTheme.onSurfaceMuted,
           textAlign: TextAlign.center,
         ),
@@ -322,8 +319,6 @@ class _ProfileHeader extends StatelessWidget {
 }
 
 /// Banner that nudges the user to finish Android permission setup.
-///
-/// Useful when the home screen loads before Usage Access / Overlay are granted.
 class _PermissionsBanner extends StatelessWidget {
   const _PermissionsBanner({required this.onOpen});
 
@@ -349,7 +344,7 @@ class _PermissionsBanner extends StatelessWidget {
   }
 }
 
-/// Card with glass preview + start/stop CTA — Telegram settings card style.
+/// Card with glass preview + start/stop CTA.
 class _TrackingCard extends StatelessWidget {
   const _TrackingCard({
     required this.isTracking,
@@ -370,13 +365,13 @@ class _TrackingCard extends StatelessWidget {
 
     return GCard(
       header: l10n.trackingSectionHeader,
-      padding: const EdgeInsets.fromLTRB(16, 4, 16, 16),
+      padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
       child: Column(
         crossAxisAlignment: CrossAxisAlignment.start,
         children: [
           GText(
             isTracking ? l10n.trackingActive : l10n.trackingInactive,
-            style: Theme.of(context).textTheme.bodyMedium,
+            style: Theme.of(context).textTheme.bodySmall,
             color: AppTheme.onSurfaceMuted,
           ),
           GGap.m(),
@@ -410,7 +405,7 @@ class _TrackingCard extends StatelessWidget {
   }
 }
 
-/// Today's app list wrapped in one white Telegram card (chat-list feel).
+/// Today's app list in one 32px white card; empty state matches “No posts yet…”.
 class _TodayUsageCard extends StatelessWidget {
   const _TodayUsageCard({
     required this.apps,
@@ -424,10 +419,9 @@ class _TodayUsageCard extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
 
-    // Empty state mirrors Telegram profile “No posts yet…” composition.
     if (apps.isEmpty) {
       return GCard(
-        padding: const EdgeInsets.symmetric(horizontal: 24, vertical: 40),
+        padding: const EdgeInsets.symmetric(horizontal: 28, vertical: 40),
         child: Column(
           children: [
             GText(

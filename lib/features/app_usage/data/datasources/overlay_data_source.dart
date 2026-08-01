@@ -115,15 +115,14 @@ class OverlayDataSource {
     }
 
     // showOverlay applies height/width as raw WindowManager pixels (not dp).
-    // Convert logical design size → physical px so the glass pill fits on all
-    // densities (e.g. 96dp ≈ 269px at 2.8x). Without this, a 96px-tall window
-    // collapses to ~34 logical px and the Column overflows.
+    // Convert logical design size → physical px so the chip fits on all
+    // densities. Keep these slightly above the painted chip so long
+    // h:mm:ss values and drag hit-targets still fit.
     //
     // How to use: keep [logicalHeight]/[logicalWidth] as the Flutter layout
     // size you want; only the native call is density-scaled.
-    // Example: on a 3x device, height becomes 288 physical pixels.
-    const logicalHeight = 96.0;
-    const logicalWidth = 280.0;
+    const logicalHeight = 36.0;
+    const logicalWidth = 140.0;
     final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
     await FlutterOverlayWindow.showOverlay(
       height: (logicalHeight * dpr).round(),

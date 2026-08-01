@@ -1,26 +1,27 @@
 import 'dart:typed_data';
-import 'dart:ui';
 
 import 'package:flutter/material.dart';
 
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
-import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
 
-/// Glassy / Telegram-blue pill that shows app name + today's formatted duration.
+/// Minimal timer chip — foreground app logo + bold mm:ss (or h:mm:ss).
 ///
 /// How to use:
 /// ```dart
-/// UsageGlassCounter(appName: 'Instagram', todaySeconds: 120);
+/// UsageGlassCounter(
+///   appName: 'Instagram',
+///   todaySeconds: 120,
+///   iconBytes: preview.iconBytes,
+/// );
 /// ```
 ///
 /// Shared by the floating overlay and the home-page preview.
-/// Keep [compact] true inside the overlay window so text stays within the
-/// floating surface; use compact false for the larger home preview.
+/// Pass [iconBytes] from PackageManager so the chip shows the open app's logo.
 class UsageGlassCounter extends StatelessWidget {
-  /// Creates the glass counter UI.
+  /// Creates the minimal timer chip.
   const UsageGlassCounter({
     super.key,
     required this.appName,
@@ -36,98 +37,78 @@ class UsageGlassCounter extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = compact ? 36.0 : 44.0;
-    final nameStyle = TextStyle(
-      fontSize: compact ? 13 : 15,
-      fontWeight: FontWeight.w500,
-      color: AppTheme.overlayText,
-      height: 1.1,
-    );
-    final timeStyle = TextStyle(
-      fontSize: compact ? 22 : 26,
-      fontWeight: FontWeight.w700,
-      color: AppTheme.overlayAccent,
-      height: 1.1,
-    );
+    final iconSize = compact ? 18.0 : 22.0;
+    final fontSize = compact ? 13.0 : 15.0;
+    final hPad = compact ? 8.0 : 10.0;
+    final vPad = compact ? 5.0 : 7.0;
+    final gap = compact ? 6.0 : 8.0;
 
-    return LayoutBuilder(
-      builder: (context, constraints) {
-        // Overlay window gives tight bounds; home preview does not.
-        final fillParent = constraints.hasBoundedHeight &&
-            constraints.maxHeight.isFinite &&
-            constraints.maxHeight < 200;
-
-        return ClipRRect(
+    return Align(
+      alignment: Alignment.center,
+      child: Container(
+        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+        decoration: BoxDecoration(
+          color: AppTheme.overlayChipFill,
           borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-          child: BackdropFilter(
-            filter: ImageFilter.blur(sigmaX: 18, sigmaY: 18),
-            child: Container(
-              width: fillParent ? double.infinity : (compact ? 260.0 : double.infinity),
-              height: fillParent ? double.infinity : (compact ? 88.0 : 96.0),
-              padding: EdgeInsets.symmetric(
-                horizontal: compact ? 14 : 18,
-                vertical: compact ? 10 : 14,
-              ),
-              decoration: BoxDecoration(
-                color: AppTheme.glassFill,
-                borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-                border: Border.all(color: AppTheme.glassBorder, width: 1.2),
-                boxShadow: compact ? null : AppTheme.cardShadow,
-              ),
-              // Scale the whole row down when the overlay window is smaller
-              // than the design size (density quirks / resize races). Without
-              // FittedBox, a tight maxHeight makes the text Column overflow.
-              //
-              // How to use: keep children at their natural sizes; FittedBox
-              // shrinks them uniformly only when the parent is too small.
-              // Example: a 40px-tall overlay still shows icon + name + time.
-              child: FittedBox(
-                fit: BoxFit.scaleDown,
-                alignment: Alignment.centerLeft,
-                child: SizedBox(
-                  // Intrinsic design width so Expanded has a real budget when
-                  // the outer Container is unbounded (home preview path).
-                  width: compact ? 232 : 280,
-                  height: 68,
-                  child: Row(
-                    children: [
-                      _IconBubble(iconBytes: iconBytes, size: iconSize),
-                      GGap.s(),
-                      Expanded(
-                        child: Column(
-                          mainAxisAlignment: MainAxisAlignment.center,
-                          mainAxisSize: MainAxisSize.max,
-                          crossAxisAlignment: CrossAxisAlignment.start,
-                          children: [
-                            Text(
-                              appName,
-                              style: nameStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                            const SizedBox(height: 2),
-                            Text(
-                              formatUsageDuration(todaySeconds),
-                              style: timeStyle,
-                              maxLines: 1,
-                              overflow: TextOverflow.ellipsis,
-                            ),
-                          ],
-                        ),
-                      ),
-                    ],
-                  ),
-                ),
+        ),
+        child: Row(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _ChipAppLogo(iconBytes: iconBytes, size: iconSize),
+            SizedBox(width: gap),
+            Text(
+              formatUsageDuration(todaySeconds),
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w700,
+                color: AppTheme.overlayChipText,
+                height: 1.0,
+                letterSpacing: -0.2,
               ),
             ),
-          ),
-        );
-      },
+          ],
+        ),
+      ),
     );
   }
 }
 
-/// Circular app-icon (or fallback glyph) — Telegram chat-avatar style.
+/// Tiny circular launcher icon for the timer chip (fallback: sage clock).
+class _ChipAppLogo extends StatelessWidget {
+  const _ChipAppLogo({this.iconBytes, required this.size});
+
+  final List<int>? iconBytes;
+  final double size;
+
+  @override
+  Widget build(BuildContext context) {
+    final bytes = iconBytes;
+    if (bytes == null || bytes.isEmpty) {
+      return Icon(
+        Icons.timelapse_rounded,
+        size: size,
+        color: AppTheme.overlayChipIcon,
+      );
+    }
+
+    return ClipOval(
+      child: Image.memory(
+        Uint8List.fromList(bytes),
+        width: size,
+        height: size,
+        fit: BoxFit.cover,
+        gaplessPlayback: true,
+        errorBuilder: (context, error, stackTrace) => Icon(
+          Icons.timelapse_rounded,
+          size: size,
+          color: AppTheme.overlayChipIcon,
+        ),
+      ),
+    );
+  }
+}
+
+/// Circular app-icon (or fallback glyph).
 class _IconBubble extends StatelessWidget {
   const _IconBubble({this.iconBytes, this.size = 28});
 
@@ -165,7 +146,7 @@ class _IconBubble extends StatelessWidget {
   }
 }
 
-/// List tile for one app — styled like a Telegram chat row.
+/// List tile for one app — avatar + name + duration pill.
 ///
 /// How to use inside a ListView / card with [AppUsageEntity] items.
 class UsageAppTile extends StatelessWidget {
@@ -186,15 +167,13 @@ class UsageAppTile extends StatelessWidget {
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
-        // Soft highlight when this app is the live foreground target —
-        // similar to Telegram’s selected username / active chat feel.
         ColoredBox(
           color: isActive ? AppTheme.primarySoft : Colors.transparent,
           child: Padding(
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                _IconBubble(iconBytes: entity.iconBytes, size: 48),
+                _IconBubble(iconBytes: entity.iconBytes, size: 44),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
@@ -218,7 +197,6 @@ class UsageAppTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                // Duration sits where Telegram puts timestamps / unread pills.
                 Container(
                   padding:
                       const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
@@ -242,7 +220,7 @@ class UsageAppTile extends StatelessWidget {
         ),
         if (showDivider)
           const Padding(
-            padding: EdgeInsetsDirectional.only(start: 76),
+            padding: EdgeInsetsDirectional.only(start: 72),
             child: Divider(height: 1, thickness: 0.5, color: AppTheme.divider),
           ),
       ],

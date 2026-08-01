@@ -38,11 +38,10 @@ class _OverlayAppState extends State<OverlayApp> {
   /// Example: user is on launcher → hidden; opens YouTube → shown.
   bool _visible = false;
 
-  /// Real launcher icon (PNG) for the foreground app from PackageManager.
+  /// Launcher icon (PNG) for the foreground app from PackageManager.
   ///
   /// How to use: updated each tick via [OverlayTickPayload.iconBytes] and
-  /// passed to [UsageGlassCounter] so Telegram/YouTube/etc. show their own
-  /// logos — never custom assets from ImagePath.
+  /// shown on the left of the timer chip.
   List<int>? _iconBytes;
 
   @override
@@ -114,7 +113,6 @@ class _OverlayAppState extends State<OverlayApp> {
             ? UsageGlassCounter(
                 appName: _appName,
                 todaySeconds: _todaySeconds,
-                // Real app logo from the device (PackageManager), not assets.
                 iconBytes: _iconBytes,
               )
             : const SizedBox.shrink(),
