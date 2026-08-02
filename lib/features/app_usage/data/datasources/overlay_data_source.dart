@@ -145,8 +145,15 @@ class OverlayDataSource {
   /// How to use: call from the overlay isolate with
   /// [FlutterOverlayWindow.resizeOverlay], which applies `dp → px` natively.
   /// Do **not** call resize from the main isolate.
-  static ({int width, int height}) logicalSizeFor(BadgeAppearance appearance) {
-    final scale = appearance.sizeScale.clamp(0.5, 1.5);
+  ///
+  /// Pass [sizeMultiplier] `1.5` during the open-app intro so the temporarily
+  /// larger chip is not clipped by the native overlay window.
+  static ({int width, int height}) logicalSizeFor(
+    BadgeAppearance appearance, {
+    double sizeMultiplier = 1.0,
+  }) {
+    final scale =
+        appearance.sizeScale.clamp(0.5, 1.5) * sizeMultiplier.clamp(1.0, 1.5);
     // Keep these slightly above the painted chip so long h:mm:ss values and
     // drag hit-targets still fit after the user scales the badge.
     return (

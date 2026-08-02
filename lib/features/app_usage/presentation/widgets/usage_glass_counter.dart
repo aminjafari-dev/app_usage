@@ -1,4 +1,6 @@
+import 'dart:async';
 import 'dart:typed_data';
+import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
@@ -20,7 +22,11 @@ import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.da
 ///
 /// Shared by the floating overlay and the home-page preview.
 /// Pass [iconBytes] from PackageManager so the chip shows the open app's logo.
-class UsageGlassCounter extends StatelessWidget {
+///
+/// With [playIntro] true, opening a new app runs:
+/// circle logo (1.5×) → pill expands right → duration fades in → shrink to
+/// the user-defined [sizeScale].
+class UsageGlassCounter extends StatefulWidget {
   /// Creates the minimal timer chip.
   ///
   /// [sizeScale] and [opacity] come from badge appearance settings
@@ -33,6 +39,10 @@ class UsageGlassCounter extends StatelessWidget {
     this.compact = true,
     this.sizeScale = 1.0,
     this.opacity = 0.9,
+    this.playIntro = false,
+    this.introKey,
+    this.onIntroSizeBoost,
+    this.onIntroComplete,
   });
 
   final String appName;
@@ -42,38 +52,226 @@ class UsageGlassCounter extends StatelessWidget {
   final double sizeScale;
   final double opacity;
 
+  /// When true, plays the open-app intro (overlay only; previews stay static).
+  final bool playIntro;
+
+  /// Restart the intro whenever this value changes (typically package name).
+  final Object? introKey;
+
+  /// Current size boost vs user size (`1.5` → `1.0`) while the intro runs.
+  ///
+  /// How to use: resize the native overlay window to match so height/width
+  /// animate down with the chip instead of staying at 1.5× then snapping.
+  final ValueChanged<double>? onIntroSizeBoost;
+
+  /// Called once the shrink-to-user-size phase finishes.
+  final VoidCallback? onIntroComplete;
+
+  @override
+  State<UsageGlassCounter> createState() => _UsageGlassCounterState();
+}
+
+class _UsageGlassCounterState extends State<UsageGlassCounter>
+    with SingleTickerProviderStateMixin {
+  /// Peak multiplier vs user size at the start of the intro.
+  static const double _introBoost = 1.5;
+
+  /// Hold the big circle before expand / reveal / settle begin.
+  static const Duration _introDelay = Duration(seconds: 1);
+
+  /// Motion length after the delay — expand, reveal, then settle to user size.
+  static const Duration _introDuration = Duration(milliseconds: 1100);
+
+  AnimationController? _controller;
+  Animation<double>? _expand;
+  Animation<double>? _textOpacity;
+  Animation<double>? _settle;
+
+  Timer? _delayTimer;
+  Object? _lastIntroKey;
+
+  /// After the intro finishes we keep painting the final animation frame so
+  /// there is no swap to a different layout (that swap caused a visible flash).
+  bool _introSettled = false;
+
+  @override
+  void initState() {
+    super.initState();
+    if (widget.playIntro) {
+      _ensureController();
+      _startIntro();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant UsageGlassCounter oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!widget.playIntro) {
+      _disposeController();
+      _introSettled = false;
+      return;
+    }
+    _ensureController();
+    // New foreground app (or first show) → replay the intro sequence.
+    if (widget.introKey != _lastIntroKey ||
+        widget.playIntro != oldWidget.playIntro) {
+      _startIntro();
+    }
+  }
+
+  void _ensureController() {
+    if (_controller != null) return;
+    final controller = AnimationController(
+      vsync: this,
+      duration: _introDuration,
+    );
+    // 1) Circle → pill grows to the right (logo stays left).
+    _expand = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.0, 0.42, curve: Curves.easeOutCubic),
+    );
+    // 2) Duration digits fade in as the pill opens.
+    _textOpacity = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.28, 0.55, curve: Curves.easeOut),
+    );
+    // 3) Soft ease into the exact user-defined size (ends at 1.0, no overshoot).
+    _settle = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.55, 1.0, curve: Curves.easeOutCubic),
+    );
+    // Drive native window size with the same boost as the painted chip.
+    controller.addListener(_emitSizeBoost);
+    controller.addStatusListener((status) {
+      if (status != AnimationStatus.completed) return;
+      _introSettled = true;
+      // Final exact 1.0 so the window never sticks slightly above user size.
+      widget.onIntroSizeBoost?.call(1.0);
+      widget.onIntroComplete?.call();
+    });
+    _controller = controller;
+  }
+
+  /// Maps the settle progress to a boost and notifies the overlay window.
+  void _emitSizeBoost() {
+    final settle = _settle;
+    if (settle == null) return;
+    final boost = lerpDouble(_introBoost, 1.0, settle.value)!;
+    widget.onIntroSizeBoost?.call(boost);
+  }
+
+  void _startIntro() {
+    _lastIntroKey = widget.introKey;
+    _introSettled = false;
+    final controller = _controller;
+    if (controller == null) return;
+
+    _delayTimer?.cancel();
+    // Park on the big circle for the delay, then run the motion.
+    controller.stop();
+    controller.value = 0;
+    // Window / chip start at 1.5× for the hold.
+    widget.onIntroSizeBoost?.call(_introBoost);
+
+    _delayTimer = Timer(_introDelay, () {
+      if (!mounted || widget.introKey != _lastIntroKey) return;
+      controller.forward(from: 0);
+    });
+  }
+
+  void _disposeController() {
+    _delayTimer?.cancel();
+    _delayTimer = null;
+    _controller?.removeListener(_emitSizeBoost);
+    _controller?.dispose();
+    _controller = null;
+    _expand = null;
+    _textOpacity = null;
+    _settle = null;
+  }
+
+  @override
+  void dispose() {
+    _disposeController();
+    super.dispose();
+  }
+
   @override
   Widget build(BuildContext context) {
-    final scale = sizeScale.clamp(0.5, 1.5);
+    final controller = _controller;
+    // Keep using the controller after completion so the last frame (== user
+    // size) stays on screen — switching to the static path felt like a flash.
+    if (widget.playIntro && controller != null) {
+      return AnimatedBuilder(
+        animation: controller,
+        builder: (context, _) {
+          final settle = _introSettled ? 1.0 : _settle!.value;
+          return _buildChip(
+            expand: _introSettled ? 1.0 : _expand!.value,
+            textOpacity: _introSettled ? 1.0 : _textOpacity!.value,
+            // settle 0 → still 1.5×; settle 1 → user size.
+            sizeBoost: lerpDouble(_introBoost, 1.0, settle)!,
+          );
+        },
+      );
+    }
+    return _buildChip(expand: 1, textOpacity: 1, sizeBoost: 1);
+  }
+
+  Widget _buildChip({
+    required double expand,
+    required double textOpacity,
+    required double sizeBoost,
+  }) {
+    final scale = widget.sizeScale.clamp(0.5, 1.5) * sizeBoost;
+    final compact = widget.compact;
     final iconSize = (compact ? 18.0 : 22.0) * scale;
     final fontSize = (compact ? 13.0 : 15.0) * scale;
     final hPad = (compact ? 8.0 : 10.0) * scale;
     final vPad = (compact ? 5.0 : 7.0) * scale;
     final gap = (compact ? 6.0 : 8.0) * scale;
 
+    // Top-center so when the native overlay window shrinks after the intro,
+    // height is trimmed from the bottom and the chip does not jump.
     return Align(
-      alignment: Alignment.center,
+      alignment: Alignment.topCenter,
       child: Opacity(
-        opacity: opacity.clamp(0.3, 1.0),
+        opacity: widget.opacity.clamp(0.3, 1.0),
         child: Container(
           padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
           decoration: BoxDecoration(
             color: AppTheme.overlayChipFill,
             borderRadius: BorderRadius.circular(AppTheme.radiusPill),
           ),
+          // Logo anchored left; trailing content clips open to the right so the
+          // chip starts as a circle and grows into the duration pill.
           child: Row(
             mainAxisSize: MainAxisSize.min,
             children: [
-              _ChipAppLogo(iconBytes: iconBytes, size: iconSize),
-              SizedBox(width: gap),
-              Text(
-                formatUsageDuration(todaySeconds),
-                style: TextStyle(
-                  fontSize: fontSize,
-                  fontWeight: FontWeight.w700,
-                  color: AppTheme.overlayChipText,
-                  height: 1.0,
-                  letterSpacing: -0.2,
+              _ChipAppLogo(iconBytes: widget.iconBytes, size: iconSize),
+              ClipRect(
+                child: Align(
+                  alignment: Alignment.centerLeft,
+                  widthFactor: expand.clamp(0.0, 1.0),
+                  child: Opacity(
+                    opacity: textOpacity.clamp(0.0, 1.0),
+                    child: Row(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        SizedBox(width: gap),
+                        Text(
+                          formatUsageDuration(widget.todaySeconds),
+                          style: TextStyle(
+                            fontSize: fontSize,
+                            fontWeight: FontWeight.w700,
+                            color: AppTheme.overlayChipText,
+                            height: 1.0,
+                            letterSpacing: -0.2,
+                          ),
+                        ),
+                      ],
+                    ),
+                  ),
                 ),
               ),
             ],

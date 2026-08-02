@@ -35,12 +35,21 @@ class _OverlayAppState extends State<OverlayApp> {
   String _appName = 'App';
   int _todaySeconds = 0;
 
+  /// Package of the app currently shown on the badge (null when hidden).
+  ///
+  /// Used to detect app switches so the intro animation only plays when the
+  /// user opens a new foreground app — not on every one-second tick.
+  String? _packageName;
+
   /// Whether the glassy top badge should be painted.
   ///
   /// How to use: start `false` so the home screen / wallpaper never shows a
   /// stale "App 00:00" pill before the first real foreground app is detected.
   /// Example: user is on launcher → hidden; opens YouTube → shown.
   bool _visible = false;
+
+  /// When true, [UsageGlassCounter] plays the open-app intro sequence.
+  bool _playIntro = false;
 
   /// Launcher icon (PNG) for the foreground app from PackageManager.
   ///
@@ -50,6 +59,10 @@ class _OverlayAppState extends State<OverlayApp> {
 
   /// Size / opacity from Settings (SharedPreferences + live shareData).
   BadgeAppearance _appearance = BadgeAppearance.defaults;
+
+  /// Last native window size applied during intro settle (skip redundant resizes).
+  int _lastOverlayWidth = 0;
+  int _lastOverlayHeight = 0;
 
   @override
   void initState() {
@@ -62,9 +75,14 @@ class _OverlayAppState extends State<OverlayApp> {
         if (!mounted) return;
         // Null payload = home / launcher — hide the badge entirely.
         if (payload == null) {
-          setState(() => _visible = false);
+          setState(() {
+            _visible = false;
+            _packageName = null;
+            _playIntro = false;
+          });
           return;
         }
+        final switched = payload.packageName != _packageName;
         setState(() {
           _visible = true;
           _appName = payload.appName.isEmpty ? 'App' : payload.appName;
@@ -73,7 +91,15 @@ class _OverlayAppState extends State<OverlayApp> {
           if (payload.iconBytes != null) {
             _iconBytes = payload.iconBytes;
           }
+          if (switched) {
+            _packageName = payload.packageName;
+            _playIntro = true;
+          }
         });
+        // Enlarge the native window so the 1.5× intro chip is not clipped.
+        if (switched) {
+          unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
+        }
       },
     );
 
@@ -114,6 +140,7 @@ class _OverlayAppState extends State<OverlayApp> {
         setState(() => _visible = false);
         return;
       }
+      final switched = payload.packageName != _packageName;
       setState(() {
         _visible = true;
         _appName = payload.appName.isEmpty ? 'App' : payload.appName;
@@ -121,7 +148,14 @@ class _OverlayAppState extends State<OverlayApp> {
         if (payload.iconBytes != null) {
           _iconBytes = payload.iconBytes;
         }
+        if (switched) {
+          _packageName = payload.packageName;
+          _playIntro = true;
+        }
       });
+      if (switched) {
+        unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
+      }
     });
   }
 
@@ -137,13 +171,38 @@ class _OverlayAppState extends State<OverlayApp> {
   ///
   /// Must stay in this isolate — [FlutterOverlayWindow.resizeOverlay] talks to
   /// the overlay MethodChannel and expects **dp**, not physical pixels.
-  Future<void> _resizeOverlay(BadgeAppearance appearance) async {
+  ///
+  /// [sizeMultiplier] `1.5` during the open-app intro; animates to `1.0` with
+  /// the chip settle so height/width ease down instead of staying large.
+  Future<void> _resizeOverlay(
+    BadgeAppearance appearance, {
+    double sizeMultiplier = 1.0,
+  }) async {
     try {
-      final size = OverlayDataSource.logicalSizeFor(appearance);
+      final size = OverlayDataSource.logicalSizeFor(
+        appearance,
+        sizeMultiplier: sizeMultiplier,
+      );
+      // Skip no-op resizes (intro settle fires this every frame).
+      if (size.width == _lastOverlayWidth &&
+          size.height == _lastOverlayHeight) {
+        return;
+      }
+      _lastOverlayWidth = size.width;
+      _lastOverlayHeight = size.height;
       await FlutterOverlayWindow.resizeOverlay(size.width, size.height, true);
     } catch (_) {
       // Window may already be closing; painted scale/opacity still update.
     }
+  }
+
+  /// Keeps the native overlay window matched to the animated chip boost.
+  ///
+  /// How to use: wired to [UsageGlassCounter.onIntroSizeBoost] so as the chip
+  /// eases from 1.5× → 1×, the window height/width follow the same curve.
+  void _onIntroSizeBoost(double sizeBoost) {
+    if (!mounted) return;
+    unawaited(_resizeOverlay(_appearance, sizeMultiplier: sizeBoost));
   }
 
   @override
@@ -168,6 +227,11 @@ class _OverlayAppState extends State<OverlayApp> {
                 iconBytes: _iconBytes,
                 sizeScale: _appearance.sizeScale,
                 opacity: _appearance.opacity,
+                // Stay on the completed intro frame (user size) — do not flip
+                // playIntro off or the settle → static swap flashes.
+                playIntro: _playIntro,
+                introKey: _packageName,
+                onIntroSizeBoost: _onIntroSizeBoost,
               )
             : const SizedBox.shrink(),
       ),
