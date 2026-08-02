@@ -7,7 +7,6 @@ import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
-import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
@@ -58,18 +57,25 @@ class _BadgeAppearanceSheetState extends State<BadgeAppearanceSheet> {
     if (_saving) return;
     setState(() => _saving = true);
 
-    final cubit = context.read<BadgeAppearanceCubit>();
-    await cubit.save(_draft);
+    try {
+      await context.read<BadgeAppearanceCubit>().save(_draft);
 
-    // Push live updates into the overlay isolate when it is showing.
-    final active = await FlutterOverlayWindow.isActive();
-    if (active) {
-      await FlutterOverlayWindow.shareData(_draft.toMap());
-      await OverlayDataSource().resizeForAppearance(_draft);
+      // Notify the overlay isolate only — resizeOverlay must run there
+      // (main-isolate calls hit a missing MethodChannel and can tear the
+      // floating FlutterView down).
+      try {
+        if (await FlutterOverlayWindow.isActive()) {
+          await FlutterOverlayWindow.shareData(_draft.toMap());
+        }
+      } catch (_) {
+        // Overlay may be mid-teardown; prefs are already persisted.
+      }
+
+      if (!mounted) return;
+      Navigator.of(context).pop();
+    } catch (_) {
+      if (mounted) setState(() => _saving = false);
     }
-
-    if (!mounted) return;
-    Navigator.of(context).pop();
   }
 
   @override

@@ -140,28 +140,30 @@ class OverlayDataSource {
     );
   }
 
-  /// Resizes the active overlay window for a new badge [appearance].
+  /// Logical chip size (dp) for [appearance] — used by overlay-side resize.
   ///
-  /// How to use: call after the user saves size changes in Settings.
-  Future<void> resizeForAppearance(BadgeAppearance appearance) async {
-    final active = await FlutterOverlayWindow.isActive();
-    if (!active) return;
-    final size = _physicalSizeFor(appearance);
-    await FlutterOverlayWindow.resizeOverlay(size.width, size.height, true);
+  /// How to use: call from the overlay isolate with
+  /// [FlutterOverlayWindow.resizeOverlay], which applies `dp → px` natively.
+  /// Do **not** call resize from the main isolate.
+  static ({int width, int height}) logicalSizeFor(BadgeAppearance appearance) {
+    final scale = appearance.sizeScale.clamp(0.5, 1.5);
+    // Keep these slightly above the painted chip so long h:mm:ss values and
+    // drag hit-targets still fit after the user scales the badge.
+    return (
+      width: (140.0 * scale).round(),
+      height: (36.0 * scale).round(),
+    );
   }
 
   /// Converts logical chip size × badge scale into WindowManager pixels.
+  ///
+  /// Used only by [show] — `showOverlay` takes raw px, unlike resizeOverlay.
   ({int width, int height}) _physicalSizeFor(BadgeAppearance appearance) {
-    // showOverlay applies height/width as raw WindowManager pixels (not dp).
-    // Keep these slightly above the painted chip so long h:mm:ss values and
-    // drag hit-targets still fit after the user scales the badge.
-    final scale = appearance.sizeScale.clamp(0.5, 1.5);
-    final logicalHeight = 36.0 * scale;
-    final logicalWidth = 140.0 * scale;
+    final logical = logicalSizeFor(appearance);
     final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
     return (
-      width: (logicalWidth * dpr).round(),
-      height: (logicalHeight * dpr).round(),
+      width: (logical.width * dpr).round(),
+      height: (logical.height * dpr).round(),
     );
   }
 

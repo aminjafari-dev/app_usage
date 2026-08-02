@@ -1,3 +1,5 @@
+import 'dart:async';
+
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -89,12 +91,16 @@ class _OverlayAppState extends State<OverlayApp> {
         return;
       }
 
-      // Settings pushed a new size/opacity — apply without restarting ticks.
+      // Settings pushed a new size/opacity — apply + resize from this isolate.
+      // resizeOverlay is only handled on the overlay MethodChannel.
       if (event['type'] == 'badgeAppearance') {
+        final next = BadgeAppearance.fromMap(event);
+        final sizeChanged = next.sizeScale != _appearance.sizeScale;
         if (!mounted) return;
-        setState(() {
-          _appearance = BadgeAppearance.fromMap(event);
-        });
+        setState(() => _appearance = next);
+        if (sizeChanged) {
+          unawaited(_resizeOverlay(next));
+        }
         return;
       }
 
@@ -125,6 +131,19 @@ class _OverlayAppState extends State<OverlayApp> {
     setState(() {
       _appearance = BadgeAppearanceCubit.readFrom(prefs);
     });
+  }
+
+  /// Applies badge scale to the native overlay window.
+  ///
+  /// Must stay in this isolate — [FlutterOverlayWindow.resizeOverlay] talks to
+  /// the overlay MethodChannel and expects **dp**, not physical pixels.
+  Future<void> _resizeOverlay(BadgeAppearance appearance) async {
+    try {
+      final size = OverlayDataSource.logicalSizeFor(appearance);
+      await FlutterOverlayWindow.resizeOverlay(size.width, size.height, true);
+    } catch (_) {
+      // Window may already be closing; painted scale/opacity still update.
+    }
   }
 
   @override
