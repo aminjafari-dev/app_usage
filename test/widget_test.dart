@@ -25,12 +25,12 @@ void main() {
         events: const [
           UsageEventPoint(
             packageName: 'org.telegram.messenger',
-            eventType: 15, // ACTIVITY_RESUMED
+            eventType: 1, // ACTIVITY_RESUMED
             timeStampMs: startMs + 10_000,
           ),
           UsageEventPoint(
             packageName: 'org.telegram.messenger',
-            eventType: 16, // ACTIVITY_PAUSED
+            eventType: 2, // ACTIVITY_PAUSED
             timeStampMs: startMs + 40_000,
           ),
         ],
@@ -71,7 +71,7 @@ void main() {
         events: const [
           UsageEventPoint(
             packageName: 'com.google.android.youtube',
-            eventType: 15,
+            eventType: 1,
             timeStampMs: startMs + 50_000,
           ),
         ],
@@ -88,17 +88,17 @@ void main() {
         events: const [
           UsageEventPoint(
             packageName: 'org.telegram.messenger',
-            eventType: 15,
+            eventType: 1,
             timeStampMs: startMs,
           ),
           UsageEventPoint(
             packageName: 'com.instagram.android',
-            eventType: 15,
+            eventType: 1,
             timeStampMs: startMs + 20_000,
           ),
           UsageEventPoint(
             packageName: 'com.instagram.android',
-            eventType: 16,
+            eventType: 2,
             timeStampMs: startMs + 50_000,
           ),
         ],
@@ -116,12 +116,12 @@ void main() {
         events: const [
           UsageEventPoint(
             packageName: 'org.telegram.messenger',
-            eventType: 15,
+            eventType: 1,
             timeStampMs: startMs,
           ),
           UsageEventPoint(
             packageName: 'com.android.launcher3',
-            eventType: 15,
+            eventType: 1,
             timeStampMs: startMs + 10_000,
           ),
         ],
@@ -132,6 +132,51 @@ void main() {
 
       expect(ms['org.telegram.messenger'], 10_000);
       expect(ms.containsKey('com.android.launcher3'), isFalse);
+    });
+
+    test('stops counting when the lock screen is shown', () {
+      final ms = sumForegroundMsByPackage(
+        events: const [
+          UsageEventPoint(
+            packageName: 'org.telegram.messenger',
+            eventType: 1, // ACTIVITY_RESUMED
+            timeStampMs: startMs,
+          ),
+          UsageEventPoint(
+            packageName: 'android',
+            eventType: 17, // KEYGUARD_SHOWN
+            timeStampMs: startMs + 20_000,
+          ),
+        ],
+        rangeStartMs: startMs,
+        rangeEndMs: startMs + 60_000,
+        isIgnoredPackage: ignoreLauncher,
+      );
+
+      // Only the 20s before lock — not the remaining 40s on the keyguard.
+      expect(ms['org.telegram.messenger'], 20_000);
+    });
+
+    test('stops counting when the screen turns off', () {
+      final ms = sumForegroundMsByPackage(
+        events: const [
+          UsageEventPoint(
+            packageName: 'com.google.android.youtube',
+            eventType: 1,
+            timeStampMs: startMs,
+          ),
+          UsageEventPoint(
+            packageName: 'android',
+            eventType: 16, // SCREEN_NON_INTERACTIVE
+            timeStampMs: startMs + 15_000,
+          ),
+        ],
+        rangeStartMs: startMs,
+        rangeEndMs: startMs + 60_000,
+        isIgnoredPackage: ignoreLauncher,
+      );
+
+      expect(ms['com.google.android.youtube'], 15_000);
     });
   });
 

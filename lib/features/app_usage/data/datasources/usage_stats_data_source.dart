@@ -34,18 +34,26 @@ class UsageStatsDataSource {
   /// Package id of this app so we can ignore our own foreground events.
   static const ownPackageName = 'com.example.app_usage';
 
-  /// Common launcher package prefixes/noise to skip when detecting foreground.
+  /// Common launcher / lock-screen / system packages to skip for live counting.
   static const _ignoredPackages = <String>{
     ownPackageName,
+    'android',
     'com.android.systemui',
+    'com.android.keyguard',
     'com.google.android.apps.nexuslauncher',
     'com.android.launcher',
     'com.android.launcher3',
     'com.miui.home',
+    'com.mi.android.globallauncher',
     'com.sec.android.app.launcher',
     'com.huawei.android.launcher',
     'com.oppo.launcher',
     'com.bbk.launcher2',
+    'com.realme.launcher',
+    'com.nothing.launcher',
+    'com.microsoft.launcher',
+    'com.teslacoilsw.launcher',
+    'com.actionlauncher.playstore',
   };
 
   /// Returns whether PACKAGE_USAGE_STATS is granted.
@@ -125,7 +133,8 @@ class UsageStatsDataSource {
   ///
   /// Android only emits ACTIVITY_RESUMED when an app becomes foreground — not
   /// every second while it stays open. So after a short idle window there are
-  /// no new events.
+  /// no new events. Lock screen / screen-off must clear the active app even
+  /// when the previous resume is still the newest type-1 event.
   ///
   /// How to use:
   /// ```dart
@@ -135,38 +144,76 @@ class UsageStatsDataSource {
   /// ```
   ///
   /// - New resumed app → that package
-  /// - Launcher / ignored → `null` (pause counting)
-  /// - No events in the window → [keepIfNoEvent] (keep counting same app)
+  /// - Launcher / ignored / lock / screen-off → `null` (do nothing)
+  /// - No relevant events in the window → [keepIfNoEvent] (keep same app)
   Future<String?> currentForegroundPackage({String? keepIfNoEvent}) async {
     final end = DateTime.now();
     // Long enough to catch app switches; not used alone for "still in app".
     final start = end.subtract(const Duration(minutes: 2));
     final events = await UsageStats.queryEvents(start, end);
 
-    String? lastPackage;
+    final points = <UsageEventPoint>[];
     for (final event in events) {
-      final type = event.eventType;
-      // MOVE_TO_FOREGROUND / ACTIVITY_RESUMED ("1") and related type "15".
-      if (type == '1' || type == '15') {
+      final pkg = event.packageName ?? '';
+      final type = event.eventTypeValue;
+      final time = int.tryParse(event.timeStamp ?? '') ?? 0;
+      if (type == null || time <= 0) continue;
+      // Only walk events that change "is a trackable app open?".
+      if (isForegroundResumeEvent(type) ||
+          isForegroundPauseEvent(type) ||
+          isScreenIdleEvent(type)) {
+        points.add(
+          UsageEventPoint(
+            packageName: pkg,
+            eventType: type,
+            timeStampMs: time,
+          ),
+        );
+      }
+    }
+
+    // Quiet window (still inside the same app) — keep counting that package.
+    if (points.isEmpty) return keepIfNoEvent;
+
+    points.sort((a, b) => a.timeStampMs.compareTo(b.timeStampMs));
+
+    String? foreground;
+    for (final event in points) {
+      // Lock screen or display off → idle; never count over the keyguard.
+      if (isScreenIdleEvent(event.eventType)) {
+        foreground = null;
+        continue;
+      }
+
+      if (isForegroundResumeEvent(event.eventType)) {
         final pkg = event.packageName;
-        if (pkg != null && pkg.isNotEmpty) {
-          lastPackage = pkg;
+        // Home / system chrome resume → explicitly idle (no keepIfNoEvent).
+        if (pkg.isEmpty || _isIgnoredPackage(pkg)) {
+          foreground = null;
+        } else {
+          foreground = pkg;
+        }
+        continue;
+      }
+
+      if (isForegroundPauseEvent(event.eventType)) {
+        final pkg = event.packageName;
+        // Matching pause (or empty OEM pause) closes the open session.
+        if (foreground != null && (pkg.isEmpty || pkg == foreground)) {
+          foreground = null;
         }
       }
     }
 
-    // No resume events recently → user is almost certainly still in the same app.
-    if (lastPackage == null) return keepIfNoEvent;
-
-    // Home / system UI / our app → pause the live counter.
-    if (_isIgnoredPackage(lastPackage)) return null;
-    return lastPackage;
+    // After processing events we know home/lock/paused — do not fall back.
+    return foreground;
   }
 
   /// Whether [packageName] should be skipped for live counting.
   bool _isIgnoredPackage(String packageName) {
     if (_ignoredPackages.contains(packageName)) return true;
     if (packageName.startsWith('com.android.launcher')) return true;
+    if (packageName.contains('launcher')) return true;
     return false;
   }
 

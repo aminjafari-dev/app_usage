@@ -305,11 +305,12 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
 
   /// Light poll so Home recovers totals after SharedPreferences writes.
   ///
-  /// The overlay isolate owns the real-time counter; this only refreshes the
-  /// dashboard when the main app is open.
+  /// The overlay isolate owns the real-time counter; this only reloads prefs
+  /// (never re-queries UsageStats) so backgrounding the app on home/lock does
+  /// not spam the system with event scans every few seconds.
   void _startHomeSync() {
     _homeSyncTimer?.cancel();
-    _homeSyncTimer = Timer.periodic(const Duration(seconds: 2), (_) {
+    _homeSyncTimer = Timer.periodic(const Duration(seconds: 5), (_) {
       unawaited(_syncFromLocalCache());
     });
   }
@@ -324,7 +325,27 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     try {
       // Overlay writes prefs from another isolate — reload native values first.
       await _local.reload();
-      await _hydrateToday();
+      final cached = await _local.loadTodaySeconds();
+      var changed = false;
+      for (final entry in cached.entries) {
+        final prev = _today[entry.key];
+        if (prev == null) {
+          if (entry.value <= 0) continue;
+          // Name/icon resolve is deferred to the next full hydrate / list open.
+          _today[entry.key] = AppUsageEntity(
+            packageName: entry.key,
+            appName: entry.key,
+            todaySeconds: entry.value,
+          );
+          changed = true;
+          continue;
+        }
+        if (entry.value > prev.todaySeconds) {
+          _today[entry.key] = prev.copyWith(todaySeconds: entry.value);
+          changed = true;
+        }
+      }
+      if (changed) _emitUsage();
     } catch (_) {
       // Sync failures should not tear down tracking.
     }

@@ -28,20 +28,29 @@ class UsageEventPoint {
   /// Android package id that generated the event.
   final String packageName;
 
-  /// Raw [UsageEvents.Event] type (e.g. 1 / 15 = resume, 2 / 16 / 23 = pause).
+  /// Raw [UsageEvents.Event] type (e.g. 1 = resume, 2 / 23 = pause, 16 / 17 = idle).
   final int eventType;
 
   /// Epoch milliseconds when the event fired.
   final int timeStampMs;
 }
 
-/// MOVE_TO_FOREGROUND (1) and ACTIVITY_RESUMED (15).
-bool isForegroundResumeEvent(int eventType) =>
-    eventType == 1 || eventType == 15;
+/// ACTIVITY_RESUMED / MOVE_TO_FOREGROUND (1).
+///
+/// Note: type 15 is SCREEN_INTERACTIVE, not a resume — do not treat it as one.
+bool isForegroundResumeEvent(int eventType) => eventType == 1;
 
-/// MOVE_TO_BACKGROUND (2), ACTIVITY_PAUSED (16), ACTIVITY_STOPPED (23).
+/// ACTIVITY_PAUSED / MOVE_TO_BACKGROUND (2) and ACTIVITY_STOPPED (23).
+///
+/// Note: type 16 is SCREEN_NON_INTERACTIVE, not an activity pause.
 bool isForegroundPauseEvent(int eventType) =>
-    eventType == 2 || eventType == 16 || eventType == 23;
+    eventType == 2 || eventType == 23;
+
+/// SCREEN_NON_INTERACTIVE (16) or KEYGUARD_SHOWN (17) — lock / screen-off.
+///
+/// How to use: close any open foreground session so lock/home never counts.
+bool isScreenIdleEvent(int eventType) =>
+    eventType == 16 || eventType == 17;
 
 /// Sums foreground milliseconds per package inside [[rangeStartMs], [rangeEndMs]].
 ///
@@ -85,7 +94,21 @@ Map<String, int> sumForegroundMsByPackage({
   for (final event in sorted) {
     final pkg = event.packageName;
     final time = event.timeStampMs;
-    if (pkg.isEmpty || time <= 0) continue;
+    if (time <= 0) continue;
+
+    // Lock screen / screen off — stop counting immediately.
+    if (isScreenIdleEvent(event.eventType)) {
+      final previousPackage = foregroundPackage;
+      final previousStart = sessionStartMs;
+      if (previousPackage != null && previousStart != null) {
+        addClipped(previousPackage, previousStart, time);
+      }
+      foregroundPackage = null;
+      sessionStartMs = null;
+      continue;
+    }
+
+    if (pkg.isEmpty) continue;
 
     // App became visible — close any previous session first.
     if (isForegroundResumeEvent(event.eventType)) {

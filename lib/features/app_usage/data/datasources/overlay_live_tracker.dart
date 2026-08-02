@@ -45,6 +45,15 @@ class OverlayLiveTracker {
   /// Creates a tracker; call [start] after the overlay widget mounts.
   OverlayLiveTracker();
 
+  /// Poll while a trackable app is open (live second counter).
+  static const _activePollInterval = Duration(seconds: 1);
+
+  /// Poll while on home / lock screen — just enough to notice the next app.
+  ///
+  /// How to use: switched in automatically when [currentForegroundPackage]
+  /// returns null so we do not hammer UsageStats on the wallpaper/keyguard.
+  static const _idlePollInterval = Duration(seconds: 5);
+
   final UsageStatsDataSource _usageStats = UsageStatsDataSource();
   UsageLocalDataSource? _local;
 
@@ -62,6 +71,7 @@ class OverlayLiveTracker {
   String? _activePackage;
   String _cacheDate = todayDateKey();
   bool _running = false;
+  bool _idle = true;
   OverlayTickCallback? _onTick;
 
   /// Whether the 1s loop is currently active in this overlay isolate.
@@ -84,12 +94,23 @@ class OverlayLiveTracker {
     await _mergeCachedTotals();
 
     _running = true;
+    // Start in idle cadence; _onTickLoop upgrades to 1s only when an app is open.
+    _armTimer(idle: true);
+    await _onTickLoop();
+  }
+
+  /// Rebuilds the periodic timer for active (1s) vs idle (5s) modes.
+  ///
+  /// Useful so home/lock screens almost never query UsageStats, while an open
+  /// app still gets a smooth second-by-second badge.
+  void _armTimer({required bool idle}) {
+    if (_timer != null && _idle == idle) return;
+    _idle = idle;
     _timer?.cancel();
-    // One-second cadence matches the old main-isolate tracker UX.
-    _timer = Timer.periodic(const Duration(seconds: 1), (_) {
+    final interval = idle ? _idlePollInterval : _activePollInterval;
+    _timer = Timer.periodic(interval, (_) {
       unawaited(_onTickLoop());
     });
-    await _onTickLoop();
   }
 
   /// Merges a package→seconds map from the main isolate into the live counter.
@@ -226,29 +247,34 @@ class OverlayLiveTracker {
     }
   }
 
-  /// One-second loop: detect foreground app, increment, persist, update badge.
+  /// Poll loop: detect foreground app, increment, persist, update badge.
+  ///
+  /// On home / lock screen this returns quickly after a null package check and
+  /// stays on the slow idle timer — no increment, persist, or shareData.
   Future<void> _onTickLoop() async {
     if (!_running) return;
     try {
       await _rollDayIfNeeded();
 
       // Pass last active package so we keep counting after UsageStats event gaps.
+      // Never pass a package while already idle — lock/home must stay quiet.
       final package = await _usageStats.currentForegroundPackage(
         keepIfNoEvent: _activePackage,
       );
 
-      // Launcher / home / our own app: pause counting and hide the top badge.
-      // Useful so the glassy counter does not linger over the wallpaper when
-      // the user has not opened a trackable application.
-      // Example: press Home → badge disappears; open Instagram → badge returns.
+      // Launcher / home / lock / our own app: do nothing (hide badge + slow poll).
+      // Example: press Home or lock → badge gone, UsageStats barely queried.
       if (package == null) {
-        // Only notify once when leaving an app → home, not every idle second.
         if (_activePackage != null) {
           _activePackage = null;
           _onTick?.call(null);
         }
+        _armTimer(idle: true);
         return;
       }
+
+      // A real app is open — run the live 1s counter.
+      _armTimer(idle: false);
 
       // App switch: resolve label + PackageManager icon once, then increment.
       // Useful so switching Telegram → YouTube swaps both name and real logo.
@@ -296,7 +322,7 @@ class OverlayLiveTracker {
         // Main isolate may be gone; badge already updated locally.
       }
     } catch (_) {
-      // Tick failures should not crash the overlay; next second retries.
+      // Tick failures should not crash the overlay; next interval retries.
     }
   }
 

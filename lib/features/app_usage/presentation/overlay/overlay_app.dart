@@ -73,7 +73,7 @@ class _OverlayAppState extends State<OverlayApp> {
     _tracker.start(
       onTick: (OverlayTickPayload? payload) {
         if (!mounted) return;
-        // Null payload = home / launcher — hide the badge entirely.
+        // Null payload = home / lock / launcher — hide the badge entirely.
         if (payload == null) {
           setState(() {
             _visible = false;
