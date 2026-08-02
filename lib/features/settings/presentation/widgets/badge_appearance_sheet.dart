@@ -128,8 +128,8 @@ class _BadgeAppearanceSheetState extends State<BadgeAppearanceSheet> {
                   label: l10n.badgeSizeLabel,
                   valueLabel: '${_draft.sizePercent}%',
                   value: _draft.sizeScale,
-                  min: 0.5,
-                  max: 1.5,
+                  min: BadgeAppearance.minSizeScale,
+                  max: BadgeAppearance.maxSizeScale,
                   onChanged: (value) {
                     setState(() {
                       _draft = _draft.copyWith(sizeScale: value);

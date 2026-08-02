@@ -18,11 +18,17 @@ class BadgeAppearance extends Equatable {
     this.opacity = 0.9,
   });
 
-  /// Multiplier for badge size (`0.5`–`1.5` → 50%–150%).
+  /// Multiplier for badge size ([minSizeScale]–[maxSizeScale] → 75%–250%).
   final double sizeScale;
 
   /// Badge opacity (`0.3`–`1.0` → 30%–100%).
   final double opacity;
+
+  /// Smallest size the customize-badge slider allows (75%).
+  static const double minSizeScale = 0.75;
+
+  /// Largest size the customize-badge slider allows (250%).
+  static const double maxSizeScale = 2.5;
 
   /// Default appearance used on first launch.
   static const BadgeAppearance defaults = BadgeAppearance();
@@ -30,7 +36,8 @@ class BadgeAppearance extends Equatable {
   /// Clamps [sizeScale] / [opacity] into the supported ranges.
   BadgeAppearance copyWith({double? sizeScale, double? opacity}) {
     return BadgeAppearance(
-      sizeScale: (sizeScale ?? this.sizeScale).clamp(0.5, 1.5),
+      sizeScale:
+          (sizeScale ?? this.sizeScale).clamp(minSizeScale, maxSizeScale),
       opacity: (opacity ?? this.opacity).clamp(0.3, 1.0),
     );
   }

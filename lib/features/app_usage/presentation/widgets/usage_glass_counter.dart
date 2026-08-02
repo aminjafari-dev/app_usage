@@ -4,6 +4,7 @@ import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
 
+import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
@@ -222,13 +223,16 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     required double textOpacity,
     required double sizeBoost,
   }) {
-    final scale = widget.sizeScale.clamp(0.5, 1.5) * sizeBoost;
-    final compact = widget.compact;
-    final iconSize = (compact ? 18.0 : 22.0) * scale;
-    final fontSize = (compact ? 13.0 : 15.0) * scale;
-    final hPad = (compact ? 8.0 : 10.0) * scale;
-    final vPad = (compact ? 5.0 : 7.0) * scale;
-    final gap = (compact ? 6.0 : 8.0) * scale;
+    final scale = widget.sizeScale.clamp(
+          BadgeAppearance.minSizeScale,
+          BadgeAppearance.maxSizeScale,
+        ) *
+        sizeBoost;
+    final iconSize = 22 * scale;
+    final fontSize = 13 * scale;
+    final hPad = 2 * scale;
+    final vPad = 2 * scale;
+    final gap = 4 * scale;
 
     // Top-left during intro so the logo stays put while the pill grows right;
     // top-center for static previews.
@@ -249,27 +253,34 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
             mainAxisSize: MainAxisSize.min,
             children: [
               _ChipAppLogo(iconBytes: widget.iconBytes, size: iconSize),
+              // widthFactor reveals the duration; heightFactor: 1 shrink-wraps to
+              // the child so this slot does not inherit the overlay window height
+              // (which made the intro "circle" a tall oval).
               ClipRect(
                 child: Align(
                   alignment: Alignment.centerLeft,
                   widthFactor: expand.clamp(0.0, 1.0),
-                  child: Opacity(
-                    opacity: textOpacity.clamp(0.0, 1.0),
-                    child: Row(
-                      mainAxisSize: MainAxisSize.min,
-                      children: [
-                        SizedBox(width: gap),
-                        Text(
-                          formatUsageDuration(widget.todaySeconds),
-                          style: TextStyle(
-                            fontSize: fontSize,
-                            fontWeight: FontWeight.w700,
-                            color: AppTheme.overlayChipText,
-                            height: 1.0,
-                            letterSpacing: -0.2,
+                  heightFactor: 1,
+                  child: SizedBox(
+                    height: iconSize,
+                    child: Opacity(
+                      opacity: textOpacity.clamp(0.0, 1.0),
+                      child: Row(
+                        mainAxisSize: MainAxisSize.min,
+                        children: [
+                          SizedBox(width: gap),
+                          Text(
+                            formatUsageDuration(widget.todaySeconds),
+                            style: TextStyle(
+                              fontSize: fontSize,
+                              fontWeight: FontWeight.w700,
+                              color: AppTheme.overlayChipText,
+                              height: 1.0,
+                              letterSpacing: -0.2,
+                            ),
                           ),
-                        ),
-                      ],
+                        ],
+                      ),
                     ),
                   ),
                 ),

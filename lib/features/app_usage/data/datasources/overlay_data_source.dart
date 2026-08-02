@@ -152,8 +152,11 @@ class OverlayDataSource {
     BadgeAppearance appearance, {
     double sizeMultiplier = 1.0,
   }) {
-    final scale =
-        appearance.sizeScale.clamp(0.5, 1.5) * sizeMultiplier.clamp(1.0, 1.5);
+    final scale = appearance.sizeScale.clamp(
+          BadgeAppearance.minSizeScale,
+          BadgeAppearance.maxSizeScale,
+        ) *
+        sizeMultiplier.clamp(1.0, 1.5);
     // Keep these slightly above the painted chip so long h:mm:ss values and
     // drag hit-targets still fit after the user scales the badge.
     return (
