@@ -127,12 +127,18 @@ class _BadgeAppearanceSheetState extends State<BadgeAppearanceSheet> {
                 _AppearanceSlider(
                   label: l10n.badgeSizeLabel,
                   valueLabel: '${_draft.sizePercent}%',
-                  value: _draft.sizeScale,
-                  min: BadgeAppearance.minSizeScale,
-                  max: BadgeAppearance.maxSizeScale,
-                  onChanged: (value) {
+                  // Index into [BadgeAppearance.sizeSteps]: 0.75 → 1 → 1.5 → 2.
+                  value: BadgeAppearance.sizeStepIndex(_draft.sizeScale)
+                      .toDouble(),
+                  min: 0,
+                  max: (BadgeAppearance.sizeSteps.length - 1).toDouble(),
+                  divisions: BadgeAppearance.sizeSteps.length - 1,
+                  onChanged: (index) {
                     setState(() {
-                      _draft = _draft.copyWith(sizeScale: value);
+                      _draft = _draft.copyWith(
+                        sizeScale:
+                            BadgeAppearance.sizeSteps[index.round()],
+                      );
                     });
                   },
                 ),
@@ -141,8 +147,13 @@ class _BadgeAppearanceSheetState extends State<BadgeAppearanceSheet> {
                   label: l10n.badgeOpacityLabel,
                   valueLabel: '${_draft.opacityPercent}%',
                   value: _draft.opacity,
-                  min: 0.3,
-                  max: 1.0,
+                  min: BadgeAppearance.minOpacity,
+                  max: BadgeAppearance.maxOpacity,
+                  // 30% → 40% → … → 100%.
+                  divisions: ((BadgeAppearance.maxOpacity -
+                              BadgeAppearance.minOpacity) /
+                          BadgeAppearance.opacityStep)
+                      .round(),
                   onChanged: (value) {
                     setState(() {
                       _draft = _draft.copyWith(opacity: value);
@@ -172,6 +183,7 @@ class _AppearanceSlider extends StatelessWidget {
     required this.value,
     required this.min,
     required this.max,
+    required this.divisions,
     required this.onChanged,
   });
 
@@ -180,6 +192,7 @@ class _AppearanceSlider extends StatelessWidget {
   final double value;
   final double min;
   final double max;
+  final int divisions;
   final ValueChanged<double> onChanged;
 
   @override
@@ -209,6 +222,7 @@ class _AppearanceSlider extends StatelessWidget {
           value: value.clamp(min, max),
           min: min,
           max: max,
+          divisions: divisions,
           onChanged: onChanged,
         ),
       ],

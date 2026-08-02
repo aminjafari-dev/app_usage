@@ -18,27 +18,62 @@ class BadgeAppearance extends Equatable {
     this.opacity = 0.9,
   });
 
-  /// Multiplier for badge size ([minSizeScale]–[maxSizeScale] → 75%–250%).
+  /// Multiplier for badge size ([minSizeScale]–[maxSizeScale] → 75%–200%).
   final double sizeScale;
 
-  /// Badge opacity (`0.3`–`1.0` → 30%–100%).
+  /// Badge opacity ([minOpacity]–[maxOpacity] → 30%–100%).
   final double opacity;
+
+  /// Allowed size steps: 75% → 100% → 150% → 200%.
+  static const List<double> sizeSteps = [0.75, 1.0, 1.5, 2.0];
 
   /// Smallest size the customize-badge slider allows (75%).
   static const double minSizeScale = 0.75;
 
-  /// Largest size the customize-badge slider allows (250%).
-  static const double maxSizeScale = 2.5;
+  /// Largest size the customize-badge slider allows (200%).
+  static const double maxSizeScale = 2.0;
+
+  /// Smallest opacity the customize-badge slider allows (30%).
+  static const double minOpacity = 0.3;
+
+  /// Largest opacity the customize-badge slider allows (100%).
+  static const double maxOpacity = 1.0;
+
+  /// Opacity slider step (10%).
+  static const double opacityStep = 0.1;
 
   /// Default appearance used on first launch.
   static const BadgeAppearance defaults = BadgeAppearance();
 
-  /// Clamps [sizeScale] / [opacity] into the supported ranges.
+  /// Index of the nearest [sizeSteps] value (for discrete sliders).
+  static int sizeStepIndex(double scale) {
+    var best = 0;
+    var bestDelta = (sizeSteps[0] - scale).abs();
+    for (var i = 1; i < sizeSteps.length; i++) {
+      final delta = (sizeSteps[i] - scale).abs();
+      if (delta < bestDelta) {
+        best = i;
+        bestDelta = delta;
+      }
+    }
+    return best;
+  }
+
+  /// Snaps [scale] to the nearest entry in [sizeSteps].
+  static double snapSizeScale(double scale) => sizeSteps[sizeStepIndex(scale)];
+
+  /// Snaps [opacity] to the nearest 10% within [minOpacity]–[maxOpacity].
+  static double snapOpacity(double opacity) {
+    final clamped = opacity.clamp(minOpacity, maxOpacity);
+    final steps = ((clamped - minOpacity) / opacityStep).round();
+    return (minOpacity + steps * opacityStep).clamp(minOpacity, maxOpacity);
+  }
+
+  /// Clamps and snaps [sizeScale] / [opacity] to the supported steps.
   BadgeAppearance copyWith({double? sizeScale, double? opacity}) {
     return BadgeAppearance(
-      sizeScale:
-          (sizeScale ?? this.sizeScale).clamp(minSizeScale, maxSizeScale),
-      opacity: (opacity ?? this.opacity).clamp(0.3, 1.0),
+      sizeScale: snapSizeScale(sizeScale ?? this.sizeScale),
+      opacity: snapOpacity(opacity ?? this.opacity),
     );
   }
 
