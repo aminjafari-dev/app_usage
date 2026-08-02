@@ -283,11 +283,18 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
 }
 
 /// Tiny circular launcher icon for the timer chip (fallback: sage clock).
+///
+/// Android PackageManager icons are often already masked as a rounded square
+/// (adaptive icon). We clip to a circle and zoom slightly so the silhouette is
+/// a true circle, not a squircle sitting inside an oval clip.
 class _ChipAppLogo extends StatelessWidget {
   const _ChipAppLogo({this.iconBytes, required this.size});
 
   final List<int>? iconBytes;
   final double size;
+
+  /// Zooms past Android's rounded-square mask so [ClipOval] cuts a real circle.
+  static const double _circleCropScale = 1.2;
 
   @override
   Widget build(BuildContext context) {
@@ -300,17 +307,24 @@ class _ChipAppLogo extends StatelessWidget {
       );
     }
 
-    return ClipOval(
-      child: Image.memory(
-        Uint8List.fromList(bytes),
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        gaplessPlayback: true,
-        errorBuilder: (context, error, stackTrace) => Icon(
-          Icons.timelapse_rounded,
-          size: size,
-          color: AppTheme.overlayChipIcon,
+    return SizedBox(
+      width: size,
+      height: size,
+      child: ClipOval(
+        child: Transform.scale(
+          scale: _circleCropScale,
+          child: Image.memory(
+            Uint8List.fromList(bytes),
+            width: size,
+            height: size,
+            fit: BoxFit.cover,
+            gaplessPlayback: true,
+            errorBuilder: (context, error, stackTrace) => Icon(
+              Icons.timelapse_rounded,
+              size: size,
+              color: AppTheme.overlayChipIcon,
+            ),
+          ),
         ),
       ),
     );
