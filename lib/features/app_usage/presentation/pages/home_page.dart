@@ -43,55 +43,6 @@ class _HomeView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return GScaffold(
-      // floatingActionButton: Padding(
-      //   padding: const EdgeInsets.only(bottom: 72),
-      //   child: BlocBuilder<UsageBloc, UsageState>(
-      //     builder: (context, state) {
-      //       final isTracking = switch (state.tracking) {
-      //         TrackingOpCompleted(:final isTracking) => isTracking,
-      //         _ => false,
-      //       };
-      //       final trackingLoading = state.tracking is TrackingOpLoading;
-      //       final permissionsReady = switch (state.permissions) {
-      //         PermissionsOpCompleted(:final status) => status.isReady,
-      //         _ => false,
-      //       };
-
-      //       return FloatingActionButton(
-      //         onPressed: trackingLoading
-      //             ? null
-      //             : () {
-      //                 if (!isTracking && !permissionsReady) {
-      //                   ScaffoldMessenger.of(context).showSnackBar(
-      //                     SnackBar(content: Text(l10n.permissionsRequired)),
-      //                   );
-      //                   Navigator.of(context).pushNamed(PageName.permissions);
-      //                   return;
-      //                 }
-      //                 context.read<UsageBloc>().add(
-      //                       isTracking
-      //                           ? const UsageEvent.stopTracking()
-      //                           : const UsageEvent.startTracking(),
-      //                     );
-      //               },
-      //         child: trackingLoading
-      //             ? const SizedBox(
-      //                 width: 22,
-      //                 height: 22,
-      //                 child: CircularProgressIndicator(
-      //                   strokeWidth: 2,
-      //                   color: AppTheme.surface,
-      //                 ),
-      //               )
-      //             : Icon(
-      //                 isTracking
-      //                     ? Icons.pause_rounded
-      //                     : Icons.play_arrow_rounded,
-      //               ),
-      //       );
-      //     },
-      //   ),
-      // ),
       body: BlocConsumer<UsageBloc, UsageState>(
         listener: (context, state) {
           if (state.tracking case TrackingOpError(:final message)) {
