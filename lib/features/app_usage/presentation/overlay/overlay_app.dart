@@ -172,8 +172,8 @@ class _OverlayAppState extends State<OverlayApp> {
   /// Must stay in this isolate — [FlutterOverlayWindow.resizeOverlay] talks to
   /// the overlay MethodChannel and expects **dp**, not physical pixels.
   ///
-  /// [sizeMultiplier] `1.5` during the open-app intro; animates to `1.0` with
-  /// the chip settle so height/width ease down instead of staying large.
+  /// [sizeMultiplier] starts at `1.5` for the big circle, then eases to `1.0`
+  /// with the scale-down phase before the pill expands.
   Future<void> _resizeOverlay(
     BadgeAppearance appearance, {
     double sizeMultiplier = 1.0,
@@ -198,8 +198,8 @@ class _OverlayAppState extends State<OverlayApp> {
 
   /// Keeps the native overlay window matched to the animated chip boost.
   ///
-  /// How to use: wired to [UsageGlassCounter.onIntroSizeBoost] so as the chip
-  /// eases from 1.5× → 1×, the window height/width follow the same curve.
+  /// How to use: wired to [UsageGlassCounter.onIntroSizeBoost] so the window
+  /// shrinks with the circle (1.5× → 1×) before the container expands.
   void _onIntroSizeBoost(double sizeBoost) {
     if (!mounted) return;
     unawaited(_resizeOverlay(_appearance, sizeMultiplier: sizeBoost));

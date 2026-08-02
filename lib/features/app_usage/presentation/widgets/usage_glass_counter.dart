@@ -24,8 +24,7 @@ import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.da
 /// Pass [iconBytes] from PackageManager so the chip shows the open app's logo.
 ///
 /// With [playIntro] true, opening a new app runs:
-/// circle logo (1.5×) → pill expands right → duration fades in → shrink to
-/// the user-defined [sizeScale].
+/// 1.5× circle → scale down to user size → pill expands right → duration fades in.
 class UsageGlassCounter extends StatefulWidget {
   /// Creates the minimal timer chip.
   ///
@@ -61,10 +60,10 @@ class UsageGlassCounter extends StatefulWidget {
   /// Current size boost vs user size (`1.5` → `1.0`) while the intro runs.
   ///
   /// How to use: resize the native overlay window to match so height/width
-  /// animate down with the chip instead of staying at 1.5× then snapping.
+  /// ease down with the circle before the pill expands.
   final ValueChanged<double>? onIntroSizeBoost;
 
-  /// Called once the shrink-to-user-size phase finishes.
+  /// Called once the full intro sequence finishes.
   final VoidCallback? onIntroComplete;
 
   @override
@@ -76,16 +75,16 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
   /// Peak multiplier vs user size at the start of the intro.
   static const double _introBoost = 1.5;
 
-  /// Hold the big circle before expand / reveal / settle begin.
+  /// Hold the big circle before scale-down / expand / reveal begin.
   static const Duration _introDelay = Duration(seconds: 1);
 
-  /// Motion length after the delay — expand, reveal, then settle to user size.
-  static const Duration _introDuration = Duration(milliseconds: 1100);
+  /// Motion after the delay: scale down → expand right → show duration.
+  static const Duration _introDuration = Duration(milliseconds: 1200);
 
   AnimationController? _controller;
+  Animation<double>? _scaleDown;
   Animation<double>? _expand;
   Animation<double>? _textOpacity;
-  Animation<double>? _settle;
 
   Timer? _delayTimer;
   Object? _lastIntroKey;
@@ -125,20 +124,20 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
       vsync: this,
       duration: _introDuration,
     );
-    // 1) Circle → pill grows to the right (logo stays left).
+    // 1) Still a circle — ease from 1.5× down to the user-defined size.
+    _scaleDown = CurvedAnimation(
+      parent: controller,
+      curve: const Interval(0.0, 0.38, curve: Curves.easeOutCubic),
+    );
+    // 2) Pill grows to the right; logo stays on the left.
     _expand = CurvedAnimation(
       parent: controller,
-      curve: const Interval(0.0, 0.42, curve: Curves.easeOutCubic),
+      curve: const Interval(0.38, 0.78, curve: Curves.easeOutCubic),
     );
-    // 2) Duration digits fade in as the pill opens.
+    // 3) Duration digits fade in as the pill opens.
     _textOpacity = CurvedAnimation(
       parent: controller,
-      curve: const Interval(0.28, 0.55, curve: Curves.easeOut),
-    );
-    // 3) Soft ease into the exact user-defined size (ends at 1.0, no overshoot).
-    _settle = CurvedAnimation(
-      parent: controller,
-      curve: const Interval(0.55, 1.0, curve: Curves.easeOutCubic),
+      curve: const Interval(0.58, 0.88, curve: Curves.easeOut),
     );
     // Drive native window size with the same boost as the painted chip.
     controller.addListener(_emitSizeBoost);
@@ -152,11 +151,11 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     _controller = controller;
   }
 
-  /// Maps the settle progress to a boost and notifies the overlay window.
+  /// Maps scale-down progress to a boost and notifies the overlay window.
   void _emitSizeBoost() {
-    final settle = _settle;
-    if (settle == null) return;
-    final boost = lerpDouble(_introBoost, 1.0, settle.value)!;
+    final scaleDown = _scaleDown;
+    if (scaleDown == null) return;
+    final boost = lerpDouble(_introBoost, 1.0, scaleDown.value)!;
     widget.onIntroSizeBoost?.call(boost);
   }
 
@@ -185,9 +184,9 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     _controller?.removeListener(_emitSizeBoost);
     _controller?.dispose();
     _controller = null;
+    _scaleDown = null;
     _expand = null;
     _textOpacity = null;
-    _settle = null;
   }
 
   @override
@@ -205,12 +204,12 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
       return AnimatedBuilder(
         animation: controller,
         builder: (context, _) {
-          final settle = _introSettled ? 1.0 : _settle!.value;
+          final scaleDown = _introSettled ? 1.0 : _scaleDown!.value;
           return _buildChip(
             expand: _introSettled ? 1.0 : _expand!.value,
             textOpacity: _introSettled ? 1.0 : _textOpacity!.value,
-            // settle 0 → still 1.5×; settle 1 → user size.
-            sizeBoost: lerpDouble(_introBoost, 1.0, settle)!,
+            // scaleDown 0 → 1.5× circle; 1 → user-sized circle, then expand.
+            sizeBoost: lerpDouble(_introBoost, 1.0, scaleDown)!,
           );
         },
       );
@@ -231,10 +230,11 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     final vPad = (compact ? 5.0 : 7.0) * scale;
     final gap = (compact ? 6.0 : 8.0) * scale;
 
-    // Top-center so when the native overlay window shrinks after the intro,
-    // height is trimmed from the bottom and the chip does not jump.
+    // Top-left during intro so the logo stays put while the pill grows right;
+    // top-center for static previews.
     return Align(
-      alignment: Alignment.topCenter,
+      alignment:
+          widget.playIntro ? Alignment.topLeft : Alignment.topCenter,
       child: Opacity(
         opacity: widget.opacity.clamp(0.3, 1.0),
         child: Container(
