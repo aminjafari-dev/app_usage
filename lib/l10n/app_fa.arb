@@ -46,6 +46,7 @@
   "permissionsRequired": "برای شمارنده زنده دسترسی استفاده، روکش و باتری بدون محدودیت لازم است.",
   "permissionsRequiredHint": "دسترسی‌های لازم را بدهید تا شمارنده زنده روی برنامه‌ها نمایش داده شود.",
   "todaySectionHeader": "امروز",
+  "totalUsageLabel": "مجموع استفاده امروز",
   "trackingSectionHeader": "شمارنده زنده",
   "statusOnline": "در حال ردیابی",
   "statusOffline": "متوقف",
@@ -85,5 +86,32 @@
   "badgeOpacityLabel": "شفافیت",
   "saveChanges": "ذخیره تغییرات",
   "privacyPolicy": "حریم خصوصی",
-  "termsOfService": "شرایط استفاده"
+  "termsOfService": "شرایط استفاده",
+  "navHome": "خانه",
+  "navTimer": "تایمر",
+  "navSettings": "تنظیمات",
+  "navProfile": "پروفایل",
+  "tabComingSoon": "این بخش به‌زودی اضافه می‌شود.",
+  "profileSubtitle": "جزئیات پروفایل و حساب شما.",
+  "timerPickAppHint": "برنامه‌ای را برای تنظیم محدودیت روزانه انتخاب کنید.",
+  "timerSetDailyLimit": "محدودیت استفاده روزانه را تنظیم کنید",
+  "timerHoursLabel": "ساعت",
+  "timerMinutesLabel": "دقیقه",
+  "timerNotifyWhenReached": "اعلان هنگام رسیدن به محدودیت",
+  "timerSetButton": "تنظیم تایمر",
+  "timerSaved": "محدودیت روزانه ذخیره شد.",
+  "timerInvalidLimit": "زمانی بیشتر از صفر انتخاب کنید.",
+  "timerEmptyTitle": "هنوز برنامه‌ای نیست",
+  "timerEmptySubtitle": "امروز از برنامه‌ها استفاده کنید، سپس برای تنظیم محدودیت برگردید.",
+  "timerLimitSummary": "محدودیت {hours}س {minutes}د",
+  "@timerLimitSummary": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

@@ -314,6 +314,12 @@ abstract class AppLocalizations {
   /// **'Today'**
   String get todaySectionHeader;
 
+  /// No description provided for @totalUsageLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total usage today'**
+  String get totalUsageLabel;
+
   /// No description provided for @trackingSectionHeader.
   ///
   /// In en, this message translates to:
@@ -469,6 +475,108 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Terms of Service'**
   String get termsOfService;
+
+  /// No description provided for @navHome.
+  ///
+  /// In en, this message translates to:
+  /// **'Home'**
+  String get navHome;
+
+  /// No description provided for @navTimer.
+  ///
+  /// In en, this message translates to:
+  /// **'Timer'**
+  String get navTimer;
+
+  /// No description provided for @navSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get navSettings;
+
+  /// No description provided for @navProfile.
+  ///
+  /// In en, this message translates to:
+  /// **'Profile'**
+  String get navProfile;
+
+  /// No description provided for @tabComingSoon.
+  ///
+  /// In en, this message translates to:
+  /// **'This section is coming soon.'**
+  String get tabComingSoon;
+
+  /// No description provided for @profileSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Your profile and account details.'**
+  String get profileSubtitle;
+
+  /// No description provided for @timerPickAppHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose an app to set a daily usage limit.'**
+  String get timerPickAppHint;
+
+  /// No description provided for @timerSetDailyLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Set daily usage limit'**
+  String get timerSetDailyLimit;
+
+  /// No description provided for @timerHoursLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'HOURS'**
+  String get timerHoursLabel;
+
+  /// No description provided for @timerMinutesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'MINUTES'**
+  String get timerMinutesLabel;
+
+  /// No description provided for @timerNotifyWhenReached.
+  ///
+  /// In en, this message translates to:
+  /// **'Notify when limit reached'**
+  String get timerNotifyWhenReached;
+
+  /// No description provided for @timerSetButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Set Timer'**
+  String get timerSetButton;
+
+  /// No description provided for @timerSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily limit saved.'**
+  String get timerSaved;
+
+  /// No description provided for @timerInvalidLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Choose a time greater than zero.'**
+  String get timerInvalidLimit;
+
+  /// No description provided for @timerEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No apps yet'**
+  String get timerEmptyTitle;
+
+  /// No description provided for @timerEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use some apps today, then come back to set a limit.'**
+  String get timerEmptySubtitle;
+
+  /// No description provided for @timerLimitSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit {hours}h {minutes}m'**
+  String timerLimitSummary(int hours, int minutes);
 }
 
 class _AppLocalizationsDelegate

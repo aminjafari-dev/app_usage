@@ -9,7 +9,7 @@
 class PageName {
   PageName._();
 
-  /// Home dashboard with today's usage list and start/stop controls.
+  /// Main shell with floating bottom navigation (Home, Timer, Settings, Profile).
   static const String home = '/home';
 
   /// Permission onboarding for usage access + overlay.

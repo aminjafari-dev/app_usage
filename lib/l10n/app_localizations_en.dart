@@ -127,6 +127,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get todaySectionHeader => 'Today';
 
   @override
+  String get totalUsageLabel => 'Total usage today';
+
+  @override
   String get trackingSectionHeader => 'Live counter';
 
   @override
@@ -209,4 +212,58 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get termsOfService => 'Terms of Service';
+
+  @override
+  String get navHome => 'Home';
+
+  @override
+  String get navTimer => 'Timer';
+
+  @override
+  String get navSettings => 'Settings';
+
+  @override
+  String get navProfile => 'Profile';
+
+  @override
+  String get tabComingSoon => 'This section is coming soon.';
+
+  @override
+  String get profileSubtitle => 'Your profile and account details.';
+
+  @override
+  String get timerPickAppHint => 'Choose an app to set a daily usage limit.';
+
+  @override
+  String get timerSetDailyLimit => 'Set daily usage limit';
+
+  @override
+  String get timerHoursLabel => 'HOURS';
+
+  @override
+  String get timerMinutesLabel => 'MINUTES';
+
+  @override
+  String get timerNotifyWhenReached => 'Notify when limit reached';
+
+  @override
+  String get timerSetButton => 'Set Timer';
+
+  @override
+  String get timerSaved => 'Daily limit saved.';
+
+  @override
+  String get timerInvalidLimit => 'Choose a time greater than zero.';
+
+  @override
+  String get timerEmptyTitle => 'No apps yet';
+
+  @override
+  String get timerEmptySubtitle =>
+      'Use some apps today, then come back to set a limit.';
+
+  @override
+  String timerLimitSummary(int hours, int minutes) {
+    return 'Limit ${hours}h ${minutes}m';
+  }
 }

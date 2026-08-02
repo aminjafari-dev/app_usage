@@ -1,13 +1,10 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/router/page_name.dart';
-import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
-import 'package:app_usage/core/widgets/g_button.dart';
+import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
@@ -19,15 +16,12 @@ import 'package:app_usage/features/app_usage/presentation/bloc/usage_state.dart'
 import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
-/// Home dashboard: start/stop live counter + today's usage list.
+/// Home dashboard: today's total usage + per-app list.
 ///
 /// How to use:
 /// ```dart
 /// Navigator.of(context).pushNamed(PageName.home);
 /// ```
-///
-/// Layout follows the shared profile design: soft grey canvas, 32px white
-/// cards, quick-action tiles, capsule CTAs, and a compact type scale.
 class HomePage extends StatelessWidget {
   /// Creates the home page; BLoC is provided internally via get_it.
   const HomePage({super.key});
@@ -49,72 +43,55 @@ class _HomeView extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
 
     return GScaffold(
-      title: l10n.appTitle,
-      actions: [
-        IconButton(
-          tooltip: l10n.refresh,
-          onPressed: () {
-            context.read<UsageBloc>().add(const UsageEvent.refreshUsage());
-            context
-                .read<UsageBloc>()
-                .add(const UsageEvent.refreshPermissions());
-          },
-          icon: const Icon(Icons.search_rounded, size: 22),
-        ),
-        IconButton(
-          tooltip: l10n.settingsTitle,
-          onPressed: () {
-            Navigator.of(context).pushNamed(PageName.settings);
-          },
-          icon: const Icon(Icons.settings_outlined, size: 22),
-        ),
-      ],
-      floatingActionButton: BlocBuilder<UsageBloc, UsageState>(
-        builder: (context, state) {
-          final isTracking = switch (state.tracking) {
-            TrackingOpCompleted(:final isTracking) => isTracking,
-            _ => false,
-          };
-          final trackingLoading = state.tracking is TrackingOpLoading;
-          final permissionsReady = switch (state.permissions) {
-            PermissionsOpCompleted(:final status) => status.isReady,
-            _ => false,
-          };
+      // floatingActionButton: Padding(
+      //   padding: const EdgeInsets.only(bottom: 72),
+      //   child: BlocBuilder<UsageBloc, UsageState>(
+      //     builder: (context, state) {
+      //       final isTracking = switch (state.tracking) {
+      //         TrackingOpCompleted(:final isTracking) => isTracking,
+      //         _ => false,
+      //       };
+      //       final trackingLoading = state.tracking is TrackingOpLoading;
+      //       final permissionsReady = switch (state.permissions) {
+      //         PermissionsOpCompleted(:final status) => status.isReady,
+      //         _ => false,
+      //       };
 
-          return FloatingActionButton(
-            onPressed: trackingLoading
-                ? null
-                : () {
-                    if (!isTracking && !permissionsReady) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.permissionsRequired)),
-                      );
-                      Navigator.of(context).pushNamed(PageName.permissions);
-                      return;
-                    }
-                    context.read<UsageBloc>().add(
-                          isTracking
-                              ? const UsageEvent.stopTracking()
-                              : const UsageEvent.startTracking(),
-                        );
-                  },
-            child: trackingLoading
-                ? const SizedBox(
-                    width: 22,
-                    height: 22,
-                    child: CircularProgressIndicator(
-                      strokeWidth: 2,
-                      color: AppTheme.surface,
-                    ),
-                  )
-                : Icon(
-                    isTracking
-                        ? Icons.pause_rounded
-                        : Icons.play_arrow_rounded,
-                  ),
-          );
-        },
-      ),
+      //       return FloatingActionButton(
+      //         onPressed: trackingLoading
+      //             ? null
+      //             : () {
+      //                 if (!isTracking && !permissionsReady) {
+      //                   ScaffoldMessenger.of(context).showSnackBar(
+      //                     SnackBar(content: Text(l10n.permissionsRequired)),
+      //                   );
+      //                   Navigator.of(context).pushNamed(PageName.permissions);
+      //                   return;
+      //                 }
+      //                 context.read<UsageBloc>().add(
+      //                       isTracking
+      //                           ? const UsageEvent.stopTracking()
+      //                           : const UsageEvent.startTracking(),
+      //                     );
+      //               },
+      //         child: trackingLoading
+      //             ? const SizedBox(
+      //                 width: 22,
+      //                 height: 22,
+      //                 child: CircularProgressIndicator(
+      //                   strokeWidth: 2,
+      //                   color: AppTheme.surface,
+      //                 ),
+      //               )
+      //             : Icon(
+      //                 isTracking
+      //                     ? Icons.pause_rounded
+      //                     : Icons.play_arrow_rounded,
+      //               ),
+      //       );
+      //     },
+      //   ),
+      // ),
       body: BlocConsumer<UsageBloc, UsageState>(
         listener: (context, state) {
           if (state.tracking case TrackingOpError(:final message)) {
@@ -128,11 +105,6 @@ class _HomeView extends StatelessWidget {
             PermissionsOpCompleted(:final status) => status.isReady,
             _ => false,
           };
-          final isTracking = switch (state.tracking) {
-            TrackingOpCompleted(:final isTracking) => isTracking,
-            _ => false,
-          };
-          final trackingLoading = state.tracking is TrackingOpLoading;
 
           return RefreshIndicator(
             color: AppTheme.primary,
@@ -140,44 +112,8 @@ class _HomeView extends StatelessWidget {
               context.read<UsageBloc>().add(const UsageEvent.refreshUsage());
             },
             child: ListView(
-              padding: const EdgeInsets.fromLTRB(16, 8, 16, 96),
+              padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
               children: [
-                _ProfileHeader(
-                  isTracking: isTracking,
-                  currentApp: state.currentApp,
-                ),
-                GGap.l(),
-                // Quick actions — 32px white tiles like the profile design.
-                Row(
-                  children: [
-                    GQuickAction(
-                      icon: Icons.refresh_rounded,
-                      label: l10n.quickRefresh,
-                      onTap: () {
-                        context
-                            .read<UsageBloc>()
-                            .add(const UsageEvent.refreshUsage());
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    GQuickAction(
-                      icon: Icons.settings_outlined,
-                      label: l10n.quickSettings,
-                      onTap: () {
-                        Navigator.of(context).pushNamed(PageName.settings);
-                      },
-                    ),
-                    const SizedBox(width: 12),
-                    GQuickAction(
-                      icon: Icons.shield_outlined,
-                      label: l10n.quickPermissions,
-                      onTap: () {
-                        Navigator.of(context).pushNamed(PageName.permissions);
-                      },
-                    ),
-                  ],
-                ),
-                GGap.l(),
                 if (!permissionsReady) ...[
                   _PermissionsBanner(
                     onOpen: () {
@@ -186,26 +122,6 @@ class _HomeView extends StatelessWidget {
                   ),
                   GGap.l(),
                 ],
-                _TrackingCard(
-                  isTracking: isTracking,
-                  isLoading: trackingLoading,
-                  currentApp: state.currentApp,
-                  onToggle: () {
-                    if (!isTracking && !permissionsReady) {
-                      ScaffoldMessenger.of(context).showSnackBar(
-                        SnackBar(content: Text(l10n.permissionsRequired)),
-                      );
-                      Navigator.of(context).pushNamed(PageName.permissions);
-                      return;
-                    }
-                    context.read<UsageBloc>().add(
-                          isTracking
-                              ? const UsageEvent.stopTracking()
-                              : const UsageEvent.startTracking(),
-                        );
-                  },
-                ),
-                GGap.l(),
                 ...switch (state.todayUsage) {
                   TodayUsageOpInitial() => [const SizedBox.shrink()],
                   TodayUsageOpLoading() => [
@@ -219,6 +135,8 @@ class _HomeView extends StatelessWidget {
                       ),
                     ],
                   TodayUsageOpCompleted(:final apps) => [
+                      _TotalUsageCard(apps: apps),
+                      GGap.l(),
                       _TodayUsageCard(
                         apps: apps,
                         currentPackage: state.currentApp?.packageName,
@@ -236,88 +154,6 @@ class _HomeView extends StatelessWidget {
           );
         },
       ),
-    );
-  }
-}
-
-/// Top identity block — large avatar, name, online/offline status.
-class _ProfileHeader extends StatelessWidget {
-  const _ProfileHeader({
-    required this.isTracking,
-    required this.currentApp,
-  });
-
-  final bool isTracking;
-  final AppUsageEntity? currentApp;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-    final preview = currentApp;
-    final iconBytes = preview?.iconBytes;
-
-    return Column(
-      children: [
-        GGap.s(),
-        Stack(
-          alignment: Alignment.bottomRight,
-          children: [
-            Container(
-              width: 100,
-              height: 100,
-              decoration: BoxDecoration(
-                shape: BoxShape.circle,
-                color: AppTheme.primarySoft,
-                border: Border.all(color: AppTheme.surface, width: 3),
-                boxShadow: AppTheme.cardShadow,
-              ),
-              clipBehavior: Clip.antiAlias,
-              child: iconBytes != null
-                  ? Image.memory(
-                      Uint8List.fromList(iconBytes),
-                      fit: BoxFit.cover,
-                    )
-                  : const Icon(
-                      Icons.hourglass_top_rounded,
-                      size: 40,
-                      color: AppTheme.primary,
-                    ),
-            ),
-            // Small circular status badge on the avatar corner.
-            Container(
-              width: 30,
-              height: 30,
-              decoration: BoxDecoration(
-                color: AppTheme.primary,
-                shape: BoxShape.circle,
-                border: Border.all(color: AppTheme.surface, width: 2),
-              ),
-              child: Icon(
-                isTracking
-                    ? Icons.visibility_rounded
-                    : Icons.visibility_off_rounded,
-                color: AppTheme.surface,
-                size: 14,
-              ),
-            ),
-          ],
-        ),
-        GGap.m(),
-        GText(
-          preview?.appName ?? l10n.appTitle,
-          style: Theme.of(context).textTheme.headlineMedium,
-          textAlign: TextAlign.center,
-        ),
-        GGap.xs(),
-        GText(
-          isTracking ? l10n.statusOnline : l10n.statusOffline,
-          style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                fontWeight: FontWeight.w500,
-              ),
-          color: isTracking ? AppTheme.primary : AppTheme.onSurfaceMuted,
-          textAlign: TextAlign.center,
-        ),
-      ],
     );
   }
 }
@@ -348,80 +184,40 @@ class _PermissionsBanner extends StatelessWidget {
   }
 }
 
-/// Card with glass preview + start/stop CTA.
-class _TrackingCard extends StatelessWidget {
-  const _TrackingCard({
-    required this.isTracking,
-    required this.isLoading,
-    required this.currentApp,
-    required this.onToggle,
-  });
+/// Sum of today's usage across every tracked app.
+class _TotalUsageCard extends StatelessWidget {
+  const _TotalUsageCard({required this.apps});
 
-  final bool isTracking;
-  final bool isLoading;
-  final AppUsageEntity? currentApp;
-  final VoidCallback onToggle;
+  final List<AppUsageEntity> apps;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final preview = currentApp;
+    final totalSeconds = apps.fold<int>(0, (sum, app) => sum + app.todaySeconds);
 
-    return GCard(
-      header: l10n.trackingSectionHeader,
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 18),
-      child: Column(
-        crossAxisAlignment: CrossAxisAlignment.start,
+    return  Column(
         children: [
+          GGap.m(),
           GText(
-            isTracking ? l10n.trackingActive : l10n.trackingInactive,
+            formatUsageDuration(totalSeconds),
+            style: Theme.of(context).textTheme.displaySmall?.copyWith(
+                  fontWeight: FontWeight.w700,
+                  letterSpacing: -0.5,
+                ),
+            textAlign: TextAlign.center,
+          ),
+          GGap.xs(),
+          GText(
+            l10n.appsTracked(apps.length),
             style: Theme.of(context).textTheme.bodySmall,
             color: AppTheme.onSurfaceMuted,
           ),
-          GGap.m(),
-          if (preview != null) ...[
-            GTextMuted(l10n.currentApp),
-            GGap.s(),
-            BlocBuilder<BadgeAppearanceCubit, BadgeAppearance>(
-              builder: (context, appearance) {
-                return UsageGlassCounter(
-                  appName: preview.appName,
-                  todaySeconds: preview.todaySeconds,
-                  iconBytes: preview.iconBytes,
-                  compact: false,
-                  sizeScale: appearance.sizeScale,
-                  opacity: appearance.opacity,
-                );
-              },
-            ),
-            GGap.m(),
-          ] else ...[
-            BlocBuilder<BadgeAppearanceCubit, BadgeAppearance>(
-              builder: (context, appearance) {
-                return UsageGlassCounter(
-                  appName: l10n.appTitle,
-                  todaySeconds: 0,
-                  compact: false,
-                  sizeScale: appearance.sizeScale,
-                  opacity: appearance.opacity,
-                );
-              },
-            ),
-            GGap.m(),
-          ],
-          GButton(
-            label: isTracking ? l10n.stopTracking : l10n.startTracking,
-            icon: isTracking ? Icons.pause_rounded : Icons.play_arrow_rounded,
-            onPressed: onToggle,
-            isLoading: isLoading,
-          ),
         ],
-      ),
     );
   }
 }
 
-/// Today's app list in one 32px white card; empty state matches “No posts yet…”.
+/// Today's app list; empty state when nothing has been tracked yet.
 class _TodayUsageCard extends StatelessWidget {
   const _TodayUsageCard({
     required this.apps,
@@ -458,14 +254,14 @@ class _TodayUsageCard extends StatelessWidget {
     }
 
     return GCard(
-      header: '${l10n.todaySectionHeader} · ${l10n.appsTracked(apps.length)}',
+      header: l10n.todaySectionHeader,
       child: Column(
         children: [
-          for (var i = 0; i < apps.length; i++)
+          for (final app in apps)
             UsageAppTile(
-              entity: apps[i],
-              isActive: currentPackage == apps[i].packageName,
-              showDivider: i != apps.length - 1,
+              entity: app,
+              isActive: currentPackage == app.packageName,
+              showDivider: false,
             ),
         ],
       ),

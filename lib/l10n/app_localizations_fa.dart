@@ -127,6 +127,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get todaySectionHeader => 'امروز';
 
   @override
+  String get totalUsageLabel => 'مجموع استفاده امروز';
+
+  @override
   String get trackingSectionHeader => 'شمارنده زنده';
 
   @override
@@ -209,4 +212,59 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get termsOfService => 'شرایط استفاده';
+
+  @override
+  String get navHome => 'خانه';
+
+  @override
+  String get navTimer => 'تایمر';
+
+  @override
+  String get navSettings => 'تنظیمات';
+
+  @override
+  String get navProfile => 'پروفایل';
+
+  @override
+  String get tabComingSoon => 'این بخش به‌زودی اضافه می‌شود.';
+
+  @override
+  String get profileSubtitle => 'جزئیات پروفایل و حساب شما.';
+
+  @override
+  String get timerPickAppHint =>
+      'برنامه‌ای را برای تنظیم محدودیت روزانه انتخاب کنید.';
+
+  @override
+  String get timerSetDailyLimit => 'محدودیت استفاده روزانه را تنظیم کنید';
+
+  @override
+  String get timerHoursLabel => 'ساعت';
+
+  @override
+  String get timerMinutesLabel => 'دقیقه';
+
+  @override
+  String get timerNotifyWhenReached => 'اعلان هنگام رسیدن به محدودیت';
+
+  @override
+  String get timerSetButton => 'تنظیم تایمر';
+
+  @override
+  String get timerSaved => 'محدودیت روزانه ذخیره شد.';
+
+  @override
+  String get timerInvalidLimit => 'زمانی بیشتر از صفر انتخاب کنید.';
+
+  @override
+  String get timerEmptyTitle => 'هنوز برنامه‌ای نیست';
+
+  @override
+  String get timerEmptySubtitle =>
+      'امروز از برنامه‌ها استفاده کنید، سپس برای تنظیم محدودیت برگردید.';
+
+  @override
+  String timerLimitSummary(int hours, int minutes) {
+    return 'محدودیت $hoursس $minutesد';
+  }
 }

@@ -431,23 +431,14 @@ class UsageAppTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                Container(
-                  padding:
-                      const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
-                  decoration: BoxDecoration(
-                    color: isActive
-                        ? AppTheme.primary
-                        : AppTheme.onSurfaceMuted.withValues(alpha: 0.12),
-                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-                  ),
-                  child: GText(
+                 GText(
                     formatUsageDuration(entity.todaySeconds),
                     style: Theme.of(context).textTheme.bodySmall?.copyWith(
                           fontWeight: FontWeight.w600,
                         ),
                     color: isActive ? AppTheme.surface : AppTheme.onSurfaceMuted,
                   ),
-                ),
+                
               ],
             ),
           ),

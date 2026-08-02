@@ -46,6 +46,7 @@
   "permissionsRequired": "Usage access, overlay, and unrestricted battery are required for the live counter.",
   "permissionsRequiredHint": "Grant the required access so the live counter can float over other apps.",
   "todaySectionHeader": "Today",
+  "totalUsageLabel": "Total usage today",
   "trackingSectionHeader": "Live counter",
   "statusOnline": "Tracking",
   "statusOffline": "Paused",
@@ -85,5 +86,32 @@
   "badgeOpacityLabel": "OPACITY",
   "saveChanges": "Save Changes",
   "privacyPolicy": "Privacy Policy",
-  "termsOfService": "Terms of Service"
+  "termsOfService": "Terms of Service",
+  "navHome": "Home",
+  "navTimer": "Timer",
+  "navSettings": "Settings",
+  "navProfile": "Profile",
+  "tabComingSoon": "This section is coming soon.",
+  "profileSubtitle": "Your profile and account details.",
+  "timerPickAppHint": "Choose an app to set a daily usage limit.",
+  "timerSetDailyLimit": "Set daily usage limit",
+  "timerHoursLabel": "HOURS",
+  "timerMinutesLabel": "MINUTES",
+  "timerNotifyWhenReached": "Notify when limit reached",
+  "timerSetButton": "Set Timer",
+  "timerSaved": "Daily limit saved.",
+  "timerInvalidLimit": "Choose a time greater than zero.",
+  "timerEmptyTitle": "No apps yet",
+  "timerEmptySubtitle": "Use some apps today, then come back to set a limit.",
+  "timerLimitSummary": "Limit {hours}h {minutes}m",
+  "@timerLimitSummary": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  }
 }

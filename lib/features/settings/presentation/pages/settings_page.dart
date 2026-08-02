@@ -16,11 +16,20 @@ import 'package:app_usage/l10n/app_localizations.dart';
 ///
 /// How to use:
 /// ```dart
+/// // As a pushed route:
 /// Navigator.of(context).pushNamed(PageName.settings);
+///
+/// // As a main-shell tab:
+/// SettingsPage(embedded: true);
 /// ```
 class SettingsPage extends StatelessWidget {
   /// Creates the settings screen.
-  const SettingsPage({super.key});
+  ///
+  /// When [embedded] is true, hides the back button (hosted by the main shell).
+  const SettingsPage({super.key, this.embedded = false});
+
+  /// True when shown inside [MainShellPage] instead of a pushed route.
+  final bool embedded;
 
   @override
   Widget build(BuildContext context) {
@@ -29,9 +38,9 @@ class SettingsPage extends StatelessWidget {
     return GScaffold(
       title: l10n.settingsTitle,
       centerTitle: true,
-      circularBackButton: true,
+      circularBackButton: !embedded,
       body: ListView(
-        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
         children: [
           _SectionLabel(l10n.settingsPreferencesSection),
           GGap.s(),
