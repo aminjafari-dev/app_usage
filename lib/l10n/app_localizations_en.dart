@@ -142,6 +142,9 @@ class AppLocalizationsEn extends AppLocalizations {
   String get quickLanguage => 'Language';
 
   @override
+  String get quickSettings => 'Settings';
+
+  @override
   String get quickPermissions => 'Access';
 
   @override
@@ -164,4 +167,46 @@ class AppLocalizationsEn extends AppLocalizations {
   String secondsFormat(String time) {
     return '$time';
   }
+
+  @override
+  String get settingsTitle => 'Settings';
+
+  @override
+  String get settingsPreferencesSection => 'Preferences';
+
+  @override
+  String get settingsTrackerSection => 'Tracker';
+
+  @override
+  String get settingsTheme => 'Theme';
+
+  @override
+  String get themeLight => 'Light';
+
+  @override
+  String get themeDark => 'Dark';
+
+  @override
+  String get badgeAppearanceTitle => 'Badge Appearance';
+
+  @override
+  String get badgeAppearanceSubtitle => 'Size & Opacity';
+
+  @override
+  String get customizeBadgeTitle => 'Customize Badge';
+
+  @override
+  String get badgeSizeLabel => 'SIZE';
+
+  @override
+  String get badgeOpacityLabel => 'OPACITY';
+
+  @override
+  String get saveChanges => 'Save Changes';
+
+  @override
+  String get privacyPolicy => 'Privacy Policy';
+
+  @override
+  String get termsOfService => 'Terms of Service';
 }

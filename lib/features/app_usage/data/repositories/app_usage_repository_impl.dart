@@ -248,8 +248,9 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
   void _onOverlayMessage(dynamic event) {
     if (!_tracking) return;
     if (event is! Map) return;
-    // Ignore our own outbound seed pushes echoed back on the same stream.
+    // Ignore our own outbound seed / settings pushes echoed on the stream.
     if (event['type'] == 'seedTotals') return;
+    if (event['type'] == 'badgeAppearance') return;
 
     final packageName = event['packageName'] as String? ?? '';
     final appName = event['appName'] as String? ?? packageName;

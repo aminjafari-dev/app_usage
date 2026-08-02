@@ -22,51 +22,62 @@ import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.da
 /// Pass [iconBytes] from PackageManager so the chip shows the open app's logo.
 class UsageGlassCounter extends StatelessWidget {
   /// Creates the minimal timer chip.
+  ///
+  /// [sizeScale] and [opacity] come from badge appearance settings
+  /// (`1.0` / `0.9` are the defaults).
   const UsageGlassCounter({
     super.key,
     required this.appName,
     required this.todaySeconds,
     this.iconBytes,
     this.compact = true,
+    this.sizeScale = 1.0,
+    this.opacity = 0.9,
   });
 
   final String appName;
   final int todaySeconds;
   final List<int>? iconBytes;
   final bool compact;
+  final double sizeScale;
+  final double opacity;
 
   @override
   Widget build(BuildContext context) {
-    final iconSize = compact ? 18.0 : 22.0;
-    final fontSize = compact ? 13.0 : 15.0;
-    final hPad = compact ? 8.0 : 10.0;
-    final vPad = compact ? 5.0 : 7.0;
-    final gap = compact ? 6.0 : 8.0;
+    final scale = sizeScale.clamp(0.5, 1.5);
+    final iconSize = (compact ? 18.0 : 22.0) * scale;
+    final fontSize = (compact ? 13.0 : 15.0) * scale;
+    final hPad = (compact ? 8.0 : 10.0) * scale;
+    final vPad = (compact ? 5.0 : 7.0) * scale;
+    final gap = (compact ? 6.0 : 8.0) * scale;
 
     return Align(
       alignment: Alignment.center,
-      child: Container(
-        padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-        decoration: BoxDecoration(
-          color: AppTheme.overlayChipFill,
-          borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-        ),
-        child: Row(
-          mainAxisSize: MainAxisSize.min,
-          children: [
-            _ChipAppLogo(iconBytes: iconBytes, size: iconSize),
-            SizedBox(width: gap),
-            Text(
-              formatUsageDuration(todaySeconds),
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w700,
-                color: AppTheme.overlayChipText,
-                height: 1.0,
-                letterSpacing: -0.2,
+      child: Opacity(
+        opacity: opacity.clamp(0.3, 1.0),
+        child: Container(
+          padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+          decoration: BoxDecoration(
+            color: AppTheme.overlayChipFill,
+            borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+          ),
+          child: Row(
+            mainAxisSize: MainAxisSize.min,
+            children: [
+              _ChipAppLogo(iconBytes: iconBytes, size: iconSize),
+              SizedBox(width: gap),
+              Text(
+                formatUsageDuration(todaySeconds),
+                style: TextStyle(
+                  fontSize: fontSize,
+                  fontWeight: FontWeight.w700,
+                  color: AppTheme.overlayChipText,
+                  height: 1.0,
+                  letterSpacing: -0.2,
+                ),
               ),
-            ),
-          ],
+            ],
+          ),
         ),
       ),
     );

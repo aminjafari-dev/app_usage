@@ -51,6 +51,7 @@
   "statusOffline": "متوقف",
   "quickRefresh": "تازه‌سازی",
   "quickLanguage": "زبان",
+  "quickSettings": "تنظیمات",
   "quickPermissions": "دسترسی",
   "openPermissions": "باز کردن دسترسی‌ها",
   "appsTracked": "{count} برنامه",
@@ -70,5 +71,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsTitle": "تنظیمات",
+  "settingsPreferencesSection": "ترجیحات",
+  "settingsTrackerSection": "ردیاب",
+  "settingsTheme": "پوسته",
+  "themeLight": "روشن",
+  "themeDark": "تاریک",
+  "badgeAppearanceTitle": "ظاهر نشان",
+  "badgeAppearanceSubtitle": "اندازه و شفافیت",
+  "customizeBadgeTitle": "سفارشی‌سازی نشان",
+  "badgeSizeLabel": "اندازه",
+  "badgeOpacityLabel": "شفافیت",
+  "saveChanges": "ذخیره تغییرات",
+  "privacyPolicy": "حریم خصوصی",
+  "termsOfService": "شرایط استفاده"
 }

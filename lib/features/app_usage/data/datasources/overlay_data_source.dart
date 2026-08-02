@@ -1,6 +1,9 @@
 import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:shared_preferences/shared_preferences.dart';
+
+import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 
 /// Payload pushed from the main isolate to the overlay UI each tick.
 ///
@@ -106,7 +109,11 @@ class OverlayDataSource {
   ///
   /// Pass [forceRestart] true when repositioning an already-visible overlay
   /// (e.g. after upgrading from a corner placement to top-center).
-  Future<void> show({bool forceRestart = false}) async {
+  /// Pass [appearance] to size the native window for the user's badge scale.
+  Future<void> show({
+    bool forceRestart = false,
+    BadgeAppearance? appearance,
+  }) async {
     final active = await FlutterOverlayWindow.isActive();
     // Avoid stacking multiple overlay windows if tracking restarts.
     if (active) {
@@ -114,19 +121,12 @@ class OverlayDataSource {
       await FlutterOverlayWindow.closeOverlay();
     }
 
-    // showOverlay applies height/width as raw WindowManager pixels (not dp).
-    // Convert logical design size → physical px so the chip fits on all
-    // densities. Keep these slightly above the painted chip so long
-    // h:mm:ss values and drag hit-targets still fit.
-    //
-    // How to use: keep [logicalHeight]/[logicalWidth] as the Flutter layout
-    // size you want; only the native call is density-scaled.
-    const logicalHeight = 36.0;
-    const logicalWidth = 140.0;
-    final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
+    // Prefer an explicit appearance; otherwise load the user's saved scale.
+    final resolved = appearance ?? await _loadAppearance();
+    final size = _physicalSizeFor(resolved);
     await FlutterOverlayWindow.showOverlay(
-      height: (logicalHeight * dpr).round(),
-      width: (logicalWidth * dpr).round(),
+      height: size.height,
+      width: size.width,
       alignment: OverlayAlignment.topCenter,
       flag: OverlayFlag.defaultFlag,
       enableDrag: true,
@@ -138,6 +138,36 @@ class OverlayDataSource {
       // is handled inside the plugin for startPosition).
       startPosition: const OverlayPosition(0, 40),
     );
+  }
+
+  /// Resizes the active overlay window for a new badge [appearance].
+  ///
+  /// How to use: call after the user saves size changes in Settings.
+  Future<void> resizeForAppearance(BadgeAppearance appearance) async {
+    final active = await FlutterOverlayWindow.isActive();
+    if (!active) return;
+    final size = _physicalSizeFor(appearance);
+    await FlutterOverlayWindow.resizeOverlay(size.width, size.height, true);
+  }
+
+  /// Converts logical chip size × badge scale into WindowManager pixels.
+  ({int width, int height}) _physicalSizeFor(BadgeAppearance appearance) {
+    // showOverlay applies height/width as raw WindowManager pixels (not dp).
+    // Keep these slightly above the painted chip so long h:mm:ss values and
+    // drag hit-targets still fit after the user scales the badge.
+    final scale = appearance.sizeScale.clamp(0.5, 1.5);
+    final logicalHeight = 36.0 * scale;
+    final logicalWidth = 140.0 * scale;
+    final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
+    return (
+      width: (logicalWidth * dpr).round(),
+      height: (logicalHeight * dpr).round(),
+    );
+  }
+
+  Future<BadgeAppearance> _loadAppearance() async {
+    final prefs = await SharedPreferences.getInstance();
+    return BadgeAppearanceCubit.readFrom(prefs);
   }
 
   /// Hides the overlay if it is currently visible.

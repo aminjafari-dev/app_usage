@@ -1,6 +1,8 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
+import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_live_tracker.dart';
@@ -44,9 +46,14 @@ class _OverlayAppState extends State<OverlayApp> {
   /// shown on the left of the timer chip.
   List<int>? _iconBytes;
 
+  /// Size / opacity from Settings (SharedPreferences + live shareData).
+  BadgeAppearance _appearance = BadgeAppearance.defaults;
+
   @override
   void initState() {
     super.initState();
+    _loadAppearance();
+
     // Start self-contained tracking in this isolate (survives main-app death).
     _tracker.start(
       onTick: (OverlayTickPayload? payload) {
@@ -60,7 +67,7 @@ class _OverlayAppState extends State<OverlayApp> {
           _visible = true;
           _appName = payload.appName.isEmpty ? 'App' : payload.appName;
           _todaySeconds = payload.todaySeconds;
-          // Keep previous icon if a tick omits bytes (should be rare).
+          // Keep previous icon if a tick omits bytes (should not be common).
           if (payload.iconBytes != null) {
             _iconBytes = payload.iconBytes;
           }
@@ -79,6 +86,15 @@ class _OverlayAppState extends State<OverlayApp> {
         if (totals is Map) {
           _tracker.applySeedTotals(totals);
         }
+        return;
+      }
+
+      // Settings pushed a new size/opacity — apply without restarting ticks.
+      if (event['type'] == 'badgeAppearance') {
+        if (!mounted) return;
+        setState(() {
+          _appearance = BadgeAppearance.fromMap(event);
+        });
         return;
       }
 
@@ -103,6 +119,14 @@ class _OverlayAppState extends State<OverlayApp> {
     });
   }
 
+  Future<void> _loadAppearance() async {
+    final prefs = await SharedPreferences.getInstance();
+    if (!mounted) return;
+    setState(() {
+      _appearance = BadgeAppearanceCubit.readFrom(prefs);
+    });
+  }
+
   @override
   void dispose() {
     // Stop the 1s loop when the overlay service is torn down.
@@ -123,6 +147,8 @@ class _OverlayAppState extends State<OverlayApp> {
                 appName: _appName,
                 todaySeconds: _todaySeconds,
                 iconBytes: _iconBytes,
+                sizeScale: _appearance.sizeScale,
+                opacity: _appearance.opacity,
               )
             : const SizedBox.shrink(),
       ),

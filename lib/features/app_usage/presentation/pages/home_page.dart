@@ -3,9 +3,9 @@ import 'dart:typed_data';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-import 'package:app_usage/core/locale/locale_cubit.dart';
 import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/router/page_name.dart';
+import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
@@ -62,9 +62,11 @@ class _HomeView extends StatelessWidget {
           icon: const Icon(Icons.search_rounded, size: 22),
         ),
         IconButton(
-          tooltip: l10n.switchLanguage,
-          onPressed: () => context.read<LocaleCubit>().toggle(),
-          icon: const Icon(Icons.more_vert_rounded, size: 22),
+          tooltip: l10n.settingsTitle,
+          onPressed: () {
+            Navigator.of(context).pushNamed(PageName.settings);
+          },
+          icon: const Icon(Icons.settings_outlined, size: 22),
         ),
       ],
       floatingActionButton: BlocBuilder<UsageBloc, UsageState>(
@@ -159,9 +161,11 @@ class _HomeView extends StatelessWidget {
                     ),
                     const SizedBox(width: 12),
                     GQuickAction(
-                      icon: Icons.language_rounded,
-                      label: l10n.quickLanguage,
-                      onTap: () => context.read<LocaleCubit>().toggle(),
+                      icon: Icons.settings_outlined,
+                      label: l10n.quickSettings,
+                      onTap: () {
+                        Navigator.of(context).pushNamed(PageName.settings);
+                      },
                     ),
                     const SizedBox(width: 12),
                     GQuickAction(
@@ -378,18 +382,30 @@ class _TrackingCard extends StatelessWidget {
           if (preview != null) ...[
             GTextMuted(l10n.currentApp),
             GGap.s(),
-            UsageGlassCounter(
-              appName: preview.appName,
-              todaySeconds: preview.todaySeconds,
-              iconBytes: preview.iconBytes,
-              compact: false,
+            BlocBuilder<BadgeAppearanceCubit, BadgeAppearance>(
+              builder: (context, appearance) {
+                return UsageGlassCounter(
+                  appName: preview.appName,
+                  todaySeconds: preview.todaySeconds,
+                  iconBytes: preview.iconBytes,
+                  compact: false,
+                  sizeScale: appearance.sizeScale,
+                  opacity: appearance.opacity,
+                );
+              },
             ),
             GGap.m(),
           ] else ...[
-            UsageGlassCounter(
-              appName: l10n.appTitle,
-              todaySeconds: 0,
-              compact: false,
+            BlocBuilder<BadgeAppearanceCubit, BadgeAppearance>(
+              builder: (context, appearance) {
+                return UsageGlassCounter(
+                  appName: l10n.appTitle,
+                  todaySeconds: 0,
+                  compact: false,
+                  sizeScale: appearance.sizeScale,
+                  opacity: appearance.opacity,
+                );
+              },
             ),
             GGap.m(),
           ],

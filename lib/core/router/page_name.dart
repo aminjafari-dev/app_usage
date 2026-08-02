@@ -17,4 +17,7 @@ class PageName {
 
   /// Shown on non-Android platforms.
   static const String unsupported = '/unsupported';
+
+  /// Language, theme, and badge appearance settings.
+  static const String settings = '/settings';
 }

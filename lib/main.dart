@@ -9,7 +9,9 @@ import 'package:app_usage/core/locale/locale_cubit.dart';
 import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/router/page_name.dart';
 import 'package:app_usage/core/router/page_router.dart';
+import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
+import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/features/app_usage/presentation/overlay/overlay_app.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
@@ -50,24 +52,34 @@ class AppUsageApp extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    return BlocProvider.value(
-      value: locator<LocaleCubit>(),
+    return MultiBlocProvider(
+      providers: [
+        BlocProvider.value(value: locator<LocaleCubit>()),
+        BlocProvider.value(value: locator<ThemeCubit>()),
+        BlocProvider.value(value: locator<BadgeAppearanceCubit>()),
+      ],
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) {
-          return MaterialApp(
-            debugShowCheckedModeBanner: false,
-            title: 'App Usage',
-            theme: AppTheme.light(),
-            locale: locale,
-            supportedLocales: AppLocalizations.supportedLocales,
-            localizationsDelegates: const [
-              AppLocalizations.delegate,
-              GlobalMaterialLocalizations.delegate,
-              GlobalWidgetsLocalizations.delegate,
-              GlobalCupertinoLocalizations.delegate,
-            ],
-            routes: PageRouter.routes,
-            initialRoute: _initialRoute(),
+          return BlocBuilder<ThemeCubit, ThemeMode>(
+            builder: (context, themeMode) {
+              return MaterialApp(
+                debugShowCheckedModeBanner: false,
+                title: 'App Usage',
+                theme: AppTheme.light(),
+                darkTheme: AppTheme.dark(),
+                themeMode: themeMode,
+                locale: locale,
+                supportedLocales: AppLocalizations.supportedLocales,
+                localizationsDelegates: const [
+                  AppLocalizations.delegate,
+                  GlobalMaterialLocalizations.delegate,
+                  GlobalWidgetsLocalizations.delegate,
+                  GlobalCupertinoLocalizations.delegate,
+                ],
+                routes: PageRouter.routes,
+                initialRoute: _initialRoute(),
+              );
+            },
           );
         },
       ),

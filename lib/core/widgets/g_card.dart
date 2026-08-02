@@ -52,7 +52,7 @@ class GCard extends StatelessWidget {
             ),
           Container(
             decoration: BoxDecoration(
-              color: AppTheme.surface,
+              color: AppTheme.surfaceOf(context),
               borderRadius: BorderRadius.circular(AppTheme.radiusCard),
               boxShadow: AppTheme.cardShadow,
             ),
@@ -182,9 +182,13 @@ class GSettingsTile extends StatelessWidget {
         ),
         // Inset divider — starts after the icon like settings list separators.
         if (showDivider)
-          const Padding(
-            padding: EdgeInsetsDirectional.only(start: 62),
-            child: Divider(height: 1, thickness: 0.5, color: AppTheme.divider),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 62),
+            child: Divider(
+              height: 1,
+              thickness: 0.5,
+              color: AppTheme.dividerOf(context),
+            ),
           ),
       ],
     );
@@ -268,10 +272,11 @@ class GQuickAction extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final ink = AppTheme.onSurfaceOf(context);
     return Expanded(
       child: Container(
         decoration: BoxDecoration(
-          color: AppTheme.surface,
+          color: AppTheme.surfaceOf(context),
           borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           boxShadow: AppTheme.cardShadow,
         ),
@@ -286,7 +291,7 @@ class GQuickAction extends StatelessWidget {
               child: Column(
                 mainAxisSize: MainAxisSize.min,
                 children: [
-                  Icon(icon, color: AppTheme.onSurface, size: 22),
+                  Icon(icon, color: ink, size: 22),
                   const SizedBox(height: 8),
                   GText(
                     label,
@@ -294,7 +299,7 @@ class GQuickAction extends StatelessWidget {
                           fontWeight: FontWeight.w500,
                           fontSize: 12,
                         ),
-                    color: AppTheme.onSurface,
+                    color: ink,
                     textAlign: TextAlign.center,
                     maxLines: 1,
                     overflow: TextOverflow.ellipsis,
@@ -333,7 +338,7 @@ class GInfoRow extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return Material(
-      color: striped ? AppTheme.rowStripe : Colors.transparent,
+      color: striped ? AppTheme.stripeOf(context) : Colors.transparent,
       child: InkWell(
         onTap: onTap,
         child: Padding(
@@ -386,10 +391,15 @@ class GSegmentedTabs extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final selectedFill = isDark ? AppTheme.surfaceDark : AppTheme.surface;
+    final selectedFg = AppTheme.primary;
+    final unselectedFg = AppTheme.onSurfaceMuted;
+
     return Container(
       padding: const EdgeInsets.all(4),
       decoration: BoxDecoration(
-        color: AppTheme.rowStripe,
+        color: AppTheme.stripeOf(context),
         borderRadius: BorderRadius.circular(AppTheme.radiusPill),
       ),
       child: Row(
@@ -403,17 +413,22 @@ class GSegmentedTabs extends StatelessWidget {
                   curve: Curves.easeOut,
                   padding: const EdgeInsets.symmetric(vertical: 10),
                   decoration: BoxDecoration(
-                    color: i == selectedIndex
-                        ? AppTheme.primarySoft
-                        : Colors.transparent,
+                    color: i == selectedIndex ? selectedFill : Colors.transparent,
                     borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                    boxShadow: i == selectedIndex
+                        ? [
+                            BoxShadow(
+                              color: AppTheme.onSurface.withValues(alpha: 0.06),
+                              blurRadius: 8,
+                              offset: const Offset(0, 2),
+                            ),
+                          ]
+                        : null,
                   ),
                   child: GText(
                     tabs[i],
                     style: Theme.of(context).textTheme.labelMedium?.copyWith(
-                          color: i == selectedIndex
-                              ? AppTheme.primary
-                              : AppTheme.onSurfaceMuted,
+                          color: i == selectedIndex ? selectedFg : unselectedFg,
                           fontWeight: FontWeight.w600,
                         ),
                     textAlign: TextAlign.center,

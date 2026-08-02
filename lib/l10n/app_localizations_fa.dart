@@ -142,6 +142,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get quickLanguage => 'زبان';
 
   @override
+  String get quickSettings => 'تنظیمات';
+
+  @override
   String get quickPermissions => 'دسترسی';
 
   @override
@@ -164,4 +167,46 @@ class AppLocalizationsFa extends AppLocalizations {
   String secondsFormat(String time) {
     return '$time';
   }
+
+  @override
+  String get settingsTitle => 'تنظیمات';
+
+  @override
+  String get settingsPreferencesSection => 'ترجیحات';
+
+  @override
+  String get settingsTrackerSection => 'ردیاب';
+
+  @override
+  String get settingsTheme => 'پوسته';
+
+  @override
+  String get themeLight => 'روشن';
+
+  @override
+  String get themeDark => 'تاریک';
+
+  @override
+  String get badgeAppearanceTitle => 'ظاهر نشان';
+
+  @override
+  String get badgeAppearanceSubtitle => 'اندازه و شفافیت';
+
+  @override
+  String get customizeBadgeTitle => 'سفارشی‌سازی نشان';
+
+  @override
+  String get badgeSizeLabel => 'اندازه';
+
+  @override
+  String get badgeOpacityLabel => 'شفافیت';
+
+  @override
+  String get saveChanges => 'ذخیره تغییرات';
+
+  @override
+  String get privacyPolicy => 'حریم خصوصی';
+
+  @override
+  String get termsOfService => 'شرایط استفاده';
 }

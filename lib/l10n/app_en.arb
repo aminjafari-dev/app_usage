@@ -51,6 +51,7 @@
   "statusOffline": "Paused",
   "quickRefresh": "Refresh",
   "quickLanguage": "Language",
+  "quickSettings": "Settings",
   "quickPermissions": "Access",
   "openPermissions": "Open permissions",
   "appsTracked": "{count} apps",
@@ -70,5 +71,19 @@
         "type": "String"
       }
     }
-  }
+  },
+  "settingsTitle": "Settings",
+  "settingsPreferencesSection": "Preferences",
+  "settingsTrackerSection": "Tracker",
+  "settingsTheme": "Theme",
+  "themeLight": "Light",
+  "themeDark": "Dark",
+  "badgeAppearanceTitle": "Badge Appearance",
+  "badgeAppearanceSubtitle": "Size & Opacity",
+  "customizeBadgeTitle": "Customize Badge",
+  "badgeSizeLabel": "SIZE",
+  "badgeOpacityLabel": "OPACITY",
+  "saveChanges": "Save Changes",
+  "privacyPolicy": "Privacy Policy",
+  "termsOfService": "Terms of Service"
 }

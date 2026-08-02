@@ -344,6 +344,12 @@ abstract class AppLocalizations {
   /// **'Language'**
   String get quickLanguage;
 
+  /// No description provided for @quickSettings.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get quickSettings;
+
   /// No description provided for @quickPermissions.
   ///
   /// In en, this message translates to:
@@ -379,6 +385,90 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'{time}'**
   String secondsFormat(String time);
+
+  /// No description provided for @settingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Settings'**
+  String get settingsTitle;
+
+  /// No description provided for @settingsPreferencesSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Preferences'**
+  String get settingsPreferencesSection;
+
+  /// No description provided for @settingsTrackerSection.
+  ///
+  /// In en, this message translates to:
+  /// **'Tracker'**
+  String get settingsTrackerSection;
+
+  /// No description provided for @settingsTheme.
+  ///
+  /// In en, this message translates to:
+  /// **'Theme'**
+  String get settingsTheme;
+
+  /// No description provided for @themeLight.
+  ///
+  /// In en, this message translates to:
+  /// **'Light'**
+  String get themeLight;
+
+  /// No description provided for @themeDark.
+  ///
+  /// In en, this message translates to:
+  /// **'Dark'**
+  String get themeDark;
+
+  /// No description provided for @badgeAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Badge Appearance'**
+  String get badgeAppearanceTitle;
+
+  /// No description provided for @badgeAppearanceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Size & Opacity'**
+  String get badgeAppearanceSubtitle;
+
+  /// No description provided for @customizeBadgeTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Customize Badge'**
+  String get customizeBadgeTitle;
+
+  /// No description provided for @badgeSizeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'SIZE'**
+  String get badgeSizeLabel;
+
+  /// No description provided for @badgeOpacityLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'OPACITY'**
+  String get badgeOpacityLabel;
+
+  /// No description provided for @saveChanges.
+  ///
+  /// In en, this message translates to:
+  /// **'Save Changes'**
+  String get saveChanges;
+
+  /// No description provided for @privacyPolicy.
+  ///
+  /// In en, this message translates to:
+  /// **'Privacy Policy'**
+  String get privacyPolicy;
+
+  /// No description provided for @termsOfService.
+  ///
+  /// In en, this message translates to:
+  /// **'Terms of Service'**
+  String get termsOfService;
 }
 
 class _AppLocalizationsDelegate
