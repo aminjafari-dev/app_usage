@@ -154,4 +154,20 @@ class OverlayDataSource {
     if (!active) return;
     await FlutterOverlayWindow.shareData(payload.toMap());
   }
+
+  /// Pushes Home's seeded today totals into the overlay isolate.
+  ///
+  /// Useful right after [show] so the badge starts from UsageStats (e.g. 2h
+  /// Telegram) instead of `00:00` when the overlay hydrate races or misses
+  /// SharedPreferences written by the main isolate.
+  ///
+  /// Example: `{ 'org.telegram.messenger': 7200 }` → overlay counter shows 2:00:00.
+  Future<void> sendTodaySeed(Map<String, int> totalsByPackage) async {
+    final active = await FlutterOverlayWindow.isActive();
+    if (!active || totalsByPackage.isEmpty) return;
+    await FlutterOverlayWindow.shareData({
+      'type': 'seedTotals',
+      'totals': totalsByPackage,
+    });
+  }
 }

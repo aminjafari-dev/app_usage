@@ -80,6 +80,9 @@ class OverlayLiveTracker {
     _local = UsageLocalDataSource(prefs);
 
     await _hydrateToday();
+    // Main may finish writing prefs a moment after showOverlay — pick that up.
+    await _mergeCachedTotals();
+
     _running = true;
     _timer?.cancel();
     // One-second cadence matches the old main-isolate tracker UX.
@@ -87,6 +90,42 @@ class OverlayLiveTracker {
       unawaited(_onTickLoop());
     });
     await _onTickLoop();
+  }
+
+  /// Merges a package→seconds map from the main isolate into the live counter.
+  ///
+  /// How to use: call when [OverlayDataSource.sendTodaySeed] arrives so the
+  /// badge jumps from `00:00` to the real today total (never decreases).
+  /// Example: seed Telegram `7200` while local has `3` → keep `7200`.
+  void applySeedTotals(Map<dynamic, dynamic>? totals) {
+    if (totals == null || totals.isEmpty) return;
+    var raisedActive = false;
+    for (final entry in totals.entries) {
+      final package = entry.key.toString();
+      final seconds = (entry.value as num?)?.toInt() ?? 0;
+      if (package.isEmpty || seconds <= 0) continue;
+      final current = _todaySeconds[package] ?? 0;
+      // Never let a late seed shrink an already-running live total.
+      if (seconds > current) {
+        _todaySeconds[package] = seconds;
+        if (package == _activePackage) raisedActive = true;
+      }
+    }
+    // Repaint immediately when the foreground app's total was corrected.
+    if (raisedActive) {
+      final package = _activePackage;
+      if (package == null) return;
+      final seconds = _todaySeconds[package] ?? 0;
+      _onTick?.call(
+        OverlayTickPayload(
+          packageName: package,
+          appName: _appNames[package] ?? package,
+          todaySeconds: seconds,
+          iconBytes: _appIcons[package],
+        ),
+      );
+      unawaited(_persistCache());
+    }
   }
 
   /// Cancels the timer and drops listeners. Call from [State.dispose].
@@ -103,6 +142,8 @@ class OverlayLiveTracker {
     final local = _local;
     if (local == null) return;
 
+    // Overlay isolate must reload — main may have just written today's totals.
+    await local.reload();
     final aggregates = await _usageStats.queryTodayAggregates();
     final cached = await local.loadTodaySeconds();
 
@@ -125,6 +166,8 @@ class OverlayLiveTracker {
     }
 
     // Keep packages that only exist in the live cache (rare but possible).
+    // Critical on first run when event query in this isolate is empty/slow but
+    // Home already persisted correct UsageStats totals to SharedPreferences.
     for (final entry in cached.entries) {
       if (_todaySeconds.containsKey(entry.key)) continue;
       _todaySeconds[entry.key] = entry.value;
@@ -135,6 +178,52 @@ class OverlayLiveTracker {
 
     // Persist corrected totals so a stale inflated cache is overwritten on disk.
     await _persistCache();
+  }
+
+  /// Reloads SharedPreferences and lifts any package totals that are ahead.
+  ///
+  /// Useful right after overlay start when Home saved seed data a few hundred
+  /// ms later than this isolate's first hydrate.
+  Future<void> _mergeCachedTotals() async {
+    final local = _local;
+    if (local == null) return;
+    try {
+      await local.reload();
+      final cached = await local.loadTodaySeconds();
+      for (final entry in cached.entries) {
+        final current = _todaySeconds[entry.key] ?? 0;
+        if (entry.value > current) {
+          _todaySeconds[entry.key] = entry.value;
+        }
+      }
+    } catch (_) {
+      // Prefs reload failures should not block the ticker.
+    }
+  }
+
+  /// Ensures [package] has a seeded today total before the first +1 tick.
+  ///
+  /// How to use: on app switch when the package is missing from memory so we
+  /// never fall back to `putIfAbsent(..., 0)` while Home already knows 2h.
+  Future<void> _ensurePackageSeeded(String package) async {
+    if ((_todaySeconds[package] ?? 0) > 0) return;
+
+    await _mergeCachedTotals();
+    if ((_todaySeconds[package] ?? 0) > 0) return;
+
+    try {
+      final aggregates = await _usageStats.queryTodayAggregates();
+      for (final model in aggregates) {
+        final current = _todaySeconds[model.packageName] ?? 0;
+        if (model.todaySeconds > current) {
+          _todaySeconds[model.packageName] = model.todaySeconds;
+          _appNames[model.packageName] = model.appName;
+          _appIcons[model.packageName] = model.iconBytes;
+        }
+      }
+    } catch (_) {
+      // Foreground detection can continue even if a re-seed query fails.
+    }
   }
 
   /// One-second loop: detect foreground app, increment, persist, update badge.
@@ -174,6 +263,8 @@ class OverlayLiveTracker {
         if (_appIcons[package] == null) {
           _appIcons[package] = await _usageStats.resolveIcon(package);
         }
+        // Prefer prefs / UsageStats over starting a known app at zero.
+        await _ensurePackageSeeded(package);
         _todaySeconds.putIfAbsent(package, () => 0);
       }
 
@@ -212,7 +303,28 @@ class OverlayLiveTracker {
   Future<void> _persistCache() async {
     final local = _local;
     if (local == null) return;
-    await local.saveTodaySeconds(Map<String, int>.from(_todaySeconds));
+    // Merge with disk so a partial overlay map cannot wipe Home's seed
+    // (e.g. Telegram 7200) before this isolate finishes hydrating.
+    try {
+      await local.reload();
+      final existing = await local.loadTodaySeconds();
+      final merged = Map<String, int>.from(existing);
+      for (final entry in _todaySeconds.entries) {
+        final previous = merged[entry.key] ?? 0;
+        if (entry.value > previous) {
+          merged[entry.key] = entry.value;
+        }
+      }
+      for (final entry in merged.entries) {
+        final current = _todaySeconds[entry.key] ?? 0;
+        if (entry.value > current) {
+          _todaySeconds[entry.key] = entry.value;
+        }
+      }
+      await local.saveTodaySeconds(merged);
+    } catch (_) {
+      await local.saveTodaySeconds(Map<String, int>.from(_todaySeconds));
+    }
   }
 
   Future<void> _rollDayIfNeeded() async {
@@ -226,6 +338,7 @@ class OverlayLiveTracker {
       _activePackage = null;
       final local = _local;
       if (local != null) {
+        await local.reload();
         await local.loadTodaySeconds();
       }
       final aggregates = await _usageStats.queryTodayAggregates();

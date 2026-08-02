@@ -152,6 +152,10 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
         await _overlay.show(forceRestart: true);
       }
 
+      // Push Home's UsageStats seed into the overlay isolate. Home can show
+      // correct totals while the overlay still starts at 00:00 without this.
+      unawaited(_pushSeedToOverlay());
+
       // AlarmManager watchdog recovers the overlay after Recents Clear-all.
       await _battery.startWatchdog();
 
@@ -201,6 +205,7 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
       final alreadyActive = await _overlay.isActive();
       if (alreadyActive) {
         await _hydrateToday();
+        unawaited(_pushSeedToOverlay());
         await _battery.startWatchdog();
         _tracking = true;
         _startHomeSync();
@@ -213,6 +218,29 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     }
   }
 
+  /// Sends in-memory today totals to the overlay so the badge matches Home.
+  ///
+  /// Retries briefly because the overlay isolate may still be mounting when
+  /// [startLiveTracking] returns. Safe no-op when the overlay is not active.
+  Future<void> _pushSeedToOverlay() async {
+    final totals = <String, int>{
+      for (final entry in _today.entries) entry.key: entry.value.todaySeconds,
+    };
+    if (totals.isEmpty) return;
+
+    // A few attempts cover slow overlay engine startup after showOverlay.
+    for (var attempt = 0; attempt < 5; attempt++) {
+      await Future<void>.delayed(Duration(milliseconds: 200 * (attempt + 1)));
+      try {
+        final active = await _overlay.isActive();
+        if (!active) continue;
+        await _overlay.sendTodaySeed(totals);
+      } catch (_) {
+        // Overlay may not be ready yet; later attempts retry.
+      }
+    }
+  }
+
   /// Applies a tick map published by [OverlayLiveTracker] via shareData.
   ///
   /// Useful while Home is open so the list and preview stay in sync without
@@ -220,10 +248,12 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
   void _onOverlayMessage(dynamic event) {
     if (!_tracking) return;
     if (event is! Map) return;
+    // Ignore our own outbound seed pushes echoed back on the same stream.
+    if (event['type'] == 'seedTotals') return;
 
     final packageName = event['packageName'] as String? ?? '';
     final appName = event['appName'] as String? ?? packageName;
-    final todaySeconds = (event['todaySeconds'] as num?)?.toInt() ?? 0;
+    final overlaySeconds = (event['todaySeconds'] as num?)?.toInt() ?? 0;
     if (packageName.isEmpty) return;
 
     // Icon is only sent on app switches; keep the previous logo otherwise.
@@ -234,6 +264,10 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     }
 
     final existing = _today[packageName];
+    // Never let a zero-started overlay wipe Home's already-seeded totals.
+    final todaySeconds = overlaySeconds >= (existing?.todaySeconds ?? 0)
+        ? overlaySeconds
+        : existing!.todaySeconds;
     final updated = AppUsageEntity(
       packageName: packageName,
       appName: appName.isEmpty ? (existing?.appName ?? packageName) : appName,
@@ -251,8 +285,10 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
         final seconds = (entry.value as num?)?.toInt() ?? 0;
         final prev = _today[pkg];
         if (prev != null) {
-          _today[pkg] = prev.copyWith(todaySeconds: seconds);
-        } else {
+          // Same guard: overlay starting at 0 must not shrink seeded rows.
+          final merged = seconds >= prev.todaySeconds ? seconds : prev.todaySeconds;
+          _today[pkg] = prev.copyWith(todaySeconds: merged);
+        } else if (seconds > 0) {
           _today[pkg] = AppUsageEntity(
             packageName: pkg,
             appName: pkg == packageName ? updated.appName : pkg,

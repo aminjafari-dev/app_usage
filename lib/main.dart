@@ -1,3 +1,5 @@
+import 'dart:ui' show DartPluginRegistrant;
+
 import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
@@ -22,9 +24,14 @@ void main() async {
 ///
 /// How to use: started by `flutter_overlay_window` when the overlay is shown.
 /// Must live in this library so the plugin can discover it.
+///
+/// [DartPluginRegistrant.ensureInitialized] is required so UsageStats and
+/// SharedPreferences work in this secondary isolate — otherwise the badge can
+/// start at `00:00` even when Home already shows today's real totals.
 @pragma('vm:entry-point')
 void overlayMain() {
   WidgetsFlutterBinding.ensureInitialized();
+  DartPluginRegistrant.ensureInitialized();
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,

@@ -68,11 +68,20 @@ class _OverlayAppState extends State<OverlayApp> {
       },
     );
 
-    // Optional: still accept ticks from main for backwards compatibility,
-    // but the live source of truth is now [_tracker] above.
+    // Home can push seeded today totals (and legacy ticks) over shareData.
+    // Forward seeds even while the tracker is running so the badge does not
+    // stay at 00:00 when only the main isolate successfully read UsageStats.
     FlutterOverlayWindow.overlayListener.listen((event) {
-      // Ignore our own outbound shareData echoes and malformed payloads.
       if (event is! Map) return;
+
+      if (event['type'] == 'seedTotals') {
+        final totals = event['totals'];
+        if (totals is Map) {
+          _tracker.applySeedTotals(totals);
+        }
+        return;
+      }
+
       // Prefer tracker-driven updates; only apply external ticks if tracker
       // is somehow not running (should not happen in normal flow).
       if (_tracker.isRunning) return;
