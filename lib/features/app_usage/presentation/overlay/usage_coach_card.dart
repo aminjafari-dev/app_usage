@@ -37,7 +37,7 @@ class UsageCoachCard extends StatelessWidget {
     final message = _messageFor(l10n, decision.messageId);
 
     return Material(
-      color: Colors.black.withValues(alpha: 0.45),
+      color: Colors.transparent,
       child: SafeArea(
         child: Center(
           child: Padding(
