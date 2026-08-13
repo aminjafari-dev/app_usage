@@ -28,7 +28,7 @@ class UsageEventPoint {
   /// Android package id that generated the event.
   final String packageName;
 
-  /// Raw [UsageEvents.Event] type (e.g. 1 = resume, 2 / 23 = pause, 16 / 17 = idle).
+  /// Raw [UsageEvents.Event] type (e.g. 1 = resume, 2 = pause, 16 / 17 = idle).
   final int eventType;
 
   /// Epoch milliseconds when the event fired.
@@ -40,11 +40,18 @@ class UsageEventPoint {
 /// Note: type 15 is SCREEN_INTERACTIVE, not a resume — do not treat it as one.
 bool isForegroundResumeEvent(int eventType) => eventType == 1;
 
-/// ACTIVITY_PAUSED / MOVE_TO_BACKGROUND (2) and ACTIVITY_STOPPED (23).
+/// ACTIVITY_PAUSED / MOVE_TO_BACKGROUND (2) — the only event that ends a session.
 ///
 /// Note: type 16 is SCREEN_NON_INTERACTIVE, not an activity pause.
-bool isForegroundPauseEvent(int eventType) =>
-    eventType == 2 || eventType == 23;
+bool isForegroundPauseEvent(int eventType) => eventType == 2;
+
+/// ACTIVITY_STOPPED (23) — bookkeeping only, never ends a foreground session.
+///
+/// Android reports lifecycle per *activity*, not per app. Moving between
+/// screens inside one app logs `A paused → B resumed → A stopped`, so the stop
+/// arrives while the app is still on screen. Treating it as a pause would end
+/// the session of an app the user never left (back press, opening a story).
+bool isActivityStoppedEvent(int eventType) => eventType == 23;
 
 /// SCREEN_NON_INTERACTIVE (16) or KEYGUARD_SHOWN (17) — lock / screen-off.
 ///
@@ -60,11 +67,14 @@ bool isScreenIdleEvent(int eventType) =>
 ///
 /// Useful when [queryAndAggregateUsageStats] would otherwise leak yesterday's
 /// daily bucket into today's totals.
+/// Pass [isTransientSystemPackage] so system chrome drawn over an app (shade,
+/// volume panel) does not truncate that app's running session.
 Map<String, int> sumForegroundMsByPackage({
   required List<UsageEventPoint> events,
   required int rangeStartMs,
   required int rangeEndMs,
   required bool Function(String packageName) isIgnoredPackage,
+  bool Function(String packageName)? isTransientSystemPackage,
 }) {
   // Guard inverted / empty ranges so callers never get negative totals.
   if (rangeEndMs <= rangeStartMs) return <String, int>{};
@@ -112,6 +122,8 @@ Map<String, int> sumForegroundMsByPackage({
 
     // App became visible — close any previous session first.
     if (isForegroundResumeEvent(event.eventType)) {
+      // Shade / volume panel over a running app: leave the session untouched.
+      if (isTransientSystemPackage?.call(pkg) ?? false) continue;
       final previousPackage = foregroundPackage;
       final previousStart = sessionStartMs;
       if (previousPackage != null && previousStart != null) {
@@ -127,6 +139,10 @@ Map<String, int> sumForegroundMsByPackage({
       }
       continue;
     }
+
+    // A stop for an app whose session is still open belongs to an activity that
+    // already paused earlier, so it must not shorten the running session.
+    if (isActivityStoppedEvent(event.eventType)) continue;
 
     // App left the foreground — close only if it matches the open session.
     if (isForegroundPauseEvent(event.eventType)) {
@@ -148,6 +164,83 @@ Map<String, int> sumForegroundMsByPackage({
   }
 
   return totalsMs;
+}
+
+/// Decides which app is on screen right now by replaying [events].
+///
+/// Android only logs an event when something *changes*, so staying inside one
+/// app produces silence. [seedPackage] carries the previously detected app into
+/// the replay: without it, a window whose opening resume has already scrolled
+/// out would wrongly report "no app open".
+///
+/// - Resume of a real app → that package
+/// - Resume of a launcher / our own app ([isIdlePackage]) → `null`
+/// - Resume of system chrome ([isTransientSystemPackage]) → unchanged; the
+///   notification shade or volume panel draws *over* the app being used
+/// - Lock / screen off → `null`
+/// - Pause of the open app → `null`, but only after [pauseGraceMs], because an
+///   in-app screen change pauses one activity a beat before the next resumes
+///
+/// How to use:
+/// ```dart
+/// final pkg = resolveForegroundPackage(
+///   events: points,
+///   nowMs: DateTime.now().millisecondsSinceEpoch,
+///   seedPackage: lastActivePackage,
+///   isIdlePackage: (p) => p.contains('launcher'),
+///   isTransientSystemPackage: (p) => p == 'com.android.systemui',
+/// );
+/// ```
+String? resolveForegroundPackage({
+  required List<UsageEventPoint> events,
+  required int nowMs,
+  required bool Function(String packageName) isIdlePackage,
+  required bool Function(String packageName) isTransientSystemPackage,
+  String? seedPackage,
+  int pauseGraceMs = 1500,
+}) {
+  final sorted = List<UsageEventPoint>.from(events)
+    ..sort((a, b) => a.timeStampMs.compareTo(b.timeStampMs));
+
+  String? foreground = seedPackage;
+  int? pendingPauseMs;
+
+  for (final event in sorted) {
+    final pkg = event.packageName;
+
+    // Lock screen or display off → idle; never count over the keyguard.
+    if (isScreenIdleEvent(event.eventType)) {
+      foreground = null;
+      pendingPauseMs = null;
+      continue;
+    }
+
+    if (isForegroundResumeEvent(event.eventType)) {
+      if (pkg.isEmpty) continue;
+      // Shade / volume / recents chrome: the app underneath is still in use.
+      if (isTransientSystemPackage(pkg)) continue;
+      foreground = isIdlePackage(pkg) ? null : pkg;
+      pendingPauseMs = null;
+      continue;
+    }
+
+    // Stops arrive after the next activity of the same app resumed — ignore.
+    if (isActivityStoppedEvent(event.eventType)) continue;
+
+    if (isForegroundPauseEvent(event.eventType)) {
+      if (foreground == null) continue;
+      // Matching pause (or empty OEM pause) may close the open session.
+      if (pkg.isEmpty || pkg == foreground) {
+        pendingPauseMs = event.timeStampMs;
+      }
+    }
+  }
+
+  final pausedAt = pendingPauseMs;
+  if (pausedAt == null) return foreground;
+  // The replacement resume may still be in flight — hold the current app.
+  if (nowMs - pausedAt < pauseGraceMs) return foreground;
+  return null;
 }
 
 /// Merges event-based seconds with the live SharedPreferences cache.

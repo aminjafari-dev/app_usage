@@ -157,6 +157,59 @@ void main() {
       expect(ms['org.telegram.messenger'], 20_000);
     });
 
+    test('keeps counting across an in-app screen change', () {
+      // Back press inside Instagram: the stop of the activity the user left
+      // lands *after* the underlying activity resumed.
+      final ms = sumForegroundMsByPackage(
+        events: const [
+          UsageEventPoint(
+            packageName: 'com.instagram.android',
+            eventType: 2, // story activity paused
+            timeStampMs: startMs + 10_000,
+          ),
+          UsageEventPoint(
+            packageName: 'com.instagram.android',
+            eventType: 1, // feed activity resumed
+            timeStampMs: startMs + 10_200,
+          ),
+          UsageEventPoint(
+            packageName: 'com.instagram.android',
+            eventType: 23, // story activity stopped
+            timeStampMs: startMs + 10_600,
+          ),
+        ],
+        rangeStartMs: startMs,
+        rangeEndMs: startMs + 60_000,
+        isIgnoredPackage: ignoreLauncher,
+      );
+
+      // Session must run to the end of the range, not stop at the ACTIVITY_STOPPED.
+      expect(ms['com.instagram.android'], 49_800);
+    });
+
+    test('a shade resume does not truncate the running session', () {
+      final ms = sumForegroundMsByPackage(
+        events: const [
+          UsageEventPoint(
+            packageName: 'com.instagram.android',
+            eventType: 1,
+            timeStampMs: startMs,
+          ),
+          UsageEventPoint(
+            packageName: 'com.android.systemui',
+            eventType: 1, // heads-up notification / shade pulled down
+            timeStampMs: startMs + 20_000,
+          ),
+        ],
+        rangeStartMs: startMs,
+        rangeEndMs: startMs + 60_000,
+        isIgnoredPackage: ignoreLauncher,
+        isTransientSystemPackage: (pkg) => pkg == 'com.android.systemui',
+      );
+
+      expect(ms['com.instagram.android'], 60_000);
+    });
+
     test('stops counting when the screen turns off', () {
       final ms = sumForegroundMsByPackage(
         events: const [
@@ -177,6 +230,177 @@ void main() {
       );
 
       expect(ms['com.google.android.youtube'], 15_000);
+    });
+  });
+
+  group('resolveForegroundPackage', () {
+    const nowMs = 1_722_038_400_000;
+    const instagram = 'com.instagram.android';
+
+    bool isIdle(String pkg) =>
+        pkg == 'com.android.launcher3' || pkg == 'com.example.app_usage';
+    bool isTransient(String pkg) =>
+        pkg == 'com.android.systemui' || pkg == 'android';
+
+    String? resolve(List<UsageEventPoint> events, {String? seed}) {
+      return resolveForegroundPackage(
+        events: events,
+        nowMs: nowMs,
+        seedPackage: seed,
+        isIdlePackage: isIdle,
+        isTransientSystemPackage: isTransient,
+      );
+    }
+
+    test('stays on the app when a stop lands after an in-app resume', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 2,
+            timeStampMs: nowMs - 8_000,
+          ),
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 1,
+            timeStampMs: nowMs - 7_800,
+          ),
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 23,
+            timeStampMs: nowMs - 7_400,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, instagram);
+    });
+
+    test('keeps the app when only system chrome resumed', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: 'com.android.systemui',
+            eventType: 1,
+            timeStampMs: nowMs - 3_000,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, instagram);
+    });
+
+    test('keeps the app when its resume scrolled out of the window', () {
+      // Only an unrelated background app's event is left in the window.
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: 'com.whatsapp',
+            eventType: 2,
+            timeStampMs: nowMs - 30_000,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, instagram);
+    });
+
+    test('holds the badge briefly after a bare pause', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 2,
+            timeStampMs: nowMs - 400,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, instagram);
+    });
+
+    test('hides once a pause is older than the grace window', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 2,
+            timeStampMs: nowMs - 5_000,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, isNull);
+    });
+
+    test('hides on the home screen', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 2,
+            timeStampMs: nowMs - 5_000,
+          ),
+          UsageEventPoint(
+            packageName: 'com.android.launcher3',
+            eventType: 1,
+            timeStampMs: nowMs - 4_800,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, isNull);
+    });
+
+    test('hides on lock even when the app never paused', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: 'android',
+            eventType: 17, // KEYGUARD_SHOWN
+            timeStampMs: nowMs - 2_000,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, isNull);
+    });
+
+    test('switches to a newly resumed app', () {
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: 'org.telegram.messenger',
+            eventType: 1,
+            timeStampMs: nowMs - 1_000,
+          ),
+        ],
+        seed: instagram,
+      );
+
+      expect(pkg, 'org.telegram.messenger');
+    });
+
+    test('recovers the open app from a wide rescan while hidden', () {
+      // Badge already hidden (no seed) — a deep scan finds the last resume.
+      final pkg = resolve(
+        const [
+          UsageEventPoint(
+            packageName: instagram,
+            eventType: 1,
+            timeStampMs: nowMs - 15 * 60 * 1000,
+          ),
+        ],
+      );
+
+      expect(pkg, instagram);
     });
   });
 

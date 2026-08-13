@@ -56,6 +56,27 @@ class UsageStatsDataSource {
     'com.actionlauncher.playstore',
   };
 
+  /// System packages that draw *over* the current app instead of replacing it.
+  ///
+  /// Pulling down the notification shade, a heads-up notification, the volume
+  /// panel or the power menu makes some OEMs log a resume for these packages.
+  /// The user never left the app, so these must not hide the badge — leaving
+  /// for real still emits a pause / keyguard / screen-off event.
+  static const _transientSystemPackages = <String>{
+    'android',
+    'com.android.systemui',
+    'com.android.keyguard',
+  };
+
+  /// Window replayed on every live tick to spot app switches.
+  static const _foregroundWindow = Duration(minutes: 2);
+
+  /// Wider window used to re-find the open app after the badge went idle.
+  ///
+  /// Why: staying inside one app emits no further resume events, so a single
+  /// stray event could otherwise hide the badge until the next app switch.
+  static const _recoveryWindow = Duration(minutes: 30);
+
   /// Returns whether PACKAGE_USAGE_STATS is granted.
   Future<bool> hasUsagePermission() async {
     return await UsageStats.checkUsagePermission() ?? false;
@@ -106,6 +127,7 @@ class UsageStatsDataSource {
       rangeStartMs: start.millisecondsSinceEpoch,
       rangeEndMs: end.millisecondsSinceEpoch,
       isIgnoredPackage: _isIgnoredPackage,
+      isTransientSystemPackage: _isTransientSystemPackage,
     );
 
     final results = <UsageInfoModel>[];
@@ -146,10 +168,17 @@ class UsageStatsDataSource {
   /// - New resumed app → that package
   /// - Launcher / ignored / lock / screen-off → `null` (do nothing)
   /// - No relevant events in the window → [keepIfNoEvent] (keep same app)
-  Future<String?> currentForegroundPackage({String? keepIfNoEvent}) async {
+  ///
+  /// Pass [deepScan] true to replay a much wider window. Useful when the badge
+  /// is already hidden: the app the user sits in emits no new resume events, so
+  /// the short window alone can never bring the counter back.
+  Future<String?> currentForegroundPackage({
+    String? keepIfNoEvent,
+    bool deepScan = false,
+  }) async {
     final end = DateTime.now();
     // Long enough to catch app switches; not used alone for "still in app".
-    final start = end.subtract(const Duration(minutes: 2));
+    final start = end.subtract(deepScan ? _recoveryWindow : _foregroundWindow);
     final events = await UsageStats.queryEvents(start, end);
 
     final points = <UsageEventPoint>[];
@@ -175,38 +204,13 @@ class UsageStatsDataSource {
     // Quiet window (still inside the same app) — keep counting that package.
     if (points.isEmpty) return keepIfNoEvent;
 
-    points.sort((a, b) => a.timeStampMs.compareTo(b.timeStampMs));
-
-    String? foreground;
-    for (final event in points) {
-      // Lock screen or display off → idle; never count over the keyguard.
-      if (isScreenIdleEvent(event.eventType)) {
-        foreground = null;
-        continue;
-      }
-
-      if (isForegroundResumeEvent(event.eventType)) {
-        final pkg = event.packageName;
-        // Home / system chrome resume → explicitly idle (no keepIfNoEvent).
-        if (pkg.isEmpty || _isIgnoredPackage(pkg)) {
-          foreground = null;
-        } else {
-          foreground = pkg;
-        }
-        continue;
-      }
-
-      if (isForegroundPauseEvent(event.eventType)) {
-        final pkg = event.packageName;
-        // Matching pause (or empty OEM pause) closes the open session.
-        if (foreground != null && (pkg.isEmpty || pkg == foreground)) {
-          foreground = null;
-        }
-      }
-    }
-
-    // After processing events we know home/lock/paused — do not fall back.
-    return foreground;
+    return resolveForegroundPackage(
+      events: points,
+      nowMs: end.millisecondsSinceEpoch,
+      seedPackage: keepIfNoEvent,
+      isIdlePackage: _isIgnoredPackage,
+      isTransientSystemPackage: _isTransientSystemPackage,
+    );
   }
 
   /// Whether [packageName] should be skipped for live counting.
@@ -216,6 +220,10 @@ class UsageStatsDataSource {
     if (packageName.contains('launcher')) return true;
     return false;
   }
+
+  /// Whether a resume for [packageName] is system chrome over the current app.
+  bool _isTransientSystemPackage(String packageName) =>
+      _transientSystemPackages.contains(packageName);
 
   /// Resolves a human-readable label for [packageName].
   Future<String> resolveAppName(String packageName) async {

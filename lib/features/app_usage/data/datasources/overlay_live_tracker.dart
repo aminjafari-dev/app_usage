@@ -54,6 +54,13 @@ class OverlayLiveTracker {
   /// returns null so we do not hammer UsageStats on the wallpaper/keyguard.
   static const _idlePollInterval = Duration(seconds: 5);
 
+  /// Re-check a wide event window every N idle ticks (~20s) while hidden.
+  ///
+  /// Why: an app the user never leaves emits no further resume events, so if a
+  /// stray pause/system event ever hides the badge, the short window alone
+  /// could not bring it back until the next app switch.
+  static const _deepScanEveryIdleTicks = 4;
+
   final UsageStatsDataSource _usageStats = UsageStatsDataSource();
   UsageLocalDataSource? _local;
 
@@ -72,6 +79,9 @@ class OverlayLiveTracker {
   String _cacheDate = todayDateKey();
   bool _running = false;
   bool _idle = true;
+
+  /// Consecutive ticks with no foreground app, used to schedule deep scans.
+  int _idleTicks = 0;
   OverlayTickCallback? _onTick;
 
   /// Whether the 1s loop is currently active in this overlay isolate.
@@ -260,11 +270,13 @@ class OverlayLiveTracker {
       // Never pass a package while already idle — lock/home must stay quiet.
       final package = await _usageStats.currentForegroundPackage(
         keepIfNoEvent: _activePackage,
+        deepScan: _idleTicks > 0 && _idleTicks % _deepScanEveryIdleTicks == 0,
       );
 
       // Launcher / home / lock / our own app: do nothing (hide badge + slow poll).
       // Example: press Home or lock → badge gone, UsageStats barely queried.
       if (package == null) {
+        _idleTicks++;
         if (_activePackage != null) {
           _activePackage = null;
           _onTick?.call(null);
@@ -274,6 +286,7 @@ class OverlayLiveTracker {
       }
 
       // A real app is open — run the live 1s counter.
+      _idleTicks = 0;
       _armTimer(idle: false);
 
       // App switch: resolve label + PackageManager icon once, then increment.
