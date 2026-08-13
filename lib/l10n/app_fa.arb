@@ -97,7 +97,7 @@
   "timerSetDailyLimit": "محدودیت استفاده روزانه را تنظیم کنید",
   "timerHoursLabel": "ساعت",
   "timerMinutesLabel": "دقیقه",
-  "timerNotifyWhenReached": "اعلان هنگام رسیدن به محدودیت",
+  "timerNotifyWhenReached": "یادآوری هنگام رسیدن به محدودیت",
   "timerSetButton": "تنظیم تایمر",
   "timerSaved": "محدودیت روزانه ذخیره شد.",
   "timerInvalidLimit": "زمانی بیشتر از صفر انتخاب کنید.",
@@ -113,5 +113,63 @@
         "type": "int"
       }
     }
-  }
+  },
+  "coachTitle": "زمان بررسی",
+  "coachOverLimitSubtitle": "شما {minutes} دقیقه از محدودیت روزانه {app} عبور کرده‌اید.",
+  "@coachOverLimitSubtitle": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "coachMessageBoss": "تو رئیس گوشی هستی — نه گوشی رئیس تو.",
+  "coachMessageGoal": "هدفت را دنبال کن. این برنامه می‌تواند صبر کند.",
+  "coachMessageAppsChange": "نگذار یک برنامه، روزت را عوض کند.",
+  "coachMessagePause": "یک نفس بکش. بعد تصمیم بگیر هنوز می‌خواهی بمانی یا نه.",
+  "coachMessageChoice": "محدودیت را برای دلیلی گذاشتی. به آن احترام بگذار.",
+  "coachMessageProtect": "زمانی را که برای چیزهای مهم گذاشتی، حفظ کن.",
+  "coachPauseButton": "مکث می‌کنم",
+  "coachSnoozeButton": "{minutes} دقیقه دیگر",
+  "@coachSnoozeButton": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "coachMuteToday": "یادآوری این برنامه را امروز خاموش کن",
+  "coachSettingsTitle": "یادآور محدودیت",
+  "coachSettingsSubtitle": "یادآوری ملایم وقتی از محدودیت روزانه یک برنامه عبور می‌کنید.",
+  "coachSettingsEnabled": "نمایش یادآور محدودیت",
+  "coachSettingsEnabledHint": "کارت وسط صفحه وقتی برنامه از محدودیت بگذرد",
+  "coachSettingsSnoozeLabel": "فاصله تعویق",
+  "coachSettingsSnoozeHint": "چقدر بعد از «دقیقه دیگر» صبر کند.",
+  "coachSettingsMaxNudgesLabel": "حداکثر یادآوری در روز برای هر برنامه",
+  "coachSettingsMaxNudgesHint": "یادآوری‌ها مفید بمانند، نه آزاردهنده.",
+  "coachSettingsAllowMute": "اجازه «خاموش کردن امروز»",
+  "coachSettingsAllowMuteHint": "دکمه‌ای برای بی‌صدا کردن یک برنامه تا فردا",
+  "coachSettingsMinutes": "{minutes}د",
+  "@coachSettingsMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "coachSettingsSummary": "تعویق {snooze}د · تا {max} بار در روز",
+  "@coachSettingsSummary": {
+    "placeholders": {
+      "snooze": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "coachSettingsOff": "یادآوری‌ها خاموش است"
 }

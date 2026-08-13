@@ -244,7 +244,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timerMinutesLabel => 'MINUTES';
 
   @override
-  String get timerNotifyWhenReached => 'Notify when limit reached';
+  String get timerNotifyWhenReached => 'Remind me when limit reached';
 
   @override
   String get timerSetButton => 'Set Timer';
@@ -266,4 +266,98 @@ class AppLocalizationsEn extends AppLocalizations {
   String timerLimitSummary(int hours, int minutes) {
     return 'Limit ${hours}h ${minutes}m';
   }
+
+  @override
+  String get coachTitle => 'Time check';
+
+  @override
+  String coachOverLimitSubtitle(String app, int minutes) {
+    return 'You\'re $minutes min over your daily limit for $app.';
+  }
+
+  @override
+  String get coachMessageBoss =>
+      'You\'re the boss of the phone — not the other way around.';
+
+  @override
+  String get coachMessageGoal => 'Follow your goal. This app can wait.';
+
+  @override
+  String get coachMessageAppsChange => 'Don\'t let an app rewrite your day.';
+
+  @override
+  String get coachMessagePause =>
+      'One breath. Then decide if you still want to stay.';
+
+  @override
+  String get coachMessageChoice => 'You chose a limit for a reason. Honor it.';
+
+  @override
+  String get coachMessageProtect =>
+      'Protect the time you saved for what matters.';
+
+  @override
+  String get coachPauseButton => 'I\'ll pause';
+
+  @override
+  String coachSnoozeButton(int minutes) {
+    String _temp0 = intl.Intl.pluralLogic(
+      minutes,
+      locale: localeName,
+      other: '$minutes more minutes',
+      one: '1 more minute',
+    );
+    return '$_temp0';
+  }
+
+  @override
+  String get coachMuteToday => 'Mute reminders for this app today';
+
+  @override
+  String get coachSettingsTitle => 'Limit reminders';
+
+  @override
+  String get coachSettingsSubtitle =>
+      'Gentle check-ins when you go past a daily app limit.';
+
+  @override
+  String get coachSettingsEnabled => 'Show limit reminders';
+
+  @override
+  String get coachSettingsEnabledHint =>
+      'Center card when a timed app goes over its limit';
+
+  @override
+  String get coachSettingsSnoozeLabel => 'Snooze interval';
+
+  @override
+  String get coachSettingsSnoozeHint =>
+      'How long to wait after “more minutes”.';
+
+  @override
+  String get coachSettingsMaxNudgesLabel => 'Max reminders per app / day';
+
+  @override
+  String get coachSettingsMaxNudgesHint =>
+      'Keeps reminders helpful instead of noisy.';
+
+  @override
+  String get coachSettingsAllowMute => 'Allow “mute today”';
+
+  @override
+  String get coachSettingsAllowMuteHint =>
+      'Show a button to silence one app until tomorrow';
+
+  @override
+  String coachSettingsMinutes(int minutes) {
+    return '${minutes}m';
+  }
+
+  @override
+  String coachSettingsSummary(int snooze, int max) {
+    return 'Snooze ${snooze}m · up to $max / day';
+  }
+
+  @override
+  String get coachSettingsOff => 'Reminders turned off';
 }

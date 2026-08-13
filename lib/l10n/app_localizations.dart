@@ -539,7 +539,7 @@ abstract class AppLocalizations {
   /// No description provided for @timerNotifyWhenReached.
   ///
   /// In en, this message translates to:
-  /// **'Notify when limit reached'**
+  /// **'Remind me when limit reached'**
   String get timerNotifyWhenReached;
 
   /// No description provided for @timerSetButton.
@@ -577,6 +577,150 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Limit {hours}h {minutes}m'**
   String timerLimitSummary(int hours, int minutes);
+
+  /// No description provided for @coachTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Time check'**
+  String get coachTitle;
+
+  /// No description provided for @coachOverLimitSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re {minutes} min over your daily limit for {app}.'**
+  String coachOverLimitSubtitle(String app, int minutes);
+
+  /// No description provided for @coachMessageBoss.
+  ///
+  /// In en, this message translates to:
+  /// **'You\'re the boss of the phone — not the other way around.'**
+  String get coachMessageBoss;
+
+  /// No description provided for @coachMessageGoal.
+  ///
+  /// In en, this message translates to:
+  /// **'Follow your goal. This app can wait.'**
+  String get coachMessageGoal;
+
+  /// No description provided for @coachMessageAppsChange.
+  ///
+  /// In en, this message translates to:
+  /// **'Don\'t let an app rewrite your day.'**
+  String get coachMessageAppsChange;
+
+  /// No description provided for @coachMessagePause.
+  ///
+  /// In en, this message translates to:
+  /// **'One breath. Then decide if you still want to stay.'**
+  String get coachMessagePause;
+
+  /// No description provided for @coachMessageChoice.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose a limit for a reason. Honor it.'**
+  String get coachMessageChoice;
+
+  /// No description provided for @coachMessageProtect.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect the time you saved for what matters.'**
+  String get coachMessageProtect;
+
+  /// No description provided for @coachPauseButton.
+  ///
+  /// In en, this message translates to:
+  /// **'I\'ll pause'**
+  String get coachPauseButton;
+
+  /// No description provided for @coachSnoozeButton.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes, plural, =1{1 more minute} other{{minutes} more minutes}}'**
+  String coachSnoozeButton(int minutes);
+
+  /// No description provided for @coachMuteToday.
+  ///
+  /// In en, this message translates to:
+  /// **'Mute reminders for this app today'**
+  String get coachMuteToday;
+
+  /// No description provided for @coachSettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit reminders'**
+  String get coachSettingsTitle;
+
+  /// No description provided for @coachSettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Gentle check-ins when you go past a daily app limit.'**
+  String get coachSettingsSubtitle;
+
+  /// No description provided for @coachSettingsEnabled.
+  ///
+  /// In en, this message translates to:
+  /// **'Show limit reminders'**
+  String get coachSettingsEnabled;
+
+  /// No description provided for @coachSettingsEnabledHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Center card when a timed app goes over its limit'**
+  String get coachSettingsEnabledHint;
+
+  /// No description provided for @coachSettingsSnoozeLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze interval'**
+  String get coachSettingsSnoozeLabel;
+
+  /// No description provided for @coachSettingsSnoozeHint.
+  ///
+  /// In en, this message translates to:
+  /// **'How long to wait after “more minutes”.'**
+  String get coachSettingsSnoozeHint;
+
+  /// No description provided for @coachSettingsMaxNudgesLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Max reminders per app / day'**
+  String get coachSettingsMaxNudgesLabel;
+
+  /// No description provided for @coachSettingsMaxNudgesHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Keeps reminders helpful instead of noisy.'**
+  String get coachSettingsMaxNudgesHint;
+
+  /// No description provided for @coachSettingsAllowMute.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow “mute today”'**
+  String get coachSettingsAllowMute;
+
+  /// No description provided for @coachSettingsAllowMuteHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Show a button to silence one app until tomorrow'**
+  String get coachSettingsAllowMuteHint;
+
+  /// No description provided for @coachSettingsMinutes.
+  ///
+  /// In en, this message translates to:
+  /// **'{minutes}m'**
+  String coachSettingsMinutes(int minutes);
+
+  /// No description provided for @coachSettingsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Snooze {snooze}m · up to {max} / day'**
+  String coachSettingsSummary(int snooze, int max);
+
+  /// No description provided for @coachSettingsOff.
+  ///
+  /// In en, this message translates to:
+  /// **'Reminders turned off'**
+  String get coachSettingsOff;
 }
 
 class _AppLocalizationsDelegate

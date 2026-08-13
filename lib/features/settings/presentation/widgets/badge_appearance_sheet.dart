@@ -127,7 +127,7 @@ class _BadgeAppearanceSheetState extends State<BadgeAppearanceSheet> {
                 _AppearanceSlider(
                   label: l10n.badgeSizeLabel,
                   valueLabel: '${_draft.sizePercent}%',
-                  // Index into [BadgeAppearance.sizeSteps]: 0.75 → 1 → 1.5 → 2.
+                  // Index into [BadgeAppearance.sizeSteps]: 0.75 → 1 → 1.25 → 1.5 → 1.75 → 2.
                   value: BadgeAppearance.sizeStepIndex(_draft.sizeScale)
                       .toDouble(),
                   min: 0,

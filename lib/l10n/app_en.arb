@@ -97,7 +97,7 @@
   "timerSetDailyLimit": "Set daily usage limit",
   "timerHoursLabel": "HOURS",
   "timerMinutesLabel": "MINUTES",
-  "timerNotifyWhenReached": "Notify when limit reached",
+  "timerNotifyWhenReached": "Remind me when limit reached",
   "timerSetButton": "Set Timer",
   "timerSaved": "Daily limit saved.",
   "timerInvalidLimit": "Choose a time greater than zero.",
@@ -113,5 +113,63 @@
         "type": "int"
       }
     }
-  }
+  },
+  "coachTitle": "Time check",
+  "coachOverLimitSubtitle": "You're {minutes} min over your daily limit for {app}.",
+  "@coachOverLimitSubtitle": {
+    "placeholders": {
+      "app": {
+        "type": "String"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "coachMessageBoss": "You're the boss of the phone — not the other way around.",
+  "coachMessageGoal": "Follow your goal. This app can wait.",
+  "coachMessageAppsChange": "Don't let an app rewrite your day.",
+  "coachMessagePause": "One breath. Then decide if you still want to stay.",
+  "coachMessageChoice": "You chose a limit for a reason. Honor it.",
+  "coachMessageProtect": "Protect the time you saved for what matters.",
+  "coachPauseButton": "I'll pause",
+  "coachSnoozeButton": "{minutes, plural, =1{1 more minute} other{{minutes} more minutes}}",
+  "@coachSnoozeButton": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "coachMuteToday": "Mute reminders for this app today",
+  "coachSettingsTitle": "Limit reminders",
+  "coachSettingsSubtitle": "Gentle check-ins when you go past a daily app limit.",
+  "coachSettingsEnabled": "Show limit reminders",
+  "coachSettingsEnabledHint": "Center card when a timed app goes over its limit",
+  "coachSettingsSnoozeLabel": "Snooze interval",
+  "coachSettingsSnoozeHint": "How long to wait after “more minutes”.",
+  "coachSettingsMaxNudgesLabel": "Max reminders per app / day",
+  "coachSettingsMaxNudgesHint": "Keeps reminders helpful instead of noisy.",
+  "coachSettingsAllowMute": "Allow “mute today”",
+  "coachSettingsAllowMuteHint": "Show a button to silence one app until tomorrow",
+  "coachSettingsMinutes": "{minutes}m",
+  "@coachSettingsMinutes": {
+    "placeholders": {
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "coachSettingsSummary": "Snooze {snooze}m · up to {max} / day",
+  "@coachSettingsSummary": {
+    "placeholders": {
+      "snooze": {
+        "type": "int"
+      },
+      "max": {
+        "type": "int"
+      }
+    }
+  },
+  "coachSettingsOff": "Reminders turned off"
 }

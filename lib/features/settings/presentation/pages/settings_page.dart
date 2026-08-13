@@ -8,7 +8,9 @@ import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
+import 'package:app_usage/core/settings/coach_settings_cubit.dart';
 import 'package:app_usage/features/settings/presentation/widgets/badge_appearance_sheet.dart';
+import 'package:app_usage/features/settings/presentation/widgets/coach_settings_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/settings_choice_segment.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
@@ -108,16 +110,48 @@ class SettingsPage extends StatelessWidget {
           _SectionLabel(l10n.settingsTrackerSection),
           GGap.s(),
           GCard(
-            child: GSettingsTile(
-              icon: Icons.layers_rounded,
-              iconColor: AppTheme.iconGreen,
-              title: l10n.badgeAppearanceTitle,
-              subtitle: l10n.badgeAppearanceSubtitle,
-              trailing: const Icon(
-                Icons.chevron_right_rounded,
-                color: AppTheme.onSurfaceMuted,
-              ),
-              onTap: () => showBadgeAppearanceSheet(context),
+            child: Column(
+              children: [
+                GSettingsTile(
+                  icon: Icons.layers_rounded,
+                  iconColor: AppTheme.iconGreen,
+                  title: l10n.badgeAppearanceTitle,
+                  subtitle: l10n.badgeAppearanceSubtitle,
+                  trailing: const Icon(
+                    Icons.chevron_right_rounded,
+                    color: AppTheme.onSurfaceMuted,
+                  ),
+                  onTap: () => showBadgeAppearanceSheet(context),
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 72),
+                  child: Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: AppTheme.dividerOf(context),
+                  ),
+                ),
+                BlocBuilder<CoachSettingsCubit, CoachSettings>(
+                  builder: (context, coach) {
+                    return GSettingsTile(
+                      icon: Icons.self_improvement_rounded,
+                      iconColor: AppTheme.iconTeal,
+                      title: l10n.coachSettingsTitle,
+                      subtitle: coach.enabled
+                          ? l10n.coachSettingsSummary(
+                              coach.snoozeMinutes,
+                              coach.maxNudgesPerDay,
+                            )
+                          : l10n.coachSettingsOff,
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppTheme.onSurfaceMuted,
+                      ),
+                      onTap: () => showCoachSettingsSheet(context),
+                    );
+                  },
+                ),
+              ],
             ),
           ),
           GGap.xl(),

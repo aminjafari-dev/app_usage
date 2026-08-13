@@ -245,7 +245,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get timerMinutesLabel => 'دقیقه';
 
   @override
-  String get timerNotifyWhenReached => 'اعلان هنگام رسیدن به محدودیت';
+  String get timerNotifyWhenReached => 'یادآوری هنگام رسیدن به محدودیت';
 
   @override
   String get timerSetButton => 'تنظیم تایمر';
@@ -267,4 +267,93 @@ class AppLocalizationsFa extends AppLocalizations {
   String timerLimitSummary(int hours, int minutes) {
     return 'محدودیت $hoursس $minutesد';
   }
+
+  @override
+  String get coachTitle => 'زمان بررسی';
+
+  @override
+  String coachOverLimitSubtitle(String app, int minutes) {
+    return 'شما $minutes دقیقه از محدودیت روزانه $app عبور کرده‌اید.';
+  }
+
+  @override
+  String get coachMessageBoss => 'تو رئیس گوشی هستی — نه گوشی رئیس تو.';
+
+  @override
+  String get coachMessageGoal =>
+      'هدفت را دنبال کن. این برنامه می‌تواند صبر کند.';
+
+  @override
+  String get coachMessageAppsChange => 'نگذار یک برنامه، روزت را عوض کند.';
+
+  @override
+  String get coachMessagePause =>
+      'یک نفس بکش. بعد تصمیم بگیر هنوز می‌خواهی بمانی یا نه.';
+
+  @override
+  String get coachMessageChoice =>
+      'محدودیت را برای دلیلی گذاشتی. به آن احترام بگذار.';
+
+  @override
+  String get coachMessageProtect =>
+      'زمانی را که برای چیزهای مهم گذاشتی، حفظ کن.';
+
+  @override
+  String get coachPauseButton => 'مکث می‌کنم';
+
+  @override
+  String coachSnoozeButton(int minutes) {
+    return '$minutes دقیقه دیگر';
+  }
+
+  @override
+  String get coachMuteToday => 'یادآوری این برنامه را امروز خاموش کن';
+
+  @override
+  String get coachSettingsTitle => 'یادآور محدودیت';
+
+  @override
+  String get coachSettingsSubtitle =>
+      'یادآوری ملایم وقتی از محدودیت روزانه یک برنامه عبور می‌کنید.';
+
+  @override
+  String get coachSettingsEnabled => 'نمایش یادآور محدودیت';
+
+  @override
+  String get coachSettingsEnabledHint =>
+      'کارت وسط صفحه وقتی برنامه از محدودیت بگذرد';
+
+  @override
+  String get coachSettingsSnoozeLabel => 'فاصله تعویق';
+
+  @override
+  String get coachSettingsSnoozeHint => 'چقدر بعد از «دقیقه دیگر» صبر کند.';
+
+  @override
+  String get coachSettingsMaxNudgesLabel =>
+      'حداکثر یادآوری در روز برای هر برنامه';
+
+  @override
+  String get coachSettingsMaxNudgesHint =>
+      'یادآوری‌ها مفید بمانند، نه آزاردهنده.';
+
+  @override
+  String get coachSettingsAllowMute => 'اجازه «خاموش کردن امروز»';
+
+  @override
+  String get coachSettingsAllowMuteHint =>
+      'دکمه‌ای برای بی‌صدا کردن یک برنامه تا فردا';
+
+  @override
+  String coachSettingsMinutes(int minutes) {
+    return '$minutesد';
+  }
+
+  @override
+  String coachSettingsSummary(int snooze, int max) {
+    return 'تعویق $snoozeد · تا $max بار در روز';
+  }
+
+  @override
+  String get coachSettingsOff => 'یادآوری‌ها خاموش است';
 }

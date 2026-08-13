@@ -24,8 +24,8 @@ class BadgeAppearance extends Equatable {
   /// Badge opacity ([minOpacity]–[maxOpacity] → 30%–100%).
   final double opacity;
 
-  /// Allowed size steps: 75% → 100% → 150% → 200%.
-  static const List<double> sizeSteps = [0.75, 1.0, 1.5, 2.0];
+  /// Allowed size steps: 75% → 100% → 125% → 150% → 175% → 200%.
+  static const List<double> sizeSteps = [0.75, 1.0, 1.25, 1.5, 1.75, 2.0];
 
   /// Smallest size the customize-badge slider allows (75%).
   static const double minSizeScale = 0.75;

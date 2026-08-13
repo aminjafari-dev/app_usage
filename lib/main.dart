@@ -4,6 +4,7 @@ import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:flutter_localizations/flutter_localizations.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_usage/core/locale/locale_cubit.dart';
 import 'package:app_usage/core/locator/locator.dart';
@@ -11,6 +12,7 @@ import 'package:app_usage/core/router/page_name.dart';
 import 'package:app_usage/core/router/page_router.dart';
 import 'package:app_usage/core/settings/app_timer_cubit.dart';
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
+import 'package:app_usage/core/settings/coach_settings_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/features/app_usage/presentation/overlay/overlay_app.dart';
@@ -32,13 +34,28 @@ void main() async {
 /// SharedPreferences work in this secondary isolate — otherwise the badge can
 /// start at `00:00` even when Home already shows today's real totals.
 @pragma('vm:entry-point')
-void overlayMain() {
+void overlayMain() async {
   WidgetsFlutterBinding.ensureInitialized();
   DartPluginRegistrant.ensureInitialized();
+
+  // Match the user's language so coach messages are localized even when the
+  // main activity is dead.
+  final prefs = await SharedPreferences.getInstance();
+  final code = prefs.getString('app_locale');
+  final locale = code == 'fa' ? const Locale('fa') : const Locale('en');
+
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
       theme: AppTheme.light(),
+      locale: locale,
+      supportedLocales: AppLocalizations.supportedLocales,
+      localizationsDelegates: const [
+        AppLocalizations.delegate,
+        GlobalMaterialLocalizations.delegate,
+        GlobalWidgetsLocalizations.delegate,
+        GlobalCupertinoLocalizations.delegate,
+      ],
       home: const OverlayApp(),
     ),
   );
@@ -59,6 +76,7 @@ class AppUsageApp extends StatelessWidget {
         BlocProvider.value(value: locator<ThemeCubit>()),
         BlocProvider.value(value: locator<BadgeAppearanceCubit>()),
         BlocProvider.value(value: locator<AppTimerCubit>()),
+        BlocProvider.value(value: locator<CoachSettingsCubit>()),
       ],
       child: BlocBuilder<LocaleCubit, Locale>(
         builder: (context, locale) {

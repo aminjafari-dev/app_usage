@@ -81,7 +81,15 @@ class AppTimerCubit extends Cubit<Map<String, AppTimerLimit>> {
 
   /// Loads saved limits into state. Call once at app start.
   void load() {
-    emit(_readAll(_prefs));
+    emit(readFrom(_prefs));
+  }
+
+  /// Reads persisted limits (also used by the overlay isolate).
+  ///
+  /// How to use: call after [SharedPreferences.reload] so the coach sees
+  /// limits saved by the main app.
+  static Map<String, AppTimerLimit> readFrom(SharedPreferences prefs) {
+    return _readAll(prefs);
   }
 
   /// Returns the saved limit for [packageName], if any.
