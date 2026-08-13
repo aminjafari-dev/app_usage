@@ -72,6 +72,34 @@ class BatteryOptimizationDataSource {
     }
   }
 
+  /// Tells native which overlay window to recreate after a process kill.
+  ///
+  /// How to use: call with the geometry passed to `showOverlay` every time the
+  /// badge is (re)shown.
+  ///
+  /// Required because the watchdog restarts the overlay service from a fresh
+  /// process, where `flutter_overlay_window` has forgotten the badge size and
+  /// would otherwise add a full-screen window that swallows every touch.
+  Future<void> cacheOverlayWindow({
+    required int width,
+    required int height,
+    required String title,
+    required String content,
+  }) async {
+    try {
+      await _keepaliveChannel.invokeMethod<void>('cacheOverlayWindow', {
+        'width': width,
+        'height': height,
+        'title': title,
+        'content': content,
+      });
+    } on MissingPluginException {
+      // No-op on unsupported platforms.
+    } on PlatformException {
+      // Ignore — the overlay itself re-asserts its size while it runs.
+    }
+  }
+
   /// Stops AlarmManager recovery when the user disables live tracking.
   Future<void> stopWatchdog() async {
     try {

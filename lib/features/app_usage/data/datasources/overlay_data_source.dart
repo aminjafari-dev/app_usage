@@ -74,6 +74,33 @@ class OverlayTickPayload {
   }
 }
 
+/// Native overlay window geometry in pixels plus its notification copy.
+///
+/// How to use: returned by [OverlayDataSource.show] so callers can hand the
+/// same values to native recovery code.
+/// Example: `battery.cacheOverlayWindow(width: c.width, height: c.height, ...)`.
+class OverlayWindowConfig {
+  /// Creates a window config.
+  const OverlayWindowConfig({
+    required this.width,
+    required this.height,
+    required this.title,
+    required this.content,
+  });
+
+  /// Window width in physical pixels (what `showOverlay` expects).
+  final int width;
+
+  /// Window height in physical pixels.
+  final int height;
+
+  /// Foreground-service notification title.
+  final String title;
+
+  /// Foreground-service notification body.
+  final String content;
+}
+
 /// Wraps `flutter_overlay_window` for permission + show/hide + messaging.
 ///
 /// How to use:
@@ -83,6 +110,12 @@ class OverlayTickPayload {
 /// await overlay.show();
 /// ```
 class OverlayDataSource {
+  /// Notification title shown while the overlay foreground service runs.
+  static const String notificationTitle = 'App Usage';
+
+  /// Notification body shown while the overlay foreground service runs.
+  static const String notificationContent = 'Live usage counter is running';
+
   /// Whether the user granted Display-over-other-apps.
   Future<bool> hasPermission() async {
     return FlutterOverlayWindow.isPermissionGranted();
@@ -110,34 +143,49 @@ class OverlayDataSource {
   /// Pass [forceRestart] true when repositioning an already-visible overlay
   /// (e.g. after upgrading from a corner placement to top-center).
   /// Pass [appearance] to size the native window for the user's badge scale.
-  Future<void> show({
+  ///
+  /// Returns the geometry that was applied (or would be applied when the
+  /// overlay is already visible) so callers can cache it for native recovery.
+  Future<OverlayWindowConfig> show({
     bool forceRestart = false,
     BadgeAppearance? appearance,
   }) async {
+    // Prefer an explicit appearance; otherwise load the user's saved scale.
+    final resolved = appearance ?? await _loadAppearance();
+    final config = windowConfigFor(resolved);
+
     final active = await FlutterOverlayWindow.isActive();
     // Avoid stacking multiple overlay windows if tracking restarts.
     if (active) {
-      if (!forceRestart) return;
+      if (!forceRestart) return config;
       await FlutterOverlayWindow.closeOverlay();
     }
 
-    // Prefer an explicit appearance; otherwise load the user's saved scale.
-    final resolved = appearance ?? await _loadAppearance();
-    final size = _physicalSizeFor(resolved);
     await FlutterOverlayWindow.showOverlay(
-      height: size.height,
-      width: size.width,
+      height: config.height,
+      width: config.width,
       alignment: OverlayAlignment.topCenter,
       flag: OverlayFlag.defaultFlag,
       enableDrag: true,
-      overlayTitle: 'App Usage',
-      overlayContent: 'Live usage counter is running',
+      overlayTitle: config.title,
+      overlayContent: config.content,
       // Keep it near the top instead of snapping to a side edge.
       positionGravity: PositionGravity.none,
       // Slight offset so the pill sits just under the status bar (dp → px
       // is handled inside the plugin for startPosition).
       startPosition: const OverlayPosition(0, 40),
     );
+    return config;
+  }
+
+  /// Window geometry for [appearance], loading saved values when omitted.
+  ///
+  /// How to use: call before [show] (or when the overlay is already running) to
+  /// refresh the native watchdog's cached badge size.
+  Future<OverlayWindowConfig> resolveWindowConfig({
+    BadgeAppearance? appearance,
+  }) async {
+    return windowConfigFor(appearance ?? await _loadAppearance());
   }
 
   /// Logical chip size (dp) for [appearance] — used by overlay-side resize.
@@ -167,13 +215,16 @@ class OverlayDataSource {
 
   /// Converts logical chip size × badge scale into WindowManager pixels.
   ///
-  /// Used only by [show] — `showOverlay` takes raw px, unlike resizeOverlay.
-  ({int width, int height}) _physicalSizeFor(BadgeAppearance appearance) {
+  /// Used by [show] and by native recovery — `showOverlay` takes raw px, unlike
+  /// resizeOverlay.
+  static OverlayWindowConfig windowConfigFor(BadgeAppearance appearance) {
     final logical = logicalSizeFor(appearance);
     final dpr = PlatformDispatcher.instance.views.first.devicePixelRatio;
-    return (
+    return OverlayWindowConfig(
       width: (logical.width * dpr).round(),
       height: (logical.height * dpr).round(),
+      title: notificationTitle,
+      content: notificationContent,
     );
   }
 

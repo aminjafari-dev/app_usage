@@ -147,9 +147,11 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
 
       // If the overlay service already survived a main-app kill, reuse it.
       final alreadyActive = await _overlay.isActive();
-      if (!alreadyActive) {
+      if (alreadyActive) {
+        await _cacheOverlayWindow(await _overlay.resolveWindowConfig());
+      } else {
         // Force restart so the pill lands at the top center on a fresh start.
-        await _overlay.show(forceRestart: true);
+        await _cacheOverlayWindow(await _overlay.show(forceRestart: true));
       }
 
       // Push Home's UsageStats seed into the overlay isolate. Home can show
@@ -206,6 +208,7 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
       if (alreadyActive) {
         await _hydrateToday();
         unawaited(_pushSeedToOverlay());
+        await _cacheOverlayWindow(await _overlay.resolveWindowConfig());
         await _battery.startWatchdog();
         _tracking = true;
         _startHomeSync();
@@ -216,6 +219,20 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     } catch (e) {
       return Left(PlatformFailure(e.toString()));
     }
+  }
+
+  /// Hands the badge window geometry to the native AlarmManager watchdog.
+  ///
+  /// Without this the watchdog recreates the overlay at the plugin's full-screen
+  /// default after the app process dies, which paints nothing but blocks every
+  /// touch on the device.
+  Future<void> _cacheOverlayWindow(OverlayWindowConfig config) async {
+    await _battery.cacheOverlayWindow(
+      width: config.width,
+      height: config.height,
+      title: config.title,
+      content: config.content,
+    );
   }
 
   /// Sends in-memory today totals to the overlay so the badge matches Home.

@@ -60,6 +60,16 @@ class MainActivity : FlutterActivity() {
                     TrackingWatchdog.stop(this)
                     result.success(null)
                 }
+                "cacheOverlayWindow" -> {
+                    TrackingWatchdog.cacheOverlayWindow(
+                        this,
+                        call.argument<Int>("width") ?: 0,
+                        call.argument<Int>("height") ?: 0,
+                        call.argument<String>("title") ?: "",
+                        call.argument<String>("content") ?: "",
+                    )
+                    result.success(null)
+                }
                 else -> result.notImplemented()
             }
         }

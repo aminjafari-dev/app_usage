@@ -29,6 +29,12 @@ class OverlayApp extends StatefulWidget {
 }
 
 class _OverlayAppState extends State<OverlayApp> {
+  /// How often the native window size is re-applied as a safety net.
+  static const Duration _windowGuardInterval = Duration(seconds: 10);
+
+  /// Longest a full-screen coach card may stay up without user interaction.
+  static const Duration _coachAutoSnooze = Duration(seconds: 60);
+
   final OverlayLiveTracker _tracker = OverlayLiveTracker();
 
   String _appName = 'App';
@@ -53,6 +59,15 @@ class _OverlayAppState extends State<OverlayApp> {
   int _lastOverlayWidth = 0;
   int _lastOverlayHeight = 0;
 
+  /// Size multiplier last requested (the intro eases 1.5 → 1.0).
+  double _sizeMultiplier = 1.0;
+
+  /// Periodically re-applies the window size so it can never stay stale.
+  Timer? _windowGuardTimer;
+
+  /// Collapses the coach card if the user never answers it.
+  Timer? _coachTimeoutTimer;
+
   UsageCoach? _coach;
 
   /// Active coach decision currently on screen (null = badge mode).
@@ -68,6 +83,11 @@ class _OverlayAppState extends State<OverlayApp> {
   void initState() {
     super.initState();
     _bootstrap();
+
+    _windowGuardTimer = Timer.periodic(
+      _windowGuardInterval,
+      (_) => unawaited(_ensureWindowMatchesMode()),
+    );
 
     // Start self-contained tracking in this isolate (survives main-app death).
     _tracker.start(
@@ -222,12 +242,21 @@ class _OverlayAppState extends State<OverlayApp> {
         _coachMarkedShown = true;
         await _coach?.markShown(decision);
       }
+      // The expanded window covers the screen and consumes every touch, so an
+      // unanswered card must never be able to strand the user.
+      _coachTimeoutTimer?.cancel();
+      _coachTimeoutTimer = Timer(
+        _coachAutoSnooze,
+        () => unawaited(_onSnooze()),
+      );
     } finally {
       _resizingForCoach = false;
     }
   }
 
   Future<void> _dismissCoach() async {
+    _coachTimeoutTimer?.cancel();
+    _coachTimeoutTimer = null;
     if (!mounted) return;
     setState(() {
       _coachDecision = null;
@@ -279,23 +308,27 @@ class _OverlayAppState extends State<OverlayApp> {
   /// Restores the small draggable badge window after the coach card closes.
   Future<void> _collapseToBadge() async {
     try {
-      await _resizeOverlay(_appearance);
+      await _resizeOverlay(_appearance, force: true);
       await FlutterOverlayWindow.moveOverlay(const OverlayPosition(0, 40));
     } catch (_) {
       // Badge may already match; ignore.
     }
   }
 
+  /// Pass [force] to re-apply the size even when it looks unchanged.
   Future<void> _resizeOverlay(
     BadgeAppearance appearance, {
     double sizeMultiplier = 1.0,
+    bool force = false,
   }) async {
     try {
+      _sizeMultiplier = sizeMultiplier;
       final size = OverlayDataSource.logicalSizeFor(
         appearance,
         sizeMultiplier: sizeMultiplier,
       );
-      if (size.width == _lastOverlayWidth &&
+      if (!force &&
+          size.width == _lastOverlayWidth &&
           size.height == _lastOverlayHeight) {
         return;
       }
@@ -307,6 +340,26 @@ class _OverlayAppState extends State<OverlayApp> {
     }
   }
 
+  /// Re-applies the window size that the current mode needs.
+  ///
+  /// The native watchdog can recreate the overlay window while this isolate
+  /// keeps running, because the overlay Flutter engine is cached. That new
+  /// window is sized from the plugin's static config rather than from our
+  /// state, so re-asserting is what stops an oversized transparent window from
+  /// silently swallowing every touch on the device.
+  Future<void> _ensureWindowMatchesMode() async {
+    if (!mounted || _resizingForCoach) return;
+    if (_coachDecision != null) {
+      await _expandForCoach();
+      return;
+    }
+    await _resizeOverlay(
+      _appearance,
+      sizeMultiplier: _sizeMultiplier,
+      force: true,
+    );
+  }
+
   void _onIntroSizeBoost(double sizeBoost) {
     if (!mounted || _coachDecision != null) return;
     unawaited(_resizeOverlay(_appearance, sizeMultiplier: sizeBoost));
@@ -314,6 +367,8 @@ class _OverlayAppState extends State<OverlayApp> {
 
   @override
   void dispose() {
+    _windowGuardTimer?.cancel();
+    _coachTimeoutTimer?.cancel();
     _tracker.dispose();
     super.dispose();
   }
