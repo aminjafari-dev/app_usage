@@ -29,7 +29,8 @@ Future<void> showUsageCoachCard(
   required CoachDecision decision,
   List<int>? iconBytes,
 }) {
-  return showGBlurredDialog<void>(
+  // Bottom sheet already applies the 12 dp edge insets.
+  return showGBlurredBottomSheet<void>(
     context: context,
     builder: (dialogContext) {
       void dismiss() => Navigator.of(dialogContext).pop();
@@ -38,6 +39,7 @@ Future<void> showUsageCoachCard(
         iconBytes: iconBytes,
         onPause: dismiss,
         onSnooze: dismiss,
+        applyScreenInsets: false,
       );
     },
   );
@@ -46,7 +48,8 @@ Future<void> showUsageCoachCard(
 /// Bottom coach reminder shown over other apps when a daily limit is hit.
 ///
 /// How to use: mounted full-screen inside [OverlayApp] while coach mode is on.
-/// The card sits at the bottom with a 12 dp inset from the screen edges.
+/// The card spans the screen width and sits at the bottom with a 12 dp inset
+/// from each edge (plus the system bottom safe area).
 class UsageCoachCard extends StatelessWidget {
   /// Creates the coach card.
   const UsageCoachCard({
@@ -56,6 +59,7 @@ class UsageCoachCard extends StatelessWidget {
     required this.onPause,
     required this.onSnooze,
     this.blurBackground = false,
+    this.applyScreenInsets = true,
   });
 
   /// Inset from each edge of the phone screen.
@@ -69,6 +73,10 @@ class UsageCoachCard extends StatelessWidget {
   /// Kept for overlay call sites; the backdrop is always transparent so no
   /// full-screen rectangle is painted behind the card.
   final bool blurBackground;
+
+  /// When false, the card fills its parent width and skips the outer 12 dp
+  /// insets (e.g. [showGBlurredBottomSheet] already pads the sheet).
+  final bool applyScreenInsets;
 
   @override
   Widget build(BuildContext context) {
@@ -104,7 +112,6 @@ class UsageCoachCard extends StatelessWidget {
                 Expanded(
                   child: GButton(
                     label: l10n.coachPauseButton,
-                    icon: Icons.spa_rounded,
                     onPressed: onPause,
                   ),
                 ),
@@ -112,7 +119,6 @@ class UsageCoachCard extends StatelessWidget {
                 Expanded(
                   child: GOutlinedButton(
                     label: l10n.coachSnoozeButton(decision.snoozeMinutes),
-                    icon: Icons.timelapse_rounded,
                     onPressed: onSnooze,
                   ),
                 ),
@@ -123,16 +129,25 @@ class UsageCoachCard extends StatelessWidget {
       ),
     );
 
-    return Align(
-      alignment: Alignment.bottomCenter,
-      child: Padding(
-        padding: EdgeInsets.fromLTRB(
-          screenMargin,
-          screenMargin,
-          screenMargin,
-          screenMargin + bottomInset,
+    final fullWidthCard = SizedBox(width: double.infinity, child: card);
+
+    if (!applyScreenInsets) {
+      return fullWidthCard;
+    }
+
+    // Expand so Align can pin the card to the true bottom of the overlay.
+    return SizedBox.expand(
+      child: Align(
+        alignment: Alignment.bottomCenter,
+        child: Padding(
+          padding: EdgeInsets.fromLTRB(
+            screenMargin,
+            screenMargin,
+            screenMargin,
+            screenMargin + bottomInset,
+          ),
+          child: fullWidthCard,
         ),
-        child: card,
       ),
     );
   }

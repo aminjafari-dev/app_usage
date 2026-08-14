@@ -367,7 +367,7 @@ class _OverlayAppState extends State<OverlayApp> {
     await _dismissCoach();
   }
 
-  /// Grows the native overlay to cover the screen for the center card.
+  /// Grows the native overlay to cover the screen for the bottom coach card.
   Future<void> _expandForCoach() async {
     try {
       final view = PlatformDispatcher.instance.views.first;
@@ -533,7 +533,7 @@ class _OverlayAppState extends State<OverlayApp> {
     // would claim the whole native overlay window and block taps in the
     // transparent padding around the badge.
     return Align(
-      alignment: Alignment.topLeft,
+      alignment: Alignment.topCenter,
       widthFactor: 1,
       heightFactor: 1,
       child: Material(
