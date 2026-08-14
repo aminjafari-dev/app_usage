@@ -81,14 +81,28 @@ Future<T?> showGBlurredBottomSheet<T>({
                   alignment: Alignment.bottomCenter,
                   child: FractionalTranslation(
                     translation: Offset(0, 1 - t),
-                    child: Material(
-                      color: Colors.transparent,
-                      child: ConstrainedBox(
-                        constraints: BoxConstraints(
-                          maxHeight: MediaQuery.sizeOf(context).height,
-                        ),
-                        child: child,
-                      ),
+                    child: Builder(
+                      builder: (context) {
+                        final media = MediaQuery.of(context);
+                        final margin = EdgeInsets.fromLTRB(
+                          12,
+                          12,
+                          12,
+                          12 + media.padding.bottom,
+                        );
+                        return Padding(
+                          padding: margin,
+                          child: Material(
+                            color: Colors.transparent,
+                            child: ConstrainedBox(
+                              constraints: BoxConstraints(
+                                maxHeight: media.size.height - margin.vertical,
+                              ),
+                              child: child,
+                            ),
+                          ),
+                        );
+                      },
                     ),
                   ),
                 ),

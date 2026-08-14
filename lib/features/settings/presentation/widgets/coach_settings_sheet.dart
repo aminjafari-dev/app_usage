@@ -75,13 +75,13 @@ class _CoachSettingsSheetState extends State<CoachSettingsSheet> {
       child: Container(
         decoration: BoxDecoration(
           color: AppTheme.surfaceOf(context),
-          borderRadius: const BorderRadius.vertical(
-            top: Radius.circular(AppTheme.radiusCard),
-          ),
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard),
           boxShadow: AppTheme.cardShadow,
         ),
+        clipBehavior: Clip.antiAlias,
         child: SafeArea(
           top: false,
+          bottom: false,
           child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
             child: Column(
