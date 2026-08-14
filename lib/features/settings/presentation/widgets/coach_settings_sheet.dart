@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/settings/coach_settings_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
+import 'package:app_usage/core/widgets/g_blur_sheet.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
@@ -17,11 +18,8 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// await showCoachSettingsSheet(context);
 /// ```
 Future<void> showCoachSettingsSheet(BuildContext context) {
-  return showModalBottomSheet<void>(
+  return showGBlurredBottomSheet<void>(
     context: context,
-    isScrollControlled: true,
-    backgroundColor: Colors.transparent,
-    barrierColor: AppTheme.onSurface.withValues(alpha: 0.35),
     builder: (sheetContext) {
       return BlocProvider.value(
         value: context.read<CoachSettingsCubit>(),

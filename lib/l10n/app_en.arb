@@ -171,5 +171,8 @@
       }
     }
   },
-  "coachSettingsOff": "Reminders turned off"
+  "coachSettingsOff": "Reminders turned off",
+  "coachAppearanceTitle": "Dialog Appearance",
+  "coachAppearanceSubtitle": "Preview the over-limit card",
+  "coachAppearancePreviewApp": "Sample app"
 }

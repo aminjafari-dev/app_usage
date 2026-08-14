@@ -360,4 +360,13 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachSettingsOff => 'Reminders turned off';
+
+  @override
+  String get coachAppearanceTitle => 'Dialog Appearance';
+
+  @override
+  String get coachAppearanceSubtitle => 'Preview the over-limit card';
+
+  @override
+  String get coachAppearancePreviewApp => 'Sample app';
 }

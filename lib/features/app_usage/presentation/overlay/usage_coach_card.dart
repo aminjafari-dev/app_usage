@@ -4,10 +4,48 @@ import 'package:flutter/material.dart';
 
 import 'package:app_usage/core/settings/usage_coach.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
+import 'package:app_usage/core/widgets/g_blur_sheet.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
+
+/// Opens the reusable over-limit coach card and returns when dismissed.
+///
+/// How to use:
+/// ```dart
+/// await showUsageCoachCard(
+///   context,
+///   appName: 'Instagram',
+///   decision: CoachDecision(
+///     shouldShow: true,
+///     minutesOver: 12,
+///     snoozeMinutes: 5,
+///     allowMuteToday: true,
+///   ),
+/// );
+/// ```
+Future<void> showUsageCoachCard(
+  BuildContext context, {
+  required String appName,
+  required CoachDecision decision,
+  List<int>? iconBytes,
+}) {
+  return showGBlurredDialog<void>(
+    context: context,
+    builder: (dialogContext) {
+      void dismiss() => Navigator.of(dialogContext).pop();
+      return UsageCoachCard(
+        appName: appName,
+        decision: decision,
+        iconBytes: iconBytes,
+        onPause: dismiss,
+        onSnooze: dismiss,
+        onMuteToday: dismiss,
+      );
+    },
+  );
+}
 
 /// Center coach reminder shown over other apps when a daily limit is hit.
 ///
@@ -22,6 +60,7 @@ class UsageCoachCard extends StatelessWidget {
     required this.onPause,
     required this.onSnooze,
     required this.onMuteToday,
+    this.blurBackground = false,
   });
 
   final String appName;
@@ -31,89 +70,83 @@ class UsageCoachCard extends StatelessWidget {
   final VoidCallback onSnooze;
   final VoidCallback onMuteToday;
 
+  /// Frosts the overlay window behind the card when shown over another app.
+  /// Settings preview already wraps this widget in [showGBlurredDialog].
+  final bool blurBackground;
+
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final message = _messageFor(l10n, decision.messageId);
 
-    return Material(
-      color: Colors.transparent,
-      child: SafeArea(
-        child: Center(
-          child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 28),
-            child: ConstrainedBox(
-              constraints: const BoxConstraints(maxWidth: 360),
-              child: DecoratedBox(
-                decoration: BoxDecoration(
-                  color: AppTheme.surface,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-                  boxShadow: [
-                    BoxShadow(
-                      color: Colors.black.withValues(alpha: 0.18),
-                      blurRadius: 28,
-                      offset: const Offset(0, 12),
-                    ),
-                  ],
-                ),
-                child: Padding(
-                  padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
-                  child: Column(
-                    mainAxisSize: MainAxisSize.min,
-                    children: [
-                      _AppIcon(iconBytes: iconBytes, size: 56),
-                      GGap.m(),
-                      GText(
-                        l10n.coachTitle,
-                        style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                              fontWeight: FontWeight.w700,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      GGap.xs(),
-                      GText(
-                        l10n.coachOverLimitSubtitle(
-                          appName,
-                          decision.minutesOver,
-                        ),
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        color: AppTheme.onSurfaceMuted,
-                        textAlign: TextAlign.center,
-                      ),
-                      GGap.l(),
-                      GText(
-                        message,
-                        style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                              height: 1.35,
-                              fontWeight: FontWeight.w600,
-                            ),
-                        textAlign: TextAlign.center,
-                      ),
-                      GGap.l(),
-                      GButton(
-                        label: l10n.coachPauseButton,
-                        icon: Icons.spa_rounded,
-                        onPressed: onPause,
-                      ),
-                      GGap.s(),
-                      GOutlinedButton(
-                        label: l10n.coachSnoozeButton(decision.snoozeMinutes),
-                        icon: Icons.timelapse_rounded,
-                        onPressed: onSnooze,
-                      ),
-                      if (decision.allowMuteToday) ...[
-                        GGap.s(),
-                        TextButton(
-                          onPressed: onMuteToday,
-                          child: GText(
-                            l10n.coachMuteToday,
-                            style: Theme.of(context).textTheme.labelMedium,
-                            color: AppTheme.onSurfaceMuted,
+    final card = SafeArea(
+      child: Center(
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 28),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(maxWidth: 360),
+            child: Material(
+              color: AppTheme.surface,
+              elevation: 12,
+              shadowColor: Colors.black.withValues(alpha: 0.18),
+              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+              child: Padding(
+                padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+                child: Column(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _AppIcon(iconBytes: iconBytes, size: 56),
+                    GGap.m(),
+                    GText(
+                      l10n.coachTitle,
+                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
+                            fontWeight: FontWeight.w700,
                           ),
+                      textAlign: TextAlign.center,
+                    ),
+                    GGap.xs(),
+                    GText(
+                      l10n.coachOverLimitSubtitle(
+                        appName,
+                        decision.minutesOver,
+                      ),
+                      style: Theme.of(context).textTheme.bodyMedium,
+                      color: AppTheme.onSurfaceMuted,
+                      textAlign: TextAlign.center,
+                    ),
+                    GGap.l(),
+                    GText(
+                      message,
+                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                            height: 1.35,
+                            fontWeight: FontWeight.w600,
+                          ),
+                      textAlign: TextAlign.center,
+                    ),
+                    GGap.l(),
+                    GButton(
+                      label: l10n.coachPauseButton,
+                      icon: Icons.spa_rounded,
+                      onPressed: onPause,
+                    ),
+                    GGap.s(),
+                    GOutlinedButton(
+                      label: l10n.coachSnoozeButton(decision.snoozeMinutes),
+                      icon: Icons.timelapse_rounded,
+                      onPressed: onSnooze,
+                    ),
+                    if (decision.allowMuteToday) ...[
+                      GGap.s(),
+                      TextButton(
+                        onPressed: onMuteToday,
+                        child: GText(
+                          l10n.coachMuteToday,
+                          style: Theme.of(context).textTheme.labelMedium,
+                          color: AppTheme.onSurfaceMuted,
                         ),
-                      ],
+                      ),
                     ],
-                  ),
+                  ],
                 ),
               ),
             ),
@@ -121,6 +154,10 @@ class UsageCoachCard extends StatelessWidget {
         ),
       ),
     );
+
+    if (!blurBackground) return card;
+
+    return GBlurScrim(t: 1, child: card);
   }
 
   String _messageFor(AppLocalizations l10n, String id) {

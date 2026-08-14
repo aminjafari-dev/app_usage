@@ -382,6 +382,7 @@ class _OverlayAppState extends State<OverlayApp> {
               appName: _appName,
               decision: _coachDecision!,
               iconBytes: _iconBytes,
+              blurBackground: true,
               onPause: () => unawaited(_onPause()),
               onSnooze: () => unawaited(_onSnooze()),
               onMuteToday: () => unawaited(_onMuteToday()),

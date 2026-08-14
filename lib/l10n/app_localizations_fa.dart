@@ -356,4 +356,13 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get coachSettingsOff => 'یادآوری‌ها خاموش است';
+
+  @override
+  String get coachAppearanceTitle => 'ظاهر گفتگو';
+
+  @override
+  String get coachAppearanceSubtitle => 'پیش‌نمایش کارت عبور از محدودیت';
+
+  @override
+  String get coachAppearancePreviewApp => 'برنامه نمونه';
 }

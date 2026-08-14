@@ -721,6 +721,24 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Reminders turned off'**
   String get coachSettingsOff;
+
+  /// No description provided for @coachAppearanceTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Dialog Appearance'**
+  String get coachAppearanceTitle;
+
+  /// No description provided for @coachAppearanceSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Preview the over-limit card'**
+  String get coachAppearanceSubtitle;
+
+  /// No description provided for @coachAppearancePreviewApp.
+  ///
+  /// In en, this message translates to:
+  /// **'Sample app'**
+  String get coachAppearancePreviewApp;
 }
 
 class _AppLocalizationsDelegate

@@ -1,20 +1,23 @@
+import 'package:flutter/foundation.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/locale/locale_cubit.dart';
+import 'package:app_usage/core/settings/coach_settings_cubit.dart';
+import 'package:app_usage/core/settings/usage_coach.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
-import 'package:app_usage/core/settings/coach_settings_cubit.dart';
+import 'package:app_usage/features/app_usage/presentation/overlay/usage_coach_card.dart';
 import 'package:app_usage/features/settings/presentation/widgets/badge_appearance_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/coach_settings_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/settings_choice_segment.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
-/// App settings: language, theme, and floating badge appearance.
+/// App settings: language, theme, badge appearance, and coach reminders.
 ///
 /// How to use:
 /// ```dart
@@ -151,6 +154,40 @@ class SettingsPage extends StatelessWidget {
                     );
                   },
                 ),
+                if (kDebugMode) ...[
+                  Padding(
+                    padding: const EdgeInsetsDirectional.only(start: 72),
+                    child: Divider(
+                      height: 1,
+                      thickness: 0.5,
+                      color: AppTheme.dividerOf(context),
+                    ),
+                  ),
+                  GSettingsTile(
+                    icon: Icons.chat_bubble_outline_rounded,
+                    iconColor: AppTheme.iconPurple,
+                    title: l10n.coachAppearanceTitle,
+                    subtitle: l10n.coachAppearanceSubtitle,
+                    trailing: const Icon(
+                      Icons.visibility_outlined,
+                      color: AppTheme.onSurfaceMuted,
+                    ),
+                    onTap: () {
+                      final coach = context.read<CoachSettingsCubit>().state;
+                      showUsageCoachCard(
+                        context,
+                        appName: l10n.coachAppearancePreviewApp,
+                        decision: CoachDecision(
+                          shouldShow: true,
+                          minutesOver: 12,
+                          limitMinutes: 30,
+                          snoozeMinutes: coach.snoozeMinutes,
+                          allowMuteToday: coach.allowMuteToday,
+                        ),
+                      );
+                    },
+                  ),
+                ],
               ],
             ),
           ),

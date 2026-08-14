@@ -171,5 +171,8 @@
       }
     }
   },
-  "coachSettingsOff": "یادآوری‌ها خاموش است"
+  "coachSettingsOff": "یادآوری‌ها خاموش است",
+  "coachAppearanceTitle": "ظاهر گفتگو",
+  "coachAppearanceSubtitle": "پیش‌نمایش کارت عبور از محدودیت",
+  "coachAppearancePreviewApp": "برنامه نمونه"
 }
