@@ -38,8 +38,8 @@ class AppTheme {
   /// Dark-mode card / surface fill.
   static const Color surfaceDark = Color(0xFF1A222D);
 
-  /// Floating notch nav — soft cool tint, distinct from canvas and cards.
-  static const Color navBar = Color(0xFFEAF2FA);
+  /// Floating notch nav — same white as cards in light mode.
+  static const Color navBar = Color(0xFFFFFFFF);
 
   /// Dark-mode floating notch nav.
   static const Color navBarDark = Color(0xFF222B36);

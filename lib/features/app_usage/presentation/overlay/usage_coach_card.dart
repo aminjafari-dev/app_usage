@@ -1,5 +1,3 @@
-import 'dart:typed_data';
-
 import 'package:flutter/material.dart';
 
 import 'package:app_usage/core/settings/usage_coach.dart';
@@ -8,6 +6,7 @@ import 'package:app_usage/core/widgets/g_blur_sheet.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
+import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
 /// Opens the reusable over-limit coach card and returns when dismissed.
@@ -96,7 +95,7 @@ class UsageCoachCard extends StatelessWidget {
         child: Column(
           mainAxisSize: MainAxisSize.min,
           children: [
-            _AppIcon(iconBytes: iconBytes, size: 56),
+            AppLogo(iconBytes: iconBytes, size: 56),
             GGap.m(),
             GText(
               l10n.coachOverLimitSubtitle(decision.minutesOver),
@@ -163,46 +162,4 @@ String coachMessageFor(AppLocalizations l10n, String id) {
     'protect' => l10n.coachMessageProtect,
     _ => l10n.coachMessageBoss,
   };
-}
-
-class _AppIcon extends StatelessWidget {
-  const _AppIcon({this.iconBytes, required this.size});
-
-  final List<int>? iconBytes;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final bytes = iconBytes;
-    final radius = size * 0.28;
-
-    Widget child;
-    if (bytes != null && bytes.isNotEmpty) {
-      child = Image.memory(
-        Uint8List.fromList(bytes),
-        width: size,
-        height: size,
-        fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _fallback(),
-      );
-    } else {
-      child = _fallback();
-    }
-
-    return ClipRRect(
-      borderRadius: BorderRadius.circular(radius),
-      child: SizedBox(width: size, height: size, child: child),
-    );
-  }
-
-  Widget _fallback() {
-    return ColoredBox(
-      color: AppTheme.primarySoft,
-      child: Icon(
-        Icons.timer_outlined,
-        size: size * 0.5,
-        color: AppTheme.primary,
-      ),
-    );
-  }
 }

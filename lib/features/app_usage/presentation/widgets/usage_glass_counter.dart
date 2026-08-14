@@ -10,6 +10,7 @@ import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
+import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart';
 
 /// Minimal timer chip — foreground app logo + bold mm:ss (or h:mm:ss).
 ///
@@ -772,44 +773,6 @@ class _ChipAppLogo extends StatelessWidget {
   }
 }
 
-/// Circular app-icon (or fallback glyph).
-class _IconBubble extends StatelessWidget {
-  const _IconBubble({this.iconBytes, this.size = 28});
-
-  final List<int>? iconBytes;
-  final double size;
-
-  @override
-  Widget build(BuildContext context) {
-    final bytes = iconBytes;
-    final glyphSize = size * 0.55;
-    return Container(
-      width: size,
-      height: size,
-      decoration: BoxDecoration(
-        color: AppTheme.primarySoft,
-        shape: BoxShape.circle,
-        border: Border.all(
-          color: AppTheme.divider,
-          width: 0.5,
-        ),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: bytes == null
-          ? Icon(Icons.apps_rounded, size: glyphSize, color: AppTheme.primary)
-          : Image.memory(
-              Uint8List.fromList(bytes),
-              fit: BoxFit.cover,
-              errorBuilder: (context, error, stackTrace) => Icon(
-                Icons.apps_rounded,
-                size: glyphSize,
-                color: AppTheme.primary,
-              ),
-            ),
-    );
-  }
-}
-
 /// List tile for one app — avatar + name + duration pill.
 ///
 /// How to use inside a ListView / card with [AppUsageEntity] items.
@@ -837,7 +800,7 @@ class UsageAppTile extends StatelessWidget {
             padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
             child: Row(
               children: [
-                _IconBubble(iconBytes: entity.iconBytes, size: 44),
+                AppLogo(iconBytes: entity.iconBytes, size: 44),
                 const SizedBox(width: 12),
                 Expanded(
                   child: Column(
