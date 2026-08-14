@@ -272,8 +272,8 @@ class AppLocalizationsFa extends AppLocalizations {
   String get coachTitle => 'زمان بررسی';
 
   @override
-  String coachOverLimitSubtitle(String app, int minutes) {
-    return 'شما $minutes دقیقه از محدودیت روزانه $app عبور کرده‌اید.';
+  String coachOverLimitSubtitle(int minutes) {
+    return 'شما $minutes دقیقه از محدودیت روزانه عبور کرده‌اید.';
   }
 
   @override

@@ -271,8 +271,8 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coachTitle => 'Time check';
 
   @override
-  String coachOverLimitSubtitle(String app, int minutes) {
-    return 'You\'re $minutes min over your daily limit for $app.';
+  String coachOverLimitSubtitle(int minutes) {
+    return 'You\'re $minutes min over your daily limit.';
   }
 
   @override

@@ -115,12 +115,9 @@
     }
   },
   "coachTitle": "زمان بررسی",
-  "coachOverLimitSubtitle": "شما {minutes} دقیقه از محدودیت روزانه {app} عبور کرده‌اید.",
+  "coachOverLimitSubtitle": "شما {minutes} دقیقه از محدودیت روزانه عبور کرده‌اید.",
   "@coachOverLimitSubtitle": {
     "placeholders": {
-      "app": {
-        "type": "String"
-      },
       "minutes": {
         "type": "int"
       }

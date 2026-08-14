@@ -285,81 +285,88 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
             mainAxisSize: MainAxisSize.min,
             crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              Container(
-                padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-                decoration: BoxDecoration(
-                  color: AppTheme.overlayChipFill,
-                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-                ),
-                // Logo anchored left; trailing content clips open to the right so
-                // the chip starts as a circle and grows into the duration pill.
-                child: Row(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _ChipAppLogo(iconBytes: widget.iconBytes, size: iconSize),
-                    // widthFactor reveals the duration; heightFactor: 1
-                    // shrink-wraps so this slot does not inherit overlay height.
-                    ClipRect(
-                      child: Align(
-                        alignment: Alignment.centerLeft,
-                        widthFactor: expand.clamp(0.0, 1.0),
-                        heightFactor: 1,
-                        child: SizedBox(
-                          height: iconSize,
-                          child: Opacity(
-                            opacity: textOpacity.clamp(0.0, 1.0),
-                            child: Row(
-                              mainAxisSize: MainAxisSize.min,
-                              children: [
-                                SizedBox(width: gap),
-                                Text(
-                                  formatUsageDuration(widget.todaySeconds),
-                                  style: TextStyle(
-                                    fontSize: fontSize,
-                                    fontWeight: FontWeight.w700,
-                                    color: AppTheme.overlayChipText,
-                                    height: 1.0,
-                                    letterSpacing: -0.2,
+              Align(
+                alignment: Alignment.centerLeft,
+                child: Container(
+                  padding: EdgeInsets.symmetric(
+                    horizontal: hPad,
+                    vertical: vPad,
+                  ),
+                  decoration: BoxDecoration(
+                    color: AppTheme.overlayChipFill,
+                    borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                  ),
+                  // Logo anchored left; trailing content clips open to the right
+                  // so the chip starts as a circle and grows into the duration pill.
+                  child: Row(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      _ChipAppLogo(
+                        iconBytes: widget.iconBytes,
+                        size: iconSize,
+                      ),
+                      // widthFactor reveals the duration; heightFactor: 1
+                      // shrink-wraps so this slot does not inherit overlay height.
+                      ClipRect(
+                        child: Align(
+                          alignment: Alignment.centerLeft,
+                          widthFactor: expand.clamp(0.0, 1.0),
+                          heightFactor: 1,
+                          child: SizedBox(
+                            height: iconSize,
+                            child: Opacity(
+                              opacity: textOpacity.clamp(0.0, 1.0),
+                              child: Row(
+                                mainAxisSize: MainAxisSize.min,
+                                children: [
+                                  SizedBox(width: gap),
+                                  Text(
+                                    formatUsageDuration(widget.todaySeconds),
+                                    style: TextStyle(
+                                      fontSize: fontSize,
+                                      fontWeight: FontWeight.w700,
+                                      color: AppTheme.overlayChipText,
+                                      height: 1.0,
+                                      letterSpacing: -0.2,
+                                    ),
                                   ),
-                                ),
-                              ],
+                                ],
+                              ),
                             ),
                           ),
                         ),
                       ),
-                    ),
-                    if (widget.overLimit)
-                      _RevealSlot(
-                        visible: showAlert,
-                        axis: Axis.horizontal,
-                        child: Row(
-                          mainAxisSize: MainAxisSize.min,
-                          children: [
-                            SizedBox(width: gap),
-                            _LimitAlertIcon(
-                              size: iconSize,
-                              semanticLabel: widget.alertLabel,
-                              onTap: widget.onAlertTap,
-                            ),
-                          ],
+                      if (widget.overLimit)
+                        _RevealSlot(
+                          visible: showAlert,
+                          axis: Axis.horizontal,
+                          child: Row(
+                            mainAxisSize: MainAxisSize.min,
+                            children: [
+                              SizedBox(width: gap),
+                              _LimitAlertIcon(
+                                size: iconSize,
+                                semanticLabel: widget.alertLabel,
+                                onTap: widget.onAlertTap,
+                              ),
+                            ],
+                          ),
                         ),
-                      ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
               _RevealSlot(
                 visible: showQuote,
                 axis: Axis.vertical,
-                child: _ZeroIntrinsicWidth(
-                  child: Padding(
-                    padding: EdgeInsets.only(top: 4 * scale),
-                    child: _QuoteBubble(
-                      quote: quote ?? '',
-                      radius: chipRadius,
-                      scale: scale,
-                      closeLabel: widget.closeLabel,
-                      onClose: widget.onQuoteClose,
-                    ),
+                child: Padding(
+                  padding: EdgeInsets.only(top: 4 * scale),
+                  child: _QuoteBubble(
+                    quote: quote ?? '',
+                    radius: chipRadius,
+                    scale: scale,
+                    closeLabel: widget.closeLabel,
+                    onClose: widget.onQuoteClose,
                   ),
                 ),
               ),
@@ -433,20 +440,68 @@ class _RevealSlotState extends State<_RevealSlot>
         final factor = _t.value.clamp(0.0, 1.0);
         return IgnorePointer(
           ignoring: factor == 0,
-          child: ClipRect(
-            child: Align(
-              alignment: widget.axis == Axis.horizontal
-                  ? Alignment.centerLeft
-                  : Alignment.topCenter,
-              widthFactor: widget.axis == Axis.horizontal ? factor : 1,
-              heightFactor: widget.axis == Axis.vertical ? factor : 1,
-              child: child,
+          child: _CollapseIntrinsicWidth(
+            collapse: widget.axis == Axis.vertical && factor == 0,
+            child: ClipRect(
+              child: Align(
+                alignment: widget.axis == Axis.horizontal
+                    ? Alignment.centerLeft
+                    : Alignment.topCenter,
+                widthFactor: widget.axis == Axis.horizontal ? factor : 1,
+                heightFactor: widget.axis == Axis.vertical ? factor : 1,
+                child: child,
+              ),
             ),
           ),
         );
       },
       child: widget.child,
     );
+  }
+}
+
+/// Drops width from [IntrinsicWidth] while a vertical reveal is fully closed.
+class _CollapseIntrinsicWidth extends SingleChildRenderObjectWidget {
+  const _CollapseIntrinsicWidth({
+    required this.collapse,
+    required super.child,
+  });
+
+  final bool collapse;
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderCollapseIntrinsicWidth(collapse: collapse);
+  }
+
+  @override
+  void updateRenderObject(
+    BuildContext context,
+    covariant _RenderCollapseIntrinsicWidth renderObject,
+  ) {
+    renderObject.collapse = collapse;
+  }
+}
+
+class _RenderCollapseIntrinsicWidth extends RenderProxyBox {
+  _RenderCollapseIntrinsicWidth({required bool collapse}) : _collapse = collapse;
+
+  bool _collapse;
+  bool get collapse => _collapse;
+  set collapse(bool value) {
+    if (_collapse == value) return;
+    _collapse = value;
+    markNeedsLayout();
+  }
+
+  @override
+  double computeMinIntrinsicWidth(double height) {
+    return _collapse ? 0 : super.computeMinIntrinsicWidth(height);
+  }
+
+  @override
+  double computeMaxIntrinsicWidth(double height) {
+    return _collapse ? 0 : super.computeMaxIntrinsicWidth(height);
   }
 }
 
@@ -540,6 +595,55 @@ class _LimitAlertIconState extends State<_LimitAlertIcon>
   }
 }
 
+/// Padding, type, and max width for the over-limit quote bubble.
+///
+/// How to use: [measure] from the overlay isolate before resizing the native
+/// window, so longer quotes get a taller / wider overlay instead of clipping.
+class UsageQuoteBubbleLayout {
+  /// Creates layout numbers for a badge [scale] (size × intro boost).
+  const UsageQuoteBubbleLayout(this.scale);
+
+  /// Same scale the painted badge is using.
+  final double scale;
+
+  /// Widest the bubble may grow before wrapping to another line.
+  double get maxWidth => 260 * scale;
+
+  EdgeInsets get padding => EdgeInsets.fromLTRB(
+        12 * scale,
+        14 * scale,
+        18 * scale,
+        12 * scale,
+      );
+
+  TextStyle get textStyle => TextStyle(
+        fontSize: 11 * scale,
+        fontWeight: FontWeight.w500,
+        height: 1.35,
+        fontStyle: FontStyle.italic,
+      );
+
+  /// Painted size of the bubble for [quote] in [direction].
+  Size measure(String quote, TextDirection direction) {
+    final maxTextWidth =
+        (maxWidth - padding.horizontal).clamp(1.0, double.infinity);
+    final painter = TextPainter(
+      text: TextSpan(text: quote, style: textStyle),
+      textAlign: TextAlign.center,
+      textDirection: direction,
+    );
+    try {
+      painter.layout(maxWidth: maxTextWidth);
+      return Size(
+        (painter.width + padding.horizontal).clamp(0.0, maxWidth),
+        painter.height + padding.vertical,
+      );
+    } finally {
+      painter.dispose();
+    }
+  }
+}
+
 /// Quote panel docked under the badge, sharing the badge's corner radius.
 class _QuoteBubble extends StatelessWidget {
   const _QuoteBubble({
@@ -558,82 +662,56 @@ class _QuoteBubble extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    final layout = UsageQuoteBubbleLayout(scale);
     final closeSize = 16 * scale;
     final closeIcon = 11 * scale;
-    final fontSize = 11 * scale;
 
-    return Container(
-      decoration: BoxDecoration(
-        color: AppTheme.overlayChipFill,
-        borderRadius: BorderRadius.circular(radius),
-      ),
-      clipBehavior: Clip.antiAlias,
-      child: Stack(
-        children: [
-          Padding(
-            padding: EdgeInsets.fromLTRB(
-              12 * scale,
-              14 * scale,
-              12 * scale,
-              12 * scale,
-            ),
-            child: Text(
-              quote,
-              textAlign: TextAlign.center,
-              maxLines: 4,
-              overflow: TextOverflow.ellipsis,
-              style: TextStyle(
-                fontSize: fontSize,
-                fontWeight: FontWeight.w500,
-                height: 1.35,
-                color: AppTheme.overlayChipText,
-                fontStyle: FontStyle.italic,
+    return ConstrainedBox(
+      constraints: BoxConstraints(maxWidth: layout.maxWidth),
+      child: Container(
+        decoration: BoxDecoration(
+          color: AppTheme.overlayChipFill,
+          borderRadius: BorderRadius.circular(radius),
+        ),
+        clipBehavior: Clip.antiAlias,
+        child: Stack(
+          children: [
+            Padding(
+              padding: layout.padding,
+              child: Text(
+                quote,
+                textAlign: TextAlign.center,
+                style: layout.textStyle.copyWith(
+                  color: AppTheme.overlayChipText,
+                ),
               ),
             ),
-          ),
-          PositionedDirectional(
-            top: 3 * scale,
-            end: 3 * scale,
-            child: Semantics(
-              button: true,
-              label: closeLabel,
-              child: GestureDetector(
-                onTap: onClose,
-                behavior: HitTestBehavior.opaque,
-                child: SizedBox(
-                  width: closeSize.clamp(22.0, 28.0),
-                  height: closeSize.clamp(22.0, 28.0),
-                  child: Icon(
-                    Icons.close_rounded,
-                    size: closeIcon,
-                    color: AppTheme.overlayChipText.withValues(alpha: 0.45),
+            PositionedDirectional(
+              top: 3 * scale,
+              end: 3 * scale,
+              child: Semantics(
+                button: true,
+                label: closeLabel,
+                child: GestureDetector(
+                  onTap: onClose,
+                  behavior: HitTestBehavior.opaque,
+                  child: SizedBox(
+                    width: closeSize.clamp(22.0, 28.0),
+                    height: closeSize.clamp(22.0, 28.0),
+                    child: Icon(
+                      Icons.close_rounded,
+                      size: closeIcon,
+                      color: AppTheme.overlayChipText.withValues(alpha: 0.45),
+                    ),
                   ),
                 ),
               ),
             ),
-          ),
-        ],
+          ],
+        ),
       ),
     );
   }
-}
-
-/// Keeps [IntrinsicWidth] tied to the badge row, not the wrapped quote text.
-class _ZeroIntrinsicWidth extends SingleChildRenderObjectWidget {
-  const _ZeroIntrinsicWidth({required Widget super.child});
-
-  @override
-  RenderObject createRenderObject(BuildContext context) {
-    return _RenderZeroIntrinsicWidth();
-  }
-}
-
-class _RenderZeroIntrinsicWidth extends RenderProxyBox {
-  @override
-  double computeMinIntrinsicWidth(double height) => 0;
-
-  @override
-  double computeMaxIntrinsicWidth(double height) => 0;
 }
 
 /// Tiny circular launcher icon for the timer chip (fallback: sage clock).

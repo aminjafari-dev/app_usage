@@ -587,8 +587,8 @@ abstract class AppLocalizations {
   /// No description provided for @coachOverLimitSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You\'re {minutes} min over your daily limit for {app}.'**
-  String coachOverLimitSubtitle(String app, int minutes);
+  /// **'You\'re {minutes} min over your daily limit.'**
+  String coachOverLimitSubtitle(int minutes);
 
   /// No description provided for @coachMessageBoss.
   ///

@@ -1,4 +1,4 @@
-import 'dart:ui' show PlatformDispatcher;
+import 'dart:ui' show PlatformDispatcher, Size;
 
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:shared_preferences/shared_preferences.dart';
@@ -191,8 +191,14 @@ class OverlayDataSource {
   /// Extra logical width (dp at scale 1) for the over-limit alert glyph.
   static const double overLimitExtraWidth = 32;
 
-  /// Extra logical height (dp at scale 1) for the quote bubble under the badge.
-  static const double quoteBubbleExtraHeight = 112;
+  /// Gap between the badge and the quote bubble (dp at scale 1).
+  static const double quoteBubbleGap = 4;
+
+  /// Breathing room around measured quote geometry (dp).
+  static const double quoteWindowPad = 8;
+
+  /// Fallback extra height when quote size has not been measured yet.
+  static const double quoteBubbleExtraHeight = 160;
 
   /// Logical chip size (dp) for [appearance] — used by overlay-side resize.
   ///
@@ -204,11 +210,14 @@ class OverlayDataSource {
   /// larger chip is not clipped by the native overlay window.
   /// Pass [overLimit] / [quoteOpen] when the badge grows sideways for the
   /// alert icon, or downward for the quote bubble.
+  /// Pass [quoteBubbleSize] (from [UsageQuoteBubbleLayout.measure]) so the
+  /// window matches a long quote instead of clipping it.
   static ({int width, int height}) logicalSizeFor(
     BadgeAppearance appearance, {
     double sizeMultiplier = 1.0,
     bool overLimit = false,
     bool quoteOpen = false,
+    Size? quoteBubbleSize,
   }) {
     final scale = appearance.sizeScale.clamp(
           BadgeAppearance.minSizeScale,
@@ -218,10 +227,21 @@ class OverlayDataSource {
     // Keep these slightly above the painted chip so long h:mm:ss values and
     // drag hit-targets still fit after the user scales the badge.
     final extraWidth = (overLimit ? overLimitExtraWidth : 0.0) * scale;
-    final extraHeight = (quoteOpen ? quoteBubbleExtraHeight : 0.0) * scale;
+    final badgeWidth = 140.0 * scale + extraWidth;
+    final badgeHeight = 36.0 * scale;
+    if (!quoteOpen) {
+      return (width: badgeWidth.round(), height: badgeHeight.round());
+    }
+    final quote = quoteBubbleSize ??
+        Size(260.0 * scale, quoteBubbleExtraHeight * scale);
+    final width = badgeWidth > quote.width ? badgeWidth : quote.width;
     return (
-      width: (140.0 * scale + extraWidth).round(),
-      height: (36.0 * scale + extraHeight).round(),
+      width: (width + quoteWindowPad).round(),
+      height: (badgeHeight +
+              quoteBubbleGap * scale +
+              quote.height +
+              quoteWindowPad)
+          .round(),
     );
   }
 

@@ -115,12 +115,9 @@
     }
   },
   "coachTitle": "Time check",
-  "coachOverLimitSubtitle": "You're {minutes} min over your daily limit for {app}.",
+  "coachOverLimitSubtitle": "You're {minutes} min over your daily limit.",
   "@coachOverLimitSubtitle": {
     "placeholders": {
-      "app": {
-        "type": "String"
-      },
       "minutes": {
         "type": "int"
       }

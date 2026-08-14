@@ -16,7 +16,6 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// ```dart
 /// await showUsageCoachCard(
 ///   context,
-///   appName: 'Instagram',
 ///   decision: CoachDecision(
 ///     shouldShow: true,
 ///     minutesOver: 12,
@@ -27,7 +26,6 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// ```
 Future<void> showUsageCoachCard(
   BuildContext context, {
-  required String appName,
   required CoachDecision decision,
   List<int>? iconBytes,
 }) {
@@ -36,12 +34,10 @@ Future<void> showUsageCoachCard(
     builder: (dialogContext) {
       void dismiss() => Navigator.of(dialogContext).pop();
       return UsageCoachCard(
-        appName: appName,
         decision: decision,
         iconBytes: iconBytes,
         onPause: dismiss,
         onSnooze: dismiss,
-        onMuteToday: dismiss,
       );
     },
   );
@@ -54,21 +50,17 @@ class UsageCoachCard extends StatelessWidget {
   /// Creates the coach card.
   const UsageCoachCard({
     super.key,
-    required this.appName,
     required this.decision,
     this.iconBytes,
     required this.onPause,
     required this.onSnooze,
-    required this.onMuteToday,
     this.blurBackground = false,
   });
 
-  final String appName;
   final CoachDecision decision;
   final List<int>? iconBytes;
   final VoidCallback onPause;
   final VoidCallback onSnooze;
-  final VoidCallback onMuteToday;
 
   /// Frosts the overlay window behind the card when shown over another app.
   /// Settings preview already wraps this widget in [showGBlurredDialog].
@@ -77,7 +69,6 @@ class UsageCoachCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final message = coachMessageFor(l10n, decision.messageId);
 
     final card = SafeArea(
       child: Center(
@@ -98,25 +89,7 @@ class UsageCoachCard extends StatelessWidget {
                     _AppIcon(iconBytes: iconBytes, size: 56),
                     GGap.m(),
                     GText(
-                      l10n.coachTitle,
-                      style: Theme.of(context).textTheme.titleLarge?.copyWith(
-                            fontWeight: FontWeight.w700,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    GGap.xs(),
-                    GText(
-                      l10n.coachOverLimitSubtitle(
-                        appName,
-                        decision.minutesOver,
-                      ),
-                      style: Theme.of(context).textTheme.bodyMedium,
-                      color: AppTheme.onSurfaceMuted,
-                      textAlign: TextAlign.center,
-                    ),
-                    GGap.l(),
-                    GText(
-                      message,
+                      l10n.coachOverLimitSubtitle(decision.minutesOver),
                       style: Theme.of(context).textTheme.titleMedium?.copyWith(
                             height: 1.35,
                             fontWeight: FontWeight.w600,
@@ -124,28 +97,25 @@ class UsageCoachCard extends StatelessWidget {
                       textAlign: TextAlign.center,
                     ),
                     GGap.l(),
-                    GButton(
-                      label: l10n.coachPauseButton,
-                      icon: Icons.spa_rounded,
-                      onPressed: onPause,
-                    ),
-                    GGap.s(),
-                    GOutlinedButton(
-                      label: l10n.coachSnoozeButton(decision.snoozeMinutes),
-                      icon: Icons.timelapse_rounded,
-                      onPressed: onSnooze,
-                    ),
-                    if (decision.allowMuteToday) ...[
-                      GGap.s(),
-                      TextButton(
-                        onPressed: onMuteToday,
-                        child: GText(
-                          l10n.coachMuteToday,
-                          style: Theme.of(context).textTheme.labelMedium,
-                          color: AppTheme.onSurfaceMuted,
+                    Row(
+                      children: [
+                        Expanded(
+                          child: GButton(
+                            label: l10n.coachPauseButton,
+                            icon: Icons.spa_rounded,
+                            onPressed: onPause,
+                          ),
                         ),
-                      ),
-                    ],
+                        const SizedBox(width: 10),
+                        Expanded(
+                          child: GOutlinedButton(
+                            label: l10n.coachSnoozeButton(decision.snoozeMinutes),
+                            icon: Icons.timelapse_rounded,
+                            onPressed: onSnooze,
+                          ),
+                        ),
+                      ],
+                    ),
                   ],
                 ),
               ),

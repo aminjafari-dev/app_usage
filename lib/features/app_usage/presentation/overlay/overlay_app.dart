@@ -79,6 +79,9 @@ class _OverlayAppState extends State<OverlayApp> {
   /// True after the user has opened the quote at least once this session.
   bool _hasShownQuote = false;
 
+  /// Last measured quote bubble size, used while the overlay window is expanded.
+  Size? _quoteBubbleSize;
+
   @override
   void initState() {
     super.initState();
@@ -122,6 +125,7 @@ class _OverlayAppState extends State<OverlayApp> {
             _quoteOpen = false;
             _quoteIndex = 0;
             _hasShownQuote = false;
+            _quoteBubbleSize = null;
           }
         });
 
@@ -178,6 +182,7 @@ class _OverlayAppState extends State<OverlayApp> {
           _quoteOpen = false;
           _quoteIndex = 0;
           _hasShownQuote = false;
+          _quoteBubbleSize = null;
         }
       });
       if (switched) {
@@ -233,6 +238,7 @@ class _OverlayAppState extends State<OverlayApp> {
     setState(() {
       _overLimit = false;
       _quoteOpen = false;
+      _quoteBubbleSize = null;
     });
     await Future<void>.delayed(_quoteCollapseDelay);
     if (!mounted) return;
@@ -246,12 +252,27 @@ class _OverlayAppState extends State<OverlayApp> {
 
   Future<void> _onAlertTap() async {
     if (_quoteOpen) return;
-    await _resizeOverlay(_appearance, quoteOpen: true, force: true);
+    var nextIndex = _quoteIndex;
+    if (_hasShownQuote && UsageCoach.messageIds.isNotEmpty) {
+      nextIndex = (_quoteIndex + 1) % UsageCoach.messageIds.length;
+    }
+    final quote = _quoteFor(AppLocalizations.of(context), nextIndex);
+    final quoteSize = UsageQuoteBubbleLayout(
+      _appearance.sizeScale.clamp(
+            BadgeAppearance.minSizeScale,
+            BadgeAppearance.maxSizeScale,
+          ) *
+          _sizeMultiplier,
+    ).measure(quote, Directionality.of(context));
+    await _resizeOverlay(
+      _appearance,
+      quoteOpen: true,
+      quoteBubbleSize: quoteSize,
+      force: true,
+    );
     if (!mounted) return;
     setState(() {
-      if (_hasShownQuote && UsageCoach.messageIds.isNotEmpty) {
-        _quoteIndex = (_quoteIndex + 1) % UsageCoach.messageIds.length;
-      }
+      _quoteIndex = nextIndex;
       _hasShownQuote = true;
       _quoteOpen = true;
     });
@@ -259,10 +280,19 @@ class _OverlayAppState extends State<OverlayApp> {
 
   Future<void> _onQuoteClose() async {
     if (!_quoteOpen) return;
-    setState(() => _quoteOpen = false);
+    setState(() {
+      _quoteOpen = false;
+      _quoteBubbleSize = null;
+    });
     await Future<void>.delayed(_quoteCollapseDelay);
     if (!mounted) return;
     await _resizeOverlay(_appearance, quoteOpen: false, force: true);
+  }
+
+  String _quoteFor(AppLocalizations l10n, int index) {
+    final ids = UsageCoach.messageIds;
+    final quoteId = ids.isEmpty ? 'boss' : ids[index % ids.length];
+    return coachMessageFor(l10n, quoteId);
   }
 
   /// Pass [force] to re-apply the size even when it looks unchanged.
@@ -272,14 +302,18 @@ class _OverlayAppState extends State<OverlayApp> {
     bool force = false,
     bool? overLimit,
     bool? quoteOpen,
+    Size? quoteBubbleSize,
   }) async {
     try {
       _sizeMultiplier = sizeMultiplier;
+      if (quoteBubbleSize != null) _quoteBubbleSize = quoteBubbleSize;
+      final open = quoteOpen ?? _quoteOpen;
       final size = OverlayDataSource.logicalSizeFor(
         appearance,
         sizeMultiplier: sizeMultiplier,
         overLimit: overLimit ?? _overLimit,
-        quoteOpen: quoteOpen ?? _quoteOpen,
+        quoteOpen: open,
+        quoteBubbleSize: open ? _quoteBubbleSize : null,
       );
       if (!force &&
           size.width == _lastOverlayWidth &&
@@ -325,8 +359,6 @@ class _OverlayAppState extends State<OverlayApp> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final ids = UsageCoach.messageIds;
-    final quoteId = ids.isEmpty ? 'boss' : ids[_quoteIndex % ids.length];
 
     return Material(
       color: Colors.transparent,
@@ -342,7 +374,7 @@ class _OverlayAppState extends State<OverlayApp> {
               onIntroSizeBoost: _onIntroSizeBoost,
               overLimit: _overLimit,
               quoteOpen: _quoteOpen,
-              quote: coachMessageFor(l10n, quoteId),
+              quote: _quoteFor(l10n, _quoteIndex),
               closeLabel: l10n.coachQuoteClose,
               alertLabel: l10n.coachLimitAlert,
               onAlertTap: () => unawaited(_onAlertTap()),
