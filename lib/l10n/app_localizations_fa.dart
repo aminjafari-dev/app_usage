@@ -321,7 +321,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get coachSettingsEnabledHint =>
-      'کارت وسط صفحه وقتی برنامه از محدودیت بگذرد';
+      'هشدار روی نشان وقتی برنامه از محدودیت بگذرد';
 
   @override
   String get coachSettingsSnoozeLabel => 'فاصله تعویق';
@@ -361,8 +361,14 @@ class AppLocalizationsFa extends AppLocalizations {
   String get coachAppearanceTitle => 'ظاهر گفتگو';
 
   @override
-  String get coachAppearanceSubtitle => 'پیش‌نمایش کارت عبور از محدودیت';
+  String get coachAppearanceSubtitle => 'پیش‌نمایش نقل‌قول عبور از محدودیت';
 
   @override
   String get coachAppearancePreviewApp => 'برنامه نمونه';
+
+  @override
+  String get coachQuoteClose => 'بستن';
+
+  @override
+  String get coachLimitAlert => 'به محدودیت روزانه رسیدی';
 }

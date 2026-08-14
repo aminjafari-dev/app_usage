@@ -4,14 +4,14 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/locale/locale_cubit.dart';
 import 'package:app_usage/core/settings/coach_settings_cubit.dart';
-import 'package:app_usage/core/settings/usage_coach.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
+import 'package:app_usage/core/widgets/g_blur_sheet.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
-import 'package:app_usage/features/app_usage/presentation/overlay/usage_coach_card.dart';
+import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
 import 'package:app_usage/features/settings/presentation/widgets/badge_appearance_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/coach_settings_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/settings_choice_segment.dart';
@@ -173,17 +173,16 @@ class SettingsPage extends StatelessWidget {
                       color: AppTheme.onSurfaceMuted,
                     ),
                     onTap: () {
-                      final coach = context.read<CoachSettingsCubit>().state;
-                      showUsageCoachCard(
-                        context,
-                        appName: l10n.coachAppearancePreviewApp,
-                        decision: CoachDecision(
-                          shouldShow: true,
-                          minutesOver: 12,
-                          limitMinutes: 30,
-                          snoozeMinutes: coach.snoozeMinutes,
-                          allowMuteToday: coach.allowMuteToday,
-                        ),
+                      showGBlurredDialog<void>(
+                        context: context,
+                        builder: (dialogContext) {
+                          return _OverLimitQuotePreview(
+                            appName: l10n.coachAppearancePreviewApp,
+                            quote: l10n.coachMessageBoss,
+                            closeLabel: l10n.coachQuoteClose,
+                            alertLabel: l10n.coachLimitAlert,
+                          );
+                        },
                       );
                     },
                   ),
@@ -302,6 +301,51 @@ class _FooterLink extends StatelessWidget {
               decorationColor: AppTheme.onSurfaceMuted,
             ),
         color: AppTheme.onSurfaceMuted,
+      ),
+    );
+  }
+}
+
+/// Debug preview of the over-limit badge + docked quote bubble.
+class _OverLimitQuotePreview extends StatefulWidget {
+  const _OverLimitQuotePreview({
+    required this.appName,
+    required this.quote,
+    required this.closeLabel,
+    required this.alertLabel,
+  });
+
+  final String appName;
+  final String quote;
+  final String closeLabel;
+  final String alertLabel;
+
+  @override
+  State<_OverLimitQuotePreview> createState() => _OverLimitQuotePreviewState();
+}
+
+class _OverLimitQuotePreviewState extends State<_OverLimitQuotePreview> {
+  bool _quoteOpen = true;
+
+  @override
+  Widget build(BuildContext context) {
+    return SafeArea(
+      child: Align(
+        alignment: Alignment.topCenter,
+        child: Padding(
+          padding: const EdgeInsets.only(top: 48),
+          child: UsageGlassCounter(
+            appName: widget.appName,
+            todaySeconds: 72 * 60 + 12,
+            overLimit: true,
+            quoteOpen: _quoteOpen,
+            quote: widget.quote,
+            closeLabel: widget.closeLabel,
+            alertLabel: widget.alertLabel,
+            onAlertTap: () => setState(() => _quoteOpen = true),
+            onQuoteClose: () => setState(() => _quoteOpen = false),
+          ),
+        ),
       ),
     );
   }

@@ -325,7 +325,7 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachSettingsEnabledHint =>
-      'Center card when a timed app goes over its limit';
+      'Alert on the badge when a timed app goes over its limit';
 
   @override
   String get coachSettingsSnoozeLabel => 'Snooze interval';
@@ -365,8 +365,14 @@ class AppLocalizationsEn extends AppLocalizations {
   String get coachAppearanceTitle => 'Dialog Appearance';
 
   @override
-  String get coachAppearanceSubtitle => 'Preview the over-limit card';
+  String get coachAppearanceSubtitle => 'Preview the over-limit quote';
 
   @override
   String get coachAppearancePreviewApp => 'Sample app';
+
+  @override
+  String get coachQuoteClose => 'Close';
+
+  @override
+  String get coachLimitAlert => 'Daily limit reached';
 }

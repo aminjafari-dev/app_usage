@@ -1,5 +1,4 @@
 import 'dart:async';
-import 'dart:ui' show PlatformDispatcher;
 
 import 'package:flutter/material.dart';
 import 'package:flutter_overlay_window/flutter_overlay_window.dart';
@@ -11,6 +10,7 @@ import 'package:app_usage/features/app_usage/data/datasources/overlay_data_sourc
 import 'package:app_usage/features/app_usage/data/datasources/overlay_live_tracker.dart';
 import 'package:app_usage/features/app_usage/presentation/overlay/usage_coach_card.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
+import 'package:app_usage/l10n/app_localizations.dart';
 
 /// Root widget living inside the overlay isolate.
 ///
@@ -18,8 +18,8 @@ import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_co
 /// window starts. Owns [OverlayLiveTracker] so the badge keeps counting even
 /// when the main application is backgrounded or removed from Recents.
 ///
-/// Also evaluates per-app daily limits and expands into a gentle coach card
-/// when the user stays past their limit.
+/// When a per-app daily limit is exceeded, the badge grows sideways to show
+/// an idle alert. Tapping it opens a quote bubble docked under the pill.
 class OverlayApp extends StatefulWidget {
   /// Creates the overlay root.
   const OverlayApp({super.key});
@@ -32,8 +32,8 @@ class _OverlayAppState extends State<OverlayApp> {
   /// How often the native window size is re-applied as a safety net.
   static const Duration _windowGuardInterval = Duration(seconds: 10);
 
-  /// Longest a full-screen coach card may stay up without user interaction.
-  static const Duration _coachAutoSnooze = Duration(seconds: 60);
+  /// Matches [_RevealSlot] so we shrink the window after the quote collapses.
+  static const Duration _quoteCollapseDelay = Duration(milliseconds: 420);
 
   final OverlayLiveTracker _tracker = OverlayLiveTracker();
 
@@ -65,19 +65,19 @@ class _OverlayAppState extends State<OverlayApp> {
   /// Periodically re-applies the window size so it can never stay stale.
   Timer? _windowGuardTimer;
 
-  /// Collapses the coach card if the user never answers it.
-  Timer? _coachTimeoutTimer;
-
   UsageCoach? _coach;
 
-  /// Active coach decision currently on screen (null = badge mode).
-  CoachDecision? _coachDecision;
+  /// True while the foreground app is past its daily cap.
+  bool _overLimit = false;
 
-  /// Avoid re-recording [UsageCoach.markShown] for the same open card.
-  bool _coachMarkedShown = false;
+  /// True while the quote bubble under the badge is open.
+  bool _quoteOpen = false;
 
-  /// Prevent overlapping expand/collapse animations.
-  bool _resizingForCoach = false;
+  /// Cursor into [UsageCoach.messageIds] for the next tap.
+  int _quoteIndex = 0;
+
+  /// True after the user has opened the quote at least once this session.
+  bool _hasShownQuote = false;
 
   @override
   void initState() {
@@ -93,18 +93,17 @@ class _OverlayAppState extends State<OverlayApp> {
     _tracker.start(
       onTick: (OverlayTickPayload? payload) {
         if (!mounted) return;
-        // Null payload = home / lock / launcher — hide badge + close coach.
+        // Null payload = home / lock / launcher — hide badge + close quote.
         if (payload == null) {
           final previous = _packageName;
           setState(() {
             _visible = false;
             _packageName = null;
             _playIntro = false;
+            _overLimit = false;
+            _quoteOpen = false;
           });
           unawaited(_coach?.onAppSwitched(previous));
-          if (_coachDecision != null) {
-            unawaited(_dismissCoach());
-          }
           return;
         }
 
@@ -120,21 +119,18 @@ class _OverlayAppState extends State<OverlayApp> {
           if (switched) {
             _packageName = payload.packageName;
             _playIntro = true;
+            _quoteOpen = false;
+            _quoteIndex = 0;
+            _hasShownQuote = false;
           }
         });
 
         if (switched) {
           unawaited(_coach?.onAppSwitched(previous));
-          // Leaving a limited app while coach is open → collapse back to badge.
-          if (_coachDecision != null &&
-              _coachDecision!.packageName != payload.packageName) {
-            unawaited(_dismissCoach());
-          } else if (_coachDecision == null) {
-            unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
-          }
+          unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
         }
 
-        unawaited(_evaluateCoach(payload));
+        unawaited(_updateOverLimit(payload));
       },
     );
 
@@ -155,7 +151,7 @@ class _OverlayAppState extends State<OverlayApp> {
         final sizeChanged = next.sizeScale != _appearance.sizeScale;
         if (!mounted) return;
         setState(() => _appearance = next);
-        if (sizeChanged && _coachDecision == null) {
+        if (sizeChanged) {
           unawaited(_resizeOverlay(next));
         }
         return;
@@ -179,12 +175,15 @@ class _OverlayAppState extends State<OverlayApp> {
         if (switched) {
           _packageName = payload.packageName;
           _playIntro = true;
+          _quoteOpen = false;
+          _quoteIndex = 0;
+          _hasShownQuote = false;
         }
       });
-      if (switched && _coachDecision == null) {
+      if (switched) {
         unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
       }
-      unawaited(_evaluateCoach(payload));
+      unawaited(_updateOverLimit(payload));
     });
   }
 
@@ -199,7 +198,7 @@ class _OverlayAppState extends State<OverlayApp> {
     final package = _packageName;
     if (package != null) {
       unawaited(
-        _evaluateCoach(
+        _updateOverLimit(
           OverlayTickPayload(
             packageName: package,
             appName: _appName,
@@ -211,108 +210,59 @@ class _OverlayAppState extends State<OverlayApp> {
     }
   }
 
-  Future<void> _evaluateCoach(OverlayTickPayload payload) async {
+  Future<void> _updateOverLimit(OverlayTickPayload payload) async {
     final coach = _coach;
     if (coach == null) return;
-    // Already showing a card for this package — keep it.
-    if (_coachDecision != null) return;
 
-    final decision = await coach.evaluate(
+    final over = await coach.isOverLimit(
       packageName: payload.packageName,
       todaySeconds: payload.todaySeconds,
     );
-    if (!mounted || !decision.shouldShow) return;
+    if (!mounted) return;
     // Foreground may have changed while we awaited prefs.
-    if (_packageName != decision.packageName) return;
+    if (_packageName != payload.packageName) return;
+    if (over == _overLimit) return;
 
-    await _showCoach(decision);
-  }
-
-  Future<void> _showCoach(CoachDecision decision) async {
-    if (_resizingForCoach || _coachDecision != null) return;
-    _resizingForCoach = true;
-    try {
-      await _expandForCoach();
-      if (!mounted) return;
-      setState(() {
-        _coachDecision = decision;
-        _coachMarkedShown = false;
-      });
-      if (!_coachMarkedShown) {
-        _coachMarkedShown = true;
-        await _coach?.markShown(decision);
-      }
-      // The expanded window covers the screen and consumes every touch, so an
-      // unanswered card must never be able to strand the user.
-      _coachTimeoutTimer?.cancel();
-      _coachTimeoutTimer = Timer(
-        _coachAutoSnooze,
-        () => unawaited(_onSnooze()),
-      );
-    } finally {
-      _resizingForCoach = false;
+    if (over) {
+      await _resizeOverlay(_appearance, overLimit: true, force: true);
+      if (!mounted || _packageName != payload.packageName) return;
+      setState(() => _overLimit = true);
+      return;
     }
+
+    setState(() {
+      _overLimit = false;
+      _quoteOpen = false;
+    });
+    await Future<void>.delayed(_quoteCollapseDelay);
+    if (!mounted) return;
+    await _resizeOverlay(
+      _appearance,
+      overLimit: false,
+      quoteOpen: false,
+      force: true,
+    );
   }
 
-  Future<void> _dismissCoach() async {
-    _coachTimeoutTimer?.cancel();
-    _coachTimeoutTimer = null;
+  Future<void> _onAlertTap() async {
+    if (_quoteOpen) return;
+    await _resizeOverlay(_appearance, quoteOpen: true, force: true);
     if (!mounted) return;
     setState(() {
-      _coachDecision = null;
-      _coachMarkedShown = false;
+      if (_hasShownQuote && UsageCoach.messageIds.isNotEmpty) {
+        _quoteIndex = (_quoteIndex + 1) % UsageCoach.messageIds.length;
+      }
+      _hasShownQuote = true;
+      _quoteOpen = true;
     });
-    await _collapseToBadge();
   }
 
-  Future<void> _onPause() async {
-    final package = _coachDecision?.packageName;
-    if (package != null) {
-      await _coach?.acknowledge(package);
-    }
-    await _dismissCoach();
-  }
-
-  Future<void> _onSnooze() async {
-    final package = _coachDecision?.packageName;
-    if (package != null) {
-      await _coach?.snooze(package);
-    }
-    await _dismissCoach();
-  }
-
-  Future<void> _onMuteToday() async {
-    final package = _coachDecision?.packageName;
-    if (package != null) {
-      await _coach?.muteToday(package);
-    }
-    await _dismissCoach();
-  }
-
-  /// Grows the native overlay to cover the screen for the center card.
-  Future<void> _expandForCoach() async {
-    try {
-      final view = PlatformDispatcher.instance.views.first;
-      final logical = view.physicalSize / view.devicePixelRatio;
-      final width = logical.width.round().clamp(320, 5000);
-      final height = logical.height.round().clamp(480, 5000);
-      _lastOverlayWidth = width;
-      _lastOverlayHeight = height;
-      await FlutterOverlayWindow.resizeOverlay(width, height, false);
-      await FlutterOverlayWindow.moveOverlay(const OverlayPosition(0, 0));
-    } catch (_) {
-      // Card may still paint inside a smaller window.
-    }
-  }
-
-  /// Restores the small draggable badge window after the coach card closes.
-  Future<void> _collapseToBadge() async {
-    try {
-      await _resizeOverlay(_appearance, force: true);
-      await FlutterOverlayWindow.moveOverlay(const OverlayPosition(0, 40));
-    } catch (_) {
-      // Badge may already match; ignore.
-    }
+  Future<void> _onQuoteClose() async {
+    if (!_quoteOpen) return;
+    setState(() => _quoteOpen = false);
+    await Future<void>.delayed(_quoteCollapseDelay);
+    if (!mounted) return;
+    await _resizeOverlay(_appearance, quoteOpen: false, force: true);
   }
 
   /// Pass [force] to re-apply the size even when it looks unchanged.
@@ -320,12 +270,16 @@ class _OverlayAppState extends State<OverlayApp> {
     BadgeAppearance appearance, {
     double sizeMultiplier = 1.0,
     bool force = false,
+    bool? overLimit,
+    bool? quoteOpen,
   }) async {
     try {
       _sizeMultiplier = sizeMultiplier;
       final size = OverlayDataSource.logicalSizeFor(
         appearance,
         sizeMultiplier: sizeMultiplier,
+        overLimit: overLimit ?? _overLimit,
+        quoteOpen: quoteOpen ?? _quoteOpen,
       );
       if (!force &&
           size.width == _lastOverlayWidth &&
@@ -348,11 +302,7 @@ class _OverlayAppState extends State<OverlayApp> {
   /// state, so re-asserting is what stops an oversized transparent window from
   /// silently swallowing every touch on the device.
   Future<void> _ensureWindowMatchesMode() async {
-    if (!mounted || _resizingForCoach) return;
-    if (_coachDecision != null) {
-      await _expandForCoach();
-      return;
-    }
+    if (!mounted) return;
     await _resizeOverlay(
       _appearance,
       sizeMultiplier: _sizeMultiplier,
@@ -361,44 +311,44 @@ class _OverlayAppState extends State<OverlayApp> {
   }
 
   void _onIntroSizeBoost(double sizeBoost) {
-    if (!mounted || _coachDecision != null) return;
+    if (!mounted) return;
     unawaited(_resizeOverlay(_appearance, sizeMultiplier: sizeBoost));
   }
 
   @override
   void dispose() {
     _windowGuardTimer?.cancel();
-    _coachTimeoutTimer?.cancel();
     _tracker.dispose();
     super.dispose();
   }
 
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final ids = UsageCoach.messageIds;
+    final quoteId = ids.isEmpty ? 'boss' : ids[_quoteIndex % ids.length];
+
     return Material(
       color: Colors.transparent,
-      child: _coachDecision != null
-          ? UsageCoachCard(
+      child: _visible
+          ? UsageGlassCounter(
               appName: _appName,
-              decision: _coachDecision!,
+              todaySeconds: _todaySeconds,
               iconBytes: _iconBytes,
-              blurBackground: true,
-              onPause: () => unawaited(_onPause()),
-              onSnooze: () => unawaited(_onSnooze()),
-              onMuteToday: () => unawaited(_onMuteToday()),
+              sizeScale: _appearance.sizeScale,
+              opacity: _appearance.opacity,
+              playIntro: _playIntro,
+              introKey: _packageName,
+              onIntroSizeBoost: _onIntroSizeBoost,
+              overLimit: _overLimit,
+              quoteOpen: _quoteOpen,
+              quote: coachMessageFor(l10n, quoteId),
+              closeLabel: l10n.coachQuoteClose,
+              alertLabel: l10n.coachLimitAlert,
+              onAlertTap: () => unawaited(_onAlertTap()),
+              onQuoteClose: () => unawaited(_onQuoteClose()),
             )
-          : (_visible
-              ? UsageGlassCounter(
-                  appName: _appName,
-                  todaySeconds: _todaySeconds,
-                  iconBytes: _iconBytes,
-                  sizeScale: _appearance.sizeScale,
-                  opacity: _appearance.opacity,
-                  playIntro: _playIntro,
-                  introKey: _packageName,
-                  onIntroSizeBoost: _onIntroSizeBoost,
-                )
-              : const SizedBox.shrink()),
+          : const SizedBox.shrink(),
     );
   }
 }

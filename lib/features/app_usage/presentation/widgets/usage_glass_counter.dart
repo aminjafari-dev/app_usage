@@ -3,6 +3,7 @@ import 'dart:typed_data';
 import 'dart:ui' show lerpDouble;
 
 import 'package:flutter/material.dart';
+import 'package:flutter/rendering.dart';
 
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
@@ -26,6 +27,9 @@ import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.da
 ///
 /// With [playIntro] true, opening a new app runs:
 /// 1.5× circle → scale down to user size → pill expands right → duration fades in.
+///
+/// When [overLimit] is true, the pill grows sideways (height stays put) to
+/// reveal an idle alert. Tapping it opens [quote] in a bubble under the badge.
 class UsageGlassCounter extends StatefulWidget {
   /// Creates the minimal timer chip.
   ///
@@ -43,6 +47,13 @@ class UsageGlassCounter extends StatefulWidget {
     this.introKey,
     this.onIntroSizeBoost,
     this.onIntroComplete,
+    this.overLimit = false,
+    this.quoteOpen = false,
+    this.quote,
+    this.closeLabel,
+    this.alertLabel,
+    this.onAlertTap,
+    this.onQuoteClose,
   });
 
   final String appName;
@@ -66,6 +77,27 @@ class UsageGlassCounter extends StatefulWidget {
 
   /// Called once the full intro sequence finishes.
   final VoidCallback? onIntroComplete;
+
+  /// When true, the pill grows sideways and shows the idle alert glyph.
+  final bool overLimit;
+
+  /// When true, the quote bubble is shown directly under the pill.
+  final bool quoteOpen;
+
+  /// Supportive quote drawn in the center of the under-badge bubble.
+  final String? quote;
+
+  /// Tooltip / semantics for the tiny close control on the quote bubble.
+  final String? closeLabel;
+
+  /// Semantics label for the over-limit alert glyph.
+  final String? alertLabel;
+
+  /// Opens the quote bubble. Ignored while [quoteOpen] is already true.
+  final VoidCallback? onAlertTap;
+
+  /// Hides the quote bubble without removing the alert glyph.
+  final VoidCallback? onQuoteClose;
 
   @override
   State<UsageGlassCounter> createState() => _UsageGlassCounterState();
@@ -233,54 +265,100 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     final hPad = 2 * scale;
     final vPad = 2 * scale;
     final gap = 4 * scale;
+    final chipHeight = iconSize + vPad * 2;
+    final chipRadius = chipHeight / 2;
+    // Hold the alert until the open-app intro has settled so the two width
+    // animations do not fight (circle → duration, then duration → alert).
+    final showAlert =
+        widget.overLimit && (!widget.playIntro || _introSettled);
+    final quote = widget.quote;
+    final showQuote = widget.quoteOpen && quote != null && quote.isNotEmpty;
 
     // Top-left during intro so the logo stays put while the pill grows right;
     // top-center for static previews.
     return Align(
-      alignment:
-          widget.playIntro ? Alignment.topLeft : Alignment.topCenter,
+      alignment: widget.playIntro ? Alignment.topLeft : Alignment.topCenter,
       child: Opacity(
         opacity: widget.opacity.clamp(0.3, 1.0),
-        child: Container(
-          padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
-          decoration: BoxDecoration(
-            color: AppTheme.overlayChipFill,
-            borderRadius: BorderRadius.circular(AppTheme.radiusPill),
-          ),
-          // Logo anchored left; trailing content clips open to the right so the
-          // chip starts as a circle and grows into the duration pill.
-          child: Row(
+        child: IntrinsicWidth(
+          child: Column(
             mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
-              _ChipAppLogo(iconBytes: widget.iconBytes, size: iconSize),
-              // widthFactor reveals the duration; heightFactor: 1 shrink-wraps to
-              // the child so this slot does not inherit the overlay window height
-              // (which made the intro "circle" a tall oval).
-              ClipRect(
-                child: Align(
-                  alignment: Alignment.centerLeft,
-                  widthFactor: expand.clamp(0.0, 1.0),
-                  heightFactor: 1,
-                  child: SizedBox(
-                    height: iconSize,
-                    child: Opacity(
-                      opacity: textOpacity.clamp(0.0, 1.0),
-                      child: Row(
-                        mainAxisSize: MainAxisSize.min,
-                        children: [
-                          SizedBox(width: gap),
-                          Text(
-                            formatUsageDuration(widget.todaySeconds),
-                            style: TextStyle(
-                              fontSize: fontSize,
-                              fontWeight: FontWeight.w700,
-                              color: AppTheme.overlayChipText,
-                              height: 1.0,
-                              letterSpacing: -0.2,
+              Container(
+                padding: EdgeInsets.symmetric(horizontal: hPad, vertical: vPad),
+                decoration: BoxDecoration(
+                  color: AppTheme.overlayChipFill,
+                  borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+                ),
+                // Logo anchored left; trailing content clips open to the right so
+                // the chip starts as a circle and grows into the duration pill.
+                child: Row(
+                  mainAxisSize: MainAxisSize.min,
+                  children: [
+                    _ChipAppLogo(iconBytes: widget.iconBytes, size: iconSize),
+                    // widthFactor reveals the duration; heightFactor: 1
+                    // shrink-wraps so this slot does not inherit overlay height.
+                    ClipRect(
+                      child: Align(
+                        alignment: Alignment.centerLeft,
+                        widthFactor: expand.clamp(0.0, 1.0),
+                        heightFactor: 1,
+                        child: SizedBox(
+                          height: iconSize,
+                          child: Opacity(
+                            opacity: textOpacity.clamp(0.0, 1.0),
+                            child: Row(
+                              mainAxisSize: MainAxisSize.min,
+                              children: [
+                                SizedBox(width: gap),
+                                Text(
+                                  formatUsageDuration(widget.todaySeconds),
+                                  style: TextStyle(
+                                    fontSize: fontSize,
+                                    fontWeight: FontWeight.w700,
+                                    color: AppTheme.overlayChipText,
+                                    height: 1.0,
+                                    letterSpacing: -0.2,
+                                  ),
+                                ),
+                              ],
                             ),
                           ),
-                        ],
+                        ),
                       ),
+                    ),
+                    if (widget.overLimit)
+                      _RevealSlot(
+                        visible: showAlert,
+                        axis: Axis.horizontal,
+                        child: Row(
+                          mainAxisSize: MainAxisSize.min,
+                          children: [
+                            SizedBox(width: gap),
+                            _LimitAlertIcon(
+                              size: iconSize,
+                              semanticLabel: widget.alertLabel,
+                              onTap: widget.onAlertTap,
+                            ),
+                          ],
+                        ),
+                      ),
+                  ],
+                ),
+              ),
+              _RevealSlot(
+                visible: showQuote,
+                axis: Axis.vertical,
+                child: _ZeroIntrinsicWidth(
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 4 * scale),
+                    child: _QuoteBubble(
+                      quote: quote ?? '',
+                      radius: chipRadius,
+                      scale: scale,
+                      closeLabel: widget.closeLabel,
+                      onClose: widget.onQuoteClose,
                     ),
                   ),
                 ),
@@ -291,6 +369,271 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
       ),
     );
   }
+}
+
+/// Clips [child] open on [axis] so the badge can grow in width (alert) or
+/// height (quote) without changing the other dimension.
+class _RevealSlot extends StatefulWidget {
+  const _RevealSlot({
+    required this.visible,
+    required this.axis,
+    required this.child,
+  });
+
+  final bool visible;
+  final Axis axis;
+  final Widget child;
+
+  @override
+  State<_RevealSlot> createState() => _RevealSlotState();
+}
+
+class _RevealSlotState extends State<_RevealSlot>
+    with SingleTickerProviderStateMixin {
+  static const Duration _duration = Duration(milliseconds: 420);
+
+  late final AnimationController _controller;
+  late final Animation<double> _t;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(
+      vsync: this,
+      duration: _duration,
+    );
+    _t = CurvedAnimation(parent: _controller, curve: Curves.easeOutCubic);
+    if (widget.visible) {
+      _controller.forward();
+    }
+  }
+
+  @override
+  void didUpdateWidget(covariant _RevealSlot oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (widget.visible == oldWidget.visible) return;
+    if (widget.visible) {
+      _controller.forward();
+    } else {
+      _controller.reverse();
+    }
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return AnimatedBuilder(
+      animation: _t,
+      builder: (context, child) {
+        final factor = _t.value.clamp(0.0, 1.0);
+        return IgnorePointer(
+          ignoring: factor == 0,
+          child: ClipRect(
+            child: Align(
+              alignment: widget.axis == Axis.horizontal
+                  ? Alignment.centerLeft
+                  : Alignment.topCenter,
+              widthFactor: widget.axis == Axis.horizontal ? factor : 1,
+              heightFactor: widget.axis == Axis.vertical ? factor : 1,
+              child: child,
+            ),
+          ),
+        );
+      },
+      child: widget.child,
+    );
+  }
+}
+
+/// Minimalist over-limit glyph that sips / wobbles in place every 2 seconds.
+class _LimitAlertIcon extends StatefulWidget {
+  const _LimitAlertIcon({
+    required this.size,
+    this.semanticLabel,
+    this.onTap,
+  });
+
+  final double size;
+  final String? semanticLabel;
+  final VoidCallback? onTap;
+
+  @override
+  State<_LimitAlertIcon> createState() => _LimitAlertIconState();
+}
+
+class _LimitAlertIconState extends State<_LimitAlertIcon>
+    with SingleTickerProviderStateMixin {
+  static const Duration _cycle = Duration(seconds: 2);
+
+  late final AnimationController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = AnimationController(vsync: this, duration: _cycle)
+      ..repeat();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    final icon = Icon(
+      Icons.error_outline_rounded,
+      size: widget.size,
+      color: AppTheme.overlayChipAlert,
+    );
+
+    return Semantics(
+      button: widget.onTap != null,
+      label: widget.semanticLabel,
+      child: GestureDetector(
+        onTap: widget.onTap,
+        behavior: HitTestBehavior.opaque,
+        child: AnimatedBuilder(
+          animation: _controller,
+          builder: (context, child) {
+            final motion = _sip(_controller.value);
+            return Transform.translate(
+              offset: Offset(motion.dx, motion.dy),
+              child: Transform.rotate(
+                angle: motion.angle,
+                child: child,
+              ),
+            );
+          },
+          child: icon,
+        ),
+      ),
+    );
+  }
+
+  /// First ~800ms of each 2s cycle: dip + lean like a tiny sip, then rest.
+  ({double dx, double dy, double angle}) _sip(double t) {
+    const sipEnd = 0.4;
+    if (t >= sipEnd) {
+      return (dx: 0.0, dy: 0.0, angle: 0.0);
+    }
+    final u = t / sipEnd;
+    final double p;
+    if (u < 0.35) {
+      p = Curves.easeInOut.transform(u / 0.35);
+    } else if (u < 0.55) {
+      p = 1;
+    } else {
+      p = 1 - Curves.easeInOut.transform((u - 0.55) / 0.45);
+    }
+    return (
+      dx: 1.2 * p,
+      dy: 2.4 * p,
+      angle: 0.22 * p,
+    );
+  }
+}
+
+/// Quote panel docked under the badge, sharing the badge's corner radius.
+class _QuoteBubble extends StatelessWidget {
+  const _QuoteBubble({
+    required this.quote,
+    required this.radius,
+    required this.scale,
+    this.closeLabel,
+    this.onClose,
+  });
+
+  final String quote;
+  final double radius;
+  final double scale;
+  final String? closeLabel;
+  final VoidCallback? onClose;
+
+  @override
+  Widget build(BuildContext context) {
+    final closeSize = 16 * scale;
+    final closeIcon = 11 * scale;
+    final fontSize = 11 * scale;
+
+    return Container(
+      decoration: BoxDecoration(
+        color: AppTheme.overlayChipFill,
+        borderRadius: BorderRadius.circular(radius),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Stack(
+        children: [
+          Padding(
+            padding: EdgeInsets.fromLTRB(
+              12 * scale,
+              14 * scale,
+              12 * scale,
+              12 * scale,
+            ),
+            child: Text(
+              quote,
+              textAlign: TextAlign.center,
+              maxLines: 4,
+              overflow: TextOverflow.ellipsis,
+              style: TextStyle(
+                fontSize: fontSize,
+                fontWeight: FontWeight.w500,
+                height: 1.35,
+                color: AppTheme.overlayChipText,
+                fontStyle: FontStyle.italic,
+              ),
+            ),
+          ),
+          PositionedDirectional(
+            top: 3 * scale,
+            end: 3 * scale,
+            child: Semantics(
+              button: true,
+              label: closeLabel,
+              child: GestureDetector(
+                onTap: onClose,
+                behavior: HitTestBehavior.opaque,
+                child: SizedBox(
+                  width: closeSize.clamp(22.0, 28.0),
+                  height: closeSize.clamp(22.0, 28.0),
+                  child: Icon(
+                    Icons.close_rounded,
+                    size: closeIcon,
+                    color: AppTheme.overlayChipText.withValues(alpha: 0.45),
+                  ),
+                ),
+              ),
+            ),
+          ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Keeps [IntrinsicWidth] tied to the badge row, not the wrapped quote text.
+class _ZeroIntrinsicWidth extends SingleChildRenderObjectWidget {
+  const _ZeroIntrinsicWidth({required Widget super.child});
+
+  @override
+  RenderObject createRenderObject(BuildContext context) {
+    return _RenderZeroIntrinsicWidth();
+  }
+}
+
+class _RenderZeroIntrinsicWidth extends RenderProxyBox {
+  @override
+  double computeMinIntrinsicWidth(double height) => 0;
+
+  @override
+  double computeMaxIntrinsicWidth(double height) => 0;
 }
 
 /// Tiny circular launcher icon for the timer chip (fallback: sage clock).

@@ -145,7 +145,7 @@
   "coachSettingsTitle": "یادآور محدودیت",
   "coachSettingsSubtitle": "یادآوری ملایم وقتی از محدودیت روزانه یک برنامه عبور می‌کنید.",
   "coachSettingsEnabled": "نمایش یادآور محدودیت",
-  "coachSettingsEnabledHint": "کارت وسط صفحه وقتی برنامه از محدودیت بگذرد",
+  "coachSettingsEnabledHint": "هشدار روی نشان وقتی برنامه از محدودیت بگذرد",
   "coachSettingsSnoozeLabel": "فاصله تعویق",
   "coachSettingsSnoozeHint": "چقدر بعد از «دقیقه دیگر» صبر کند.",
   "coachSettingsMaxNudgesLabel": "حداکثر یادآوری در روز برای هر برنامه",
@@ -173,6 +173,8 @@
   },
   "coachSettingsOff": "یادآوری‌ها خاموش است",
   "coachAppearanceTitle": "ظاهر گفتگو",
-  "coachAppearanceSubtitle": "پیش‌نمایش کارت عبور از محدودیت",
-  "coachAppearancePreviewApp": "برنامه نمونه"
+  "coachAppearanceSubtitle": "پیش‌نمایش نقل‌قول عبور از محدودیت",
+  "coachAppearancePreviewApp": "برنامه نمونه",
+  "coachQuoteClose": "بستن",
+  "coachLimitAlert": "به محدودیت روزانه رسیدی"
 }

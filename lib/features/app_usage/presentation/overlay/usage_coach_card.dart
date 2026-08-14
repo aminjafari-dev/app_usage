@@ -77,7 +77,7 @@ class UsageCoachCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final message = _messageFor(l10n, decision.messageId);
+    final message = coachMessageFor(l10n, decision.messageId);
 
     final card = SafeArea(
       child: Center(
@@ -159,17 +159,18 @@ class UsageCoachCard extends StatelessWidget {
 
     return GBlurScrim(t: 1, child: card);
   }
+}
 
-  String _messageFor(AppLocalizations l10n, String id) {
-    return switch (id) {
-      'goal' => l10n.coachMessageGoal,
-      'appsChange' => l10n.coachMessageAppsChange,
-      'pause' => l10n.coachMessagePause,
-      'choice' => l10n.coachMessageChoice,
-      'protect' => l10n.coachMessageProtect,
-      _ => l10n.coachMessageBoss,
-    };
-  }
+/// Resolves a rotating coach [id] into the matching localized quote.
+String coachMessageFor(AppLocalizations l10n, String id) {
+  return switch (id) {
+    'goal' => l10n.coachMessageGoal,
+    'appsChange' => l10n.coachMessageAppsChange,
+    'pause' => l10n.coachMessagePause,
+    'choice' => l10n.coachMessageChoice,
+    'protect' => l10n.coachMessageProtect,
+    _ => l10n.coachMessageBoss,
+  };
 }
 
 class _AppIcon extends StatelessWidget {

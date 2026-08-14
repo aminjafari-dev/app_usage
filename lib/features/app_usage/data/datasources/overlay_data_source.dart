@@ -188,6 +188,12 @@ class OverlayDataSource {
     return windowConfigFor(appearance ?? await _loadAppearance());
   }
 
+  /// Extra logical width (dp at scale 1) for the over-limit alert glyph.
+  static const double overLimitExtraWidth = 32;
+
+  /// Extra logical height (dp at scale 1) for the quote bubble under the badge.
+  static const double quoteBubbleExtraHeight = 112;
+
   /// Logical chip size (dp) for [appearance] — used by overlay-side resize.
   ///
   /// How to use: call from the overlay isolate with
@@ -196,9 +202,13 @@ class OverlayDataSource {
   ///
   /// Pass [sizeMultiplier] `1.5` during the open-app intro so the temporarily
   /// larger chip is not clipped by the native overlay window.
+  /// Pass [overLimit] / [quoteOpen] when the badge grows sideways for the
+  /// alert icon, or downward for the quote bubble.
   static ({int width, int height}) logicalSizeFor(
     BadgeAppearance appearance, {
     double sizeMultiplier = 1.0,
+    bool overLimit = false,
+    bool quoteOpen = false,
   }) {
     final scale = appearance.sizeScale.clamp(
           BadgeAppearance.minSizeScale,
@@ -207,9 +217,11 @@ class OverlayDataSource {
         sizeMultiplier.clamp(1.0, 1.5);
     // Keep these slightly above the painted chip so long h:mm:ss values and
     // drag hit-targets still fit after the user scales the badge.
+    final extraWidth = (overLimit ? overLimitExtraWidth : 0.0) * scale;
+    final extraHeight = (quoteOpen ? quoteBubbleExtraHeight : 0.0) * scale;
     return (
-      width: (140.0 * scale).round(),
-      height: (36.0 * scale).round(),
+      width: (140.0 * scale + extraWidth).round(),
+      height: (36.0 * scale + extraHeight).round(),
     );
   }
 

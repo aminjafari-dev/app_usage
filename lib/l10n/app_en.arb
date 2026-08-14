@@ -145,7 +145,7 @@
   "coachSettingsTitle": "Limit reminders",
   "coachSettingsSubtitle": "Gentle check-ins when you go past a daily app limit.",
   "coachSettingsEnabled": "Show limit reminders",
-  "coachSettingsEnabledHint": "Center card when a timed app goes over its limit",
+  "coachSettingsEnabledHint": "Alert on the badge when a timed app goes over its limit",
   "coachSettingsSnoozeLabel": "Snooze interval",
   "coachSettingsSnoozeHint": "How long to wait after “more minutes”.",
   "coachSettingsMaxNudgesLabel": "Max reminders per app / day",
@@ -173,6 +173,8 @@
   },
   "coachSettingsOff": "Reminders turned off",
   "coachAppearanceTitle": "Dialog Appearance",
-  "coachAppearanceSubtitle": "Preview the over-limit card",
-  "coachAppearancePreviewApp": "Sample app"
+  "coachAppearanceSubtitle": "Preview the over-limit quote",
+  "coachAppearancePreviewApp": "Sample app",
+  "coachQuoteClose": "Close",
+  "coachLimitAlert": "Daily limit reached"
 }

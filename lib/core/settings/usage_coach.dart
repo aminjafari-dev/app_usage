@@ -38,6 +38,33 @@ class UsageCoach {
   /// Latest preferences (reloaded on each evaluate).
   CoachSettings get settings => CoachSettingsCubit.readFrom(_prefs);
 
+  /// Whether [packageName] is over its daily cap and reminders are on.
+  ///
+  /// Unlike [evaluate], this ignores snooze / mute / daily caps — the badge
+  /// alert stays visible for as long as the user keeps using the limited app.
+  Future<bool> isOverLimit({
+    required String packageName,
+    required int todaySeconds,
+  }) async {
+    if (packageName.isEmpty) return false;
+
+    try {
+      await _prefs.reload();
+    } catch (_) {
+      // Continue with in-memory prefs if reload fails.
+    }
+
+    if (!settings.enabled) return false;
+
+    final limits = AppTimerCubit.readFrom(_prefs);
+    final limit = limits[packageName];
+    if (limit == null || !limit.notify || limit.limitMinutes <= 0) {
+      return false;
+    }
+
+    return todaySeconds >= limit.limitMinutes * 60;
+  }
+
   /// Decides whether to show a coach card for the foreground app.
   ///
   /// Reloads prefs so limits/state written by the main isolate are visible.

@@ -91,6 +91,9 @@ class AppTheme {
   static const Color overlayChipIcon = Color(0xFFA8C69F);
   static const Color overlayChipText = Color(0xFF2D2D2D);
 
+  /// Soft amber for the over-limit alert on the overlay chip.
+  static const Color overlayChipAlert = Color(0xFFE0A14A);
+
   /// Shared radii — 32px cards/buttons; full capsule for pills.
   static const double radiusCard = 32;
   static const double radiusPill = 999;

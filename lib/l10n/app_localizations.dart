@@ -665,7 +665,7 @@ abstract class AppLocalizations {
   /// No description provided for @coachSettingsEnabledHint.
   ///
   /// In en, this message translates to:
-  /// **'Center card when a timed app goes over its limit'**
+  /// **'Alert on the badge when a timed app goes over its limit'**
   String get coachSettingsEnabledHint;
 
   /// No description provided for @coachSettingsSnoozeLabel.
@@ -731,7 +731,7 @@ abstract class AppLocalizations {
   /// No description provided for @coachAppearanceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Preview the over-limit card'**
+  /// **'Preview the over-limit quote'**
   String get coachAppearanceSubtitle;
 
   /// No description provided for @coachAppearancePreviewApp.
@@ -739,6 +739,18 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Sample app'**
   String get coachAppearancePreviewApp;
+
+  /// No description provided for @coachQuoteClose.
+  ///
+  /// In en, this message translates to:
+  /// **'Close'**
+  String get coachQuoteClose;
+
+  /// No description provided for @coachLimitAlert.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily limit reached'**
+  String get coachLimitAlert;
 }
 
 class _AppLocalizationsDelegate
