@@ -32,7 +32,7 @@ class GBlurScrim extends StatelessWidget {
             sigmaY: _sigma * progress,
           ),
           child: ColoredBox(
-            color: Colors.black.withValues(alpha: 0.22 * progress),
+            color: Colors.white.withValues(alpha: 0.2 * progress),
             child: child,
           ),
         ),
