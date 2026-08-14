@@ -274,20 +274,29 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     final quote = widget.quote;
     final showQuote = widget.quoteOpen && quote != null && quote.isNotEmpty;
 
+    // Shrink-wrap (width/heightFactor) so empty overlay window space does not
+    // inherit a full-bleed hit target around the painted chip.
     // Top-left during intro so the logo stays put while the pill grows right;
     // top-center for static previews.
+    //
+    // FittedBox absorbs a brief native-window lag: the intro paints at 1.5×
+    // before resizeOverlay has grown the overlay height, which previously
+    // overflowed the Column by ~11px (39 vs 28).
     return Align(
       alignment: widget.playIntro ? Alignment.topLeft : Alignment.topCenter,
+      widthFactor: 1,
+      heightFactor: 1,
       child: Opacity(
         opacity: widget.opacity.clamp(0.3, 1.0),
-        child: IntrinsicWidth(
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.stretch,
-            children: [
-              Align(
-                alignment: Alignment.centerLeft,
-                child: Container(
+        child: FittedBox(
+          fit: BoxFit.scaleDown,
+          alignment: Alignment.topLeft,
+          child: IntrinsicWidth(
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              crossAxisAlignment: CrossAxisAlignment.start,
+              children: [
+                Container(
                   padding: EdgeInsets.symmetric(
                     horizontal: hPad,
                     vertical: vPad,
@@ -355,22 +364,22 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
                     ],
                   ),
                 ),
-              ),
-              _RevealSlot(
-                visible: showQuote,
-                axis: Axis.vertical,
-                child: Padding(
-                  padding: EdgeInsets.only(top: 4 * scale),
-                  child: _QuoteBubble(
-                    quote: quote ?? '',
-                    radius: chipRadius,
-                    scale: scale,
-                    closeLabel: widget.closeLabel,
-                    onClose: widget.onQuoteClose,
+                _RevealSlot(
+                  visible: showQuote,
+                  axis: Axis.vertical,
+                  child: Padding(
+                    padding: EdgeInsets.only(top: 4 * scale),
+                    child: _QuoteBubble(
+                      quote: quote ?? '',
+                      radius: chipRadius,
+                      scale: scale,
+                      closeLabel: widget.closeLabel,
+                      onClose: widget.onQuoteClose,
+                    ),
                   ),
                 ),
-              ),
-            ],
+              ],
+            ),
           ),
         ),
       ),

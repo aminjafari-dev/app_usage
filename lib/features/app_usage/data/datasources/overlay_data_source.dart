@@ -189,7 +189,9 @@ class OverlayDataSource {
   }
 
   /// Extra logical width (dp at scale 1) for the over-limit alert glyph.
-  static const double overLimitExtraWidth = 32;
+  ///
+  /// Matches [UsageGlassCounter]: gap (4) + icon (22) + a couple dp of slack.
+  static const double overLimitExtraWidth = 28;
 
   /// Gap between the badge and the quote bubble (dp at scale 1).
   static const double quoteBubbleGap = 4;
@@ -199,6 +201,15 @@ class OverlayDataSource {
 
   /// Fallback extra height when quote size has not been measured yet.
   static const double quoteBubbleExtraHeight = 160;
+
+  /// Painted badge width at scale 1 (icon + pads + gap + long h:mm:ss).
+  ///
+  /// Kept tight on purpose: the native overlay window blocks every touch
+  /// inside its bounds, including transparent padding around the chip.
+  static const double badgeBaseWidth = 100;
+
+  /// Painted badge height at scale 1 (22 icon + 2×2 pad + slight slack).
+  static const double badgeBaseHeight = 28;
 
   /// Logical chip size (dp) for [appearance] — used by overlay-side resize.
   ///
@@ -224,11 +235,10 @@ class OverlayDataSource {
           BadgeAppearance.maxSizeScale,
         ) *
         sizeMultiplier.clamp(1.0, 1.5);
-    // Keep these slightly above the painted chip so long h:mm:ss values and
-    // drag hit-targets still fit after the user scales the badge.
+    // Hug the painted chip — leftover window chrome silently eats taps.
     final extraWidth = (overLimit ? overLimitExtraWidth : 0.0) * scale;
-    final badgeWidth = 140.0 * scale + extraWidth;
-    final badgeHeight = 36.0 * scale;
+    final badgeWidth = badgeBaseWidth * scale + extraWidth;
+    final badgeHeight = badgeBaseHeight * scale;
     if (!quoteOpen) {
       return (width: badgeWidth.round(), height: badgeHeight.round());
     }

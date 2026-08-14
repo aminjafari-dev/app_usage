@@ -35,8 +35,8 @@ object TrackingWatchdog {
     private const val WATCHDOG_INTERVAL_MS = 60_000L
 
     /** Badge chip size in dp, mirroring `OverlayDataSource.logicalSizeFor`. */
-    private const val FALLBACK_WIDTH_DP = 140
-    private const val FALLBACK_HEIGHT_DP = 36
+    private const val FALLBACK_WIDTH_DP = 100
+    private const val FALLBACK_HEIGHT_DP = 28
 
     /** Start offset in dp, mirroring `OverlayDataSource.show`. */
     private const val START_X_DP = 0

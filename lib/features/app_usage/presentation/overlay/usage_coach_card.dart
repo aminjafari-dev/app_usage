@@ -43,9 +43,10 @@ Future<void> showUsageCoachCard(
   );
 }
 
-/// Center coach reminder shown over other apps when a daily limit is hit.
+/// Bottom coach reminder shown over other apps when a daily limit is hit.
 ///
 /// How to use: mounted full-screen inside [OverlayApp] while coach mode is on.
+/// The card sits at the bottom with a 12 dp inset from the screen edges.
 class UsageCoachCard extends StatelessWidget {
   /// Creates the coach card.
   const UsageCoachCard({
@@ -57,77 +58,83 @@ class UsageCoachCard extends StatelessWidget {
     this.blurBackground = false,
   });
 
+  /// Inset from each edge of the phone screen.
+  static const double screenMargin = 12;
+
   final CoachDecision decision;
   final List<int>? iconBytes;
   final VoidCallback onPause;
   final VoidCallback onSnooze;
 
-  /// Frosts the overlay window behind the card when shown over another app.
-  /// Settings preview already wraps this widget in [showGBlurredDialog].
+  /// Kept for overlay call sites; the backdrop is always transparent so no
+  /// full-screen rectangle is painted behind the card.
   final bool blurBackground;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final bottomInset = MediaQuery.paddingOf(context).bottom;
 
-    final card = SafeArea(
-      child: Center(
-        child: Padding(
-          padding: const EdgeInsets.symmetric(horizontal: 28),
-          child: ConstrainedBox(
-            constraints: const BoxConstraints(maxWidth: 360),
-            child: Material(
-              color: AppTheme.surface,
-              elevation: 12,
-              shadowColor: Colors.black.withValues(alpha: 0.18),
-              borderRadius: BorderRadius.circular(AppTheme.radiusCard),
-              child: Padding(
-                padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
-                child: Column(
-                  mainAxisSize: MainAxisSize.min,
-                  children: [
-                    _AppIcon(iconBytes: iconBytes, size: 56),
-                    GGap.m(),
-                    GText(
-                      l10n.coachOverLimitSubtitle(decision.minutesOver),
-                      style: Theme.of(context).textTheme.titleMedium?.copyWith(
-                            height: 1.35,
-                            fontWeight: FontWeight.w600,
-                          ),
-                      textAlign: TextAlign.center,
-                    ),
-                    GGap.l(),
-                    Row(
-                      children: [
-                        Expanded(
-                          child: GButton(
-                            label: l10n.coachPauseButton,
-                            icon: Icons.spa_rounded,
-                            onPressed: onPause,
-                          ),
-                        ),
-                        const SizedBox(width: 10),
-                        Expanded(
-                          child: GOutlinedButton(
-                            label: l10n.coachSnoozeButton(decision.snoozeMinutes),
-                            icon: Icons.timelapse_rounded,
-                            onPressed: onSnooze,
-                          ),
-                        ),
-                      ],
-                    ),
-                  ],
-                ),
-              ),
+    final card = Material(
+      color: AppTheme.surface,
+      elevation: 12,
+      shadowColor: Colors.black.withValues(alpha: 0.18),
+      shape: RoundedRectangleBorder(
+        borderRadius: BorderRadius.circular(AppTheme.radiusCard),
+      ),
+      clipBehavior: Clip.antiAlias,
+      child: Padding(
+        padding: const EdgeInsets.fromLTRB(22, 22, 22, 18),
+        child: Column(
+          mainAxisSize: MainAxisSize.min,
+          children: [
+            _AppIcon(iconBytes: iconBytes, size: 56),
+            GGap.m(),
+            GText(
+              l10n.coachOverLimitSubtitle(decision.minutesOver),
+              style: Theme.of(context).textTheme.titleMedium?.copyWith(
+                    height: 1.35,
+                    fontWeight: FontWeight.w600,
+                  ),
+              textAlign: TextAlign.center,
             ),
-          ),
+            GGap.l(),
+            Row(
+              children: [
+                Expanded(
+                  child: GButton(
+                    label: l10n.coachPauseButton,
+                    icon: Icons.spa_rounded,
+                    onPressed: onPause,
+                  ),
+                ),
+                const SizedBox(width: 10),
+                Expanded(
+                  child: GOutlinedButton(
+                    label: l10n.coachSnoozeButton(decision.snoozeMinutes),
+                    icon: Icons.timelapse_rounded,
+                    onPressed: onSnooze,
+                  ),
+                ),
+              ],
+            ),
+          ],
         ),
       ),
     );
 
-    if (!blurBackground) return card;
-
-    return GBlurScrim(t: 1, child: card);
+    return Align(
+      alignment: Alignment.bottomCenter,
+      child: Padding(
+        padding: EdgeInsets.fromLTRB(
+          screenMargin,
+          screenMargin,
+          screenMargin,
+          screenMargin + bottomInset,
+        ),
+        child: card,
+      ),
+    );
   }
 }
 
