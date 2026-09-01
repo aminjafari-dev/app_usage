@@ -18,6 +18,12 @@ class AppLocalizationsEn extends AppLocalizations {
   String get permissionsTitle => 'Permissions';
 
   @override
+  String get permissionsSubtitle => 'Allow permissions for a better experience';
+
+  @override
+  String get permissionAllow => 'Allow';
+
+  @override
   String get unsupportedTitle => 'Not supported';
 
   @override

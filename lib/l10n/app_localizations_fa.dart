@@ -18,6 +18,12 @@ class AppLocalizationsFa extends AppLocalizations {
   String get permissionsTitle => 'دسترسی‌ها';
 
   @override
+  String get permissionsSubtitle => 'برای تجربه بهتر، دسترسی‌ها را فعال کنید';
+
+  @override
+  String get permissionAllow => 'اجازه';
+
+  @override
   String get unsupportedTitle => 'پشتیبانی نمی‌شود';
 
   @override

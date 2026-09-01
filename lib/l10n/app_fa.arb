@@ -3,6 +3,8 @@
   "appTitle": "زمان استفاده",
   "homeTitle": "استفاده امروز",
   "permissionsTitle": "دسترسی‌ها",
+  "permissionsSubtitle": "برای تجربه بهتر، دسترسی‌ها را فعال کنید",
+  "permissionAllow": "اجازه",
   "unsupportedTitle": "پشتیبانی نمی‌شود",
   "unsupportedMessage": "شمارنده زنده روی برنامه‌ها فقط روی اندروید در دسترس است.",
   "usagePermissionTitle": "دسترسی به آمار استفاده",

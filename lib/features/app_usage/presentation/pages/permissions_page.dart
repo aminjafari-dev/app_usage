@@ -4,7 +4,6 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/router/page_name.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
-import 'package:app_usage/core/widgets/g_button.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
@@ -14,15 +13,15 @@ import 'package:app_usage/features/app_usage/presentation/bloc/usage_event.dart'
 import 'package:app_usage/features/app_usage/presentation/bloc/usage_state.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
-/// One-permission-per-step onboarding for Usage, Overlay, and Battery access.
+/// Single-page permission checklist for Usage, Overlay, and Battery access.
 ///
 /// How to use:
 /// ```dart
 /// Navigator.of(context).pushNamed(PageName.permissions);
 /// ```
 ///
-/// Each step explains why the permission matters, then offers a single CTA to
-/// open the system grant flow. Progress shows as `1/3`, `2/3`, `3/3`.
+/// Each row has an Allow CTA (or a green check when granted). Once every
+/// permission is ready, the bottom arrow continues into the main shell.
 class PermissionsPage extends StatelessWidget {
   /// Creates the permissions page with its own [UsageBloc] instance.
   const PermissionsPage({super.key});
@@ -46,10 +45,7 @@ class _PermissionsView extends StatefulWidget {
 
 class _PermissionsViewState extends State<_PermissionsView>
     with WidgetsBindingObserver {
-  static const int _totalSteps = 3;
-
-  int _stepIndex = 0;
-  bool _didAlignToMissing = false;
+  bool _didHandleInitial = false;
 
   @override
   void initState() {
@@ -70,100 +66,38 @@ class _PermissionsViewState extends State<_PermissionsView>
     }
   }
 
-  bool _isStepGranted(PermissionsStatus status, int step) {
-    return switch (step) {
-      0 => status.hasUsageAccess,
-      1 => status.hasOverlayAccess,
-      2 => status.hasBatteryUnrestricted,
-      _ => false,
-    };
-  }
-
-  int _firstMissingStep(PermissionsStatus status) {
-    for (var i = 0; i < _totalSteps; i++) {
-      if (!_isStepGranted(status, i)) return i;
-    }
-    return _totalSteps - 1;
-  }
-
   void _goHome() {
     Navigator.of(context).pushReplacementNamed(PageName.home);
   }
 
   void _onPermissionsUpdated(PermissionsStatus status) {
-    if (!_didAlignToMissing) {
-      _didAlignToMissing = true;
+    if (!_didHandleInitial) {
+      _didHandleInitial = true;
       // Fresh launch with everything already granted → skip straight home.
       if (status.isReady && !Navigator.of(context).canPop()) {
         _goHome();
-        return;
-      }
-      final missing = _firstMissingStep(status);
-      if (missing != _stepIndex) {
-        setState(() => _stepIndex = missing);
       }
       return;
     }
 
-    if (status.isReady) {
+    if (status.isReady && !Navigator.of(context).canPop()) {
       _goHome();
-      return;
-    }
-
-    // Advance past a step once the user grants it.
-    if (_isStepGranted(status, _stepIndex) && _stepIndex < _totalSteps - 1) {
-      setState(() => _stepIndex += 1);
     }
   }
 
-  void _requestCurrentPermission() {
-    final event = switch (_stepIndex) {
-      0 => const UsageEvent.requestUsagePermission(),
-      1 => const UsageEvent.requestOverlayPermission(),
-      _ => const UsageEvent.requestBatteryUnrestricted(),
-    };
+  void _request(UsageEvent event) {
     context.read<UsageBloc>().add(event);
-  }
-
-  void _showPrivacySheet(AppLocalizations l10n) {
-    showModalBottomSheet<void>(
-      context: context,
-      backgroundColor: AppTheme.surface,
-      shape: const RoundedRectangleBorder(
-        borderRadius: BorderRadius.vertical(
-          top: Radius.circular(AppTheme.radiusCard),
-        ),
-      ),
-      builder: (context) {
-        return Padding(
-          padding: const EdgeInsets.fromLTRB(24, 20, 24, 32),
-          child: Column(
-            mainAxisSize: MainAxisSize.min,
-            crossAxisAlignment: CrossAxisAlignment.start,
-            children: [
-              GText(
-                l10n.learnMorePrivacy,
-                style: Theme.of(context).textTheme.titleLarge,
-              ),
-              GGap.m(),
-              GText(
-                l10n.footerHintPermissions,
-                style: Theme.of(context).textTheme.bodyMedium,
-                color: AppTheme.onSurfaceMuted,
-              ),
-            ],
-          ),
-        );
-      },
-    );
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final canPop = Navigator.of(context).canPop();
+    final isDark = Theme.of(context).brightness == Brightness.dark;
+    final pageBg = isDark ? AppTheme.backgroundDark : AppTheme.surface;
 
     return GScaffold(
+      backgroundColor: pageBg,
       body: BlocConsumer<UsageBloc, UsageState>(
         listenWhen: (previous, current) =>
             previous.permissions != current.permissions,
@@ -185,98 +119,95 @@ class _PermissionsViewState extends State<_PermissionsView>
                 hasBatteryUnrestricted: false,
               ),
           };
-          final step = _PermissionStepData.fromIndex(_stepIndex, l10n);
-          final granted = _isStepGranted(status, _stepIndex);
+
+          final rows = [
+            _PermissionRowData(
+              icon: Icons.bar_chart_rounded,
+              label: l10n.usagePermissionTitle,
+              granted: status.hasUsageAccess,
+              onAllow: () =>
+                  _request(const UsageEvent.requestUsagePermission()),
+            ),
+            _PermissionRowData(
+              icon: Icons.layers_outlined,
+              label: l10n.overlayPermissionTitle,
+              granted: status.hasOverlayAccess,
+              onAllow: () =>
+                  _request(const UsageEvent.requestOverlayPermission()),
+            ),
+            _PermissionRowData(
+              icon: Icons.battery_charging_full_rounded,
+              label: l10n.batteryPermissionTitle,
+              granted: status.hasBatteryUnrestricted,
+              onAllow: () =>
+                  _request(const UsageEvent.requestBatteryUnrestricted()),
+            ),
+          ];
 
           return Column(
+            crossAxisAlignment: CrossAxisAlignment.stretch,
             children: [
               Padding(
                 padding: const EdgeInsets.fromLTRB(8, 4, 8, 0),
-                child: Row(
-                  children: [
-                    if (canPop)
-                      IconButton(
-                        onPressed: () => Navigator.of(context).maybePop(),
-                        icon: const Icon(Icons.arrow_back_rounded),
-                        color: AppTheme.onSurface,
-                      )
-                    else
-                      const SizedBox(width: 48),
-                    const Spacer(),
-                    _StepBadge(
-                      label: l10n.permissionStep(
-                        _stepIndex + 1,
-                        _totalSteps,
-                      ),
-                    ),
-                    const Spacer(),
-                    const SizedBox(width: 48),
-                  ],
+                child: Align(
+                  alignment: AlignmentDirectional.centerStart,
+                  child: canPop
+                      ? IconButton(
+                          onPressed: () => Navigator.of(context).maybePop(),
+                          icon: const Icon(Icons.arrow_back_rounded),
+                          color: AppTheme.onSurfaceOf(context),
+                        )
+                      : const SizedBox(height: 48),
                 ),
               ),
               Expanded(
-                child: Padding(
-                  padding: const EdgeInsets.symmetric(horizontal: 32),
-                  child: Column(
-                    children: [
-                      const Spacer(flex: 2),
-                      _PermissionHero(
-                        icon: step.icon,
-                        iconColor: step.iconColor,
-                        softColor: step.softColor,
-                      ),
-                      GGap.xl(),
-                      GText(
-                        step.title,
-                        style: Theme.of(context).textTheme.headlineLarge,
-                        textAlign: TextAlign.center,
-                      ),
-                      GGap.m(),
-                      GText(
-                        step.body,
-                        style: Theme.of(context).textTheme.bodyLarge,
-                        color: AppTheme.onSurfaceMuted,
-                        textAlign: TextAlign.center,
-                      ),
-                      const Spacer(flex: 3),
+                child: ListView(
+                  padding: const EdgeInsets.fromLTRB(28, 8, 28, 24),
+                  children: [
+                    GText(
+                      l10n.permissionsTitle,
+                      style: Theme.of(context).textTheme.headlineLarge,
+                    ),
+                    GGap.s(),
+                    GText(
+                      l10n.permissionsSubtitle,
+                      style: Theme.of(context).textTheme.bodyLarge,
+                      color: AppTheme.onSurfaceMuted,
+                    ),
+                    GGap.xl(),
+                    for (var i = 0; i < rows.length; i++) ...[
+                      if (i > 0)
+                        Divider(
+                          height: 1,
+                          thickness: 1,
+                          color: AppTheme.dividerOf(context),
+                        ),
+                      _PermissionRow(data: rows[i], allowLabel: l10n.permissionAllow),
                     ],
-                  ),
+                  ],
                 ),
               ),
-              Padding(
-                padding: const EdgeInsets.fromLTRB(24, 0, 24, 24),
-                child: Column(
-                  children: [
-                    GButton(
-                      label: granted ? l10n.continueNext : l10n.grantAccess,
-                      icon: granted
-                          ? Icons.arrow_forward_rounded
-                          : Icons.lock_open_rounded,
-                      onPressed: () {
-                        if (granted) {
-                          if (_stepIndex >= _totalSteps - 1) {
-                            if (status.isReady) {
-                              _goHome();
-                            }
-                            return;
-                          }
-                          setState(() => _stepIndex += 1);
-                          return;
-                        }
-                        _requestCurrentPermission();
-                      },
-                    ),
-                    GGap.m(),
-                    TextButton(
-                      onPressed: () => _showPrivacySheet(l10n),
-                      child: GText(
-                        l10n.learnMorePrivacy,
-                        style: Theme.of(context).textTheme.bodyMedium,
-                        color: AppTheme.onSurfaceMuted,
-                        textAlign: TextAlign.center,
+              SafeArea(
+                top: false,
+                child: Padding(
+                  padding: const EdgeInsets.fromLTRB(28, 8, 28, 20),
+                  child: Row(
+                    children: [
+                      const Spacer(),
+                      _ContinueFab(
+                        enabled: status.isReady,
+                        onPressed: status.isReady
+                            ? () {
+                                if (canPop) {
+                                  Navigator.of(context).maybePop();
+                                } else {
+                                  _goHome();
+                                }
+                              }
+                            : null,
                       ),
-                    ),
-                  ],
+                    ],
+                  ),
                 ),
               ),
             ],
@@ -287,97 +218,169 @@ class _PermissionsViewState extends State<_PermissionsView>
   }
 }
 
-/// Visual + copy for a single permission step.
-class _PermissionStepData {
-  const _PermissionStepData({
+class _PermissionRowData {
+  const _PermissionRowData({
     required this.icon,
-    required this.iconColor,
-    required this.softColor,
-    required this.title,
-    required this.body,
+    required this.label,
+    required this.granted,
+    required this.onAllow,
   });
 
   final IconData icon;
-  final Color iconColor;
-  final Color softColor;
-  final String title;
-  final String body;
-
-  static _PermissionStepData fromIndex(int index, AppLocalizations l10n) {
-    return switch (index) {
-      0 => _PermissionStepData(
-          icon: Icons.bar_chart_rounded,
-          iconColor: AppTheme.iconBlue,
-          softColor: AppTheme.primarySoft,
-          title: l10n.usagePermissionTitle,
-          body: l10n.usagePermissionBody,
-        ),
-      1 => _PermissionStepData(
-          icon: Icons.layers_rounded,
-          iconColor: AppTheme.iconOrange,
-          softColor: AppTheme.iconOrange.withValues(alpha: 0.16),
-          title: l10n.overlayPermissionTitle,
-          body: l10n.overlayPermissionBody,
-        ),
-      _ => _PermissionStepData(
-          icon: Icons.battery_charging_full_rounded,
-          iconColor: AppTheme.iconGreen,
-          softColor: AppTheme.iconGreen.withValues(alpha: 0.16),
-          title: l10n.batteryPermissionTitle,
-          body: l10n.batteryPermissionBody,
-        ),
-    };
-  }
+  final String label;
+  final bool granted;
+  final VoidCallback onAllow;
 }
 
-/// Circular `1/3` progress chip at the top of each step.
-class _StepBadge extends StatelessWidget {
-  const _StepBadge({required this.label});
+/// Icon + label + Allow / check action for one Android permission.
+class _PermissionRow extends StatelessWidget {
+  const _PermissionRow({
+    required this.data,
+    required this.allowLabel,
+  });
 
-  final String label;
+  final _PermissionRowData data;
+  final String allowLabel;
 
   @override
   Widget build(BuildContext context) {
-    return Container(
-      width: 48,
-      height: 48,
-      alignment: Alignment.center,
-      decoration: BoxDecoration(
-        shape: BoxShape.circle,
-        border: Border.all(color: AppTheme.primary, width: 1.5),
-      ),
-      child: GText(
-        label,
-        style: Theme.of(context).textTheme.labelMedium,
-        color: AppTheme.primary,
-        textAlign: TextAlign.center,
+    return Padding(
+      padding: const EdgeInsets.symmetric(vertical: 18),
+      child: Row(
+        children: [
+          Icon(
+            data.icon,
+            size: 26,
+            color: AppTheme.onSurfaceOf(context),
+          ),
+          const SizedBox(width: 16),
+          Expanded(
+            child: GText(
+              data.label,
+              style: Theme.of(context).textTheme.titleMedium,
+              maxLines: 2,
+              overflow: TextOverflow.ellipsis,
+            ),
+          ),
+          const SizedBox(width: 12),
+          if (data.granted)
+            const _GrantedChip()
+          else
+            _AllowChip(label: allowLabel, onPressed: data.onAllow),
+        ],
       ),
     );
   }
 }
 
-/// Large soft circle with the permission glyph in the center.
-class _PermissionHero extends StatelessWidget {
-  const _PermissionHero({
-    required this.icon,
-    required this.iconColor,
-    required this.softColor,
+/// Compact primary pill used to open the system grant screen.
+class _AllowChip extends StatelessWidget {
+  const _AllowChip({
+    required this.label,
+    required this.onPressed,
   });
 
-  final IconData icon;
-  final Color iconColor;
-  final Color softColor;
+  final String label;
+  final VoidCallback onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    return DecoratedBox(
+      decoration: BoxDecoration(
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: AppTheme.primaryButtonShadow,
+      ),
+      child: Material(
+        color: AppTheme.primary,
+        borderRadius: BorderRadius.circular(14),
+        child: InkWell(
+          onTap: onPressed,
+          borderRadius: BorderRadius.circular(14),
+          child: Padding(
+            padding: const EdgeInsets.symmetric(horizontal: 18, vertical: 10),
+            child: GText(
+              label,
+              style: Theme.of(context).textTheme.labelLarge?.copyWith(
+                    fontSize: 14,
+                    fontWeight: FontWeight.w600,
+                  ),
+              color: AppTheme.surface,
+            ),
+          ),
+        ),
+      ),
+    );
+  }
+}
+
+/// Soft green check shown once a permission is already granted.
+class _GrantedChip extends StatelessWidget {
+  const _GrantedChip();
 
   @override
   Widget build(BuildContext context) {
     return Container(
-      width: 168,
-      height: 168,
+      width: 48,
+      height: 40,
+      alignment: Alignment.center,
+      decoration: BoxDecoration(
+        color: AppTheme.success,
+        borderRadius: BorderRadius.circular(14),
+        boxShadow: [
+          BoxShadow(
+            color: AppTheme.success.withValues(alpha: 0.35),
+            blurRadius: 12,
+            offset: const Offset(0, 6),
+          ),
+        ],
+      ),
+      child: const Icon(
+        Icons.check_rounded,
+        color: AppTheme.surface,
+        size: 22,
+      ),
+    );
+  }
+}
+
+/// Circular continue control — enabled only when every permission is ready.
+class _ContinueFab extends StatelessWidget {
+  const _ContinueFab({
+    required this.enabled,
+    required this.onPressed,
+  });
+
+  final bool enabled;
+  final VoidCallback? onPressed;
+
+  @override
+  Widget build(BuildContext context) {
+    final bg = enabled
+        ? AppTheme.primary
+        : AppTheme.onSurfaceMuted.withValues(alpha: 0.28);
+
+    return DecoratedBox(
       decoration: BoxDecoration(
         shape: BoxShape.circle,
-        color: softColor,
+        boxShadow: enabled ? AppTheme.primaryButtonShadow : null,
       ),
-      child: Icon(icon, size: 72, color: iconColor),
+      child: Material(
+        color: bg,
+        shape: const CircleBorder(),
+        child: InkWell(
+          customBorder: const CircleBorder(),
+          onTap: onPressed,
+          child: const SizedBox(
+            width: 64,
+            height: 64,
+            child: Icon(
+              Icons.arrow_forward_rounded,
+              color: AppTheme.surface,
+              size: 28,
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

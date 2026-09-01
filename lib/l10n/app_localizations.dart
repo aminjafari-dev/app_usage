@@ -116,6 +116,18 @@ abstract class AppLocalizations {
   /// **'Permissions'**
   String get permissionsTitle;
 
+  /// No description provided for @permissionsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow permissions for a better experience'**
+  String get permissionsSubtitle;
+
+  /// No description provided for @permissionAllow.
+  ///
+  /// In en, this message translates to:
+  /// **'Allow'**
+  String get permissionAllow;
+
   /// No description provided for @unsupportedTitle.
   ///
   /// In en, this message translates to:

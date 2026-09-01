@@ -1,4 +1,3 @@
-import 'dart:async';
 import 'dart:typed_data';
 import 'dart:ui' show lerpDouble;
 
@@ -109,10 +108,7 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
   /// Peak multiplier vs user size at the start of the intro.
   static const double _introBoost = 1.5;
 
-  /// Hold the big circle before scale-down / expand / reveal begin.
-  static const Duration _introDelay = Duration(seconds: 1);
-
-  /// Motion after the delay: scale down → expand right → show duration.
+  /// Scale down → expand right → show duration.
   static const Duration _introDuration = Duration(milliseconds: 1200);
 
   AnimationController? _controller;
@@ -120,7 +116,6 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
   Animation<double>? _expand;
   Animation<double>? _textOpacity;
 
-  Timer? _delayTimer;
   Object? _lastIntroKey;
 
   /// After the intro finishes we keep painting the final animation frame so
@@ -199,22 +194,13 @@ class _UsageGlassCounterState extends State<UsageGlassCounter>
     final controller = _controller;
     if (controller == null) return;
 
-    _delayTimer?.cancel();
-    // Park on the big circle for the delay, then run the motion.
     controller.stop();
     controller.value = 0;
-    // Window / chip start at 1.5× for the hold.
     widget.onIntroSizeBoost?.call(_introBoost);
-
-    _delayTimer = Timer(_introDelay, () {
-      if (!mounted || widget.introKey != _lastIntroKey) return;
-      controller.forward(from: 0);
-    });
+    controller.forward(from: 0);
   }
 
   void _disposeController() {
-    _delayTimer?.cancel();
-    _delayTimer = null;
     _controller?.removeListener(_emitSizeBoost);
     _controller?.dispose();
     _controller = null;

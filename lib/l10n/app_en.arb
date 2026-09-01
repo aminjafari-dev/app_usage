@@ -3,6 +3,8 @@
   "appTitle": "App Usage",
   "homeTitle": "Today's usage",
   "permissionsTitle": "Permissions",
+  "permissionsSubtitle": "Allow permissions for a better experience",
+  "permissionAllow": "Allow",
   "unsupportedTitle": "Not supported",
   "unsupportedMessage": "Live app usage tracking with a floating counter is only available on Android.",
   "usagePermissionTitle": "Usage access",
