@@ -698,6 +698,330 @@ abstract class AppLocalizations {
   /// **'Protect the time you saved for what matters.'**
   String get coachMessageProtect;
 
+  /// No description provided for @coachMessageProtectPeace.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your peace.'**
+  String get coachMessageProtectPeace;
+
+  /// No description provided for @coachMessageProtectEnergy.
+  ///
+  /// In en, this message translates to:
+  /// **'Protect your energy.'**
+  String get coachMessageProtectEnergy;
+
+  /// No description provided for @coachMessageTrustProcess.
+  ///
+  /// In en, this message translates to:
+  /// **'Trust the process.'**
+  String get coachMessageTrustProcess;
+
+  /// No description provided for @coachMessageProgressOverPerfection.
+  ///
+  /// In en, this message translates to:
+  /// **'Progress over perfection.'**
+  String get coachMessageProgressOverPerfection;
+
+  /// No description provided for @coachMessageComparisonThief.
+  ///
+  /// In en, this message translates to:
+  /// **'Comparison is the thief of joy.'**
+  String get coachMessageComparisonThief;
+
+  /// No description provided for @coachMessageDoneBetterPerfect.
+  ///
+  /// In en, this message translates to:
+  /// **'Done is better than perfect.'**
+  String get coachMessageDoneBetterPerfect;
+
+  /// No description provided for @coachMessageDisciplineFreedom.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline equals freedom.'**
+  String get coachMessageDisciplineFreedom;
+
+  /// No description provided for @coachMessageStayHungry.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay hungry. Stay foolish.'**
+  String get coachMessageStayHungry;
+
+  /// No description provided for @coachMessageBeSoGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Be so good they can\'t ignore you.'**
+  String get coachMessageBeSoGood;
+
+  /// No description provided for @coachMessageImpossibleUntilDone.
+  ///
+  /// In en, this message translates to:
+  /// **'It always seems impossible until it\'s done.'**
+  String get coachMessageImpossibleUntilDone;
+
+  /// No description provided for @coachMessageBelieveHalfway.
+  ///
+  /// In en, this message translates to:
+  /// **'Believe you can and you\'re halfway there.'**
+  String get coachMessageBelieveHalfway;
+
+  /// No description provided for @coachMessageGettingStarted.
+  ///
+  /// In en, this message translates to:
+  /// **'The secret of getting ahead is getting started.'**
+  String get coachMessageGettingStarted;
+
+  /// No description provided for @coachMessageShotsYouDontTake.
+  ///
+  /// In en, this message translates to:
+  /// **'You miss 100% of the shots you don\'t take.'**
+  String get coachMessageShotsYouDontTake;
+
+  /// No description provided for @coachMessageFallSeven.
+  ///
+  /// In en, this message translates to:
+  /// **'Fall seven times, stand up eight.'**
+  String get coachMessageFallSeven;
+
+  /// No description provided for @coachMessageStartWhereYouAre.
+  ///
+  /// In en, this message translates to:
+  /// **'Start where you are. Use what you have. Do what you can.'**
+  String get coachMessageStartWhereYouAre;
+
+  /// No description provided for @coachMessageRepeatedlyDo.
+  ///
+  /// In en, this message translates to:
+  /// **'We are what we repeatedly do.'**
+  String get coachMessageRepeatedlyDo;
+
+  /// No description provided for @coachMessageLittleByLittle.
+  ///
+  /// In en, this message translates to:
+  /// **'Little by little, a little becomes a lot.'**
+  String get coachMessageLittleByLittle;
+
+  /// No description provided for @coachMessageProductiveNotBusy.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on being productive instead of busy.'**
+  String get coachMessageProductiveNotBusy;
+
+  /// No description provided for @coachMessageHardWorkTalent.
+  ///
+  /// In en, this message translates to:
+  /// **'Hard work beats talent when talent doesn\'t work hard.'**
+  String get coachMessageHardWorkTalent;
+
+  /// No description provided for @coachMessageSuccessNotFinal.
+  ///
+  /// In en, this message translates to:
+  /// **'Success is not final, failure is not fatal.'**
+  String get coachMessageSuccessNotFinal;
+
+  /// No description provided for @coachMessageSmallWins.
+  ///
+  /// In en, this message translates to:
+  /// **'Small wins still count.'**
+  String get coachMessageSmallWins;
+
+  /// No description provided for @coachMessageRestProductive.
+  ///
+  /// In en, this message translates to:
+  /// **'Rest is productive too.'**
+  String get coachMessageRestProductive;
+
+  /// No description provided for @coachMessageDisciplineSelfLove.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline is self-love.'**
+  String get coachMessageDisciplineSelfLove;
+
+  /// No description provided for @coachMessageDecisionsDistractions.
+  ///
+  /// In en, this message translates to:
+  /// **'Decisions over distractions.'**
+  String get coachMessageDecisionsDistractions;
+
+  /// No description provided for @coachMessageCameThisFar.
+  ///
+  /// In en, this message translates to:
+  /// **'You didn\'t come this far to only come this far.'**
+  String get coachMessageCameThisFar;
+
+  /// No description provided for @coachMessageMakeItExist.
+  ///
+  /// In en, this message translates to:
+  /// **'Just make it exist first. You can make it good later.'**
+  String get coachMessageMakeItExist;
+
+  /// No description provided for @coachMessageWholePoint.
+  ///
+  /// In en, this message translates to:
+  /// **'Almost forgot this was the whole point.'**
+  String get coachMessageWholePoint;
+
+  /// No description provided for @coachMessageNextOpponent.
+  ///
+  /// In en, this message translates to:
+  /// **'Your next opponent is you.'**
+  String get coachMessageNextOpponent;
+
+  /// No description provided for @coachMessageFearRespect.
+  ///
+  /// In en, this message translates to:
+  /// **'I fear no one, but respect everyone.'**
+  String get coachMessageFearRespect;
+
+  /// No description provided for @coachMessageEmptyCup.
+  ///
+  /// In en, this message translates to:
+  /// **'You can\'t pour from an empty cup.'**
+  String get coachMessageEmptyCup;
+
+  /// No description provided for @coachMessageFocusControl.
+  ///
+  /// In en, this message translates to:
+  /// **'Focus on what you can control.'**
+  String get coachMessageFocusControl;
+
+  /// No description provided for @coachMessageLessScrolling.
+  ///
+  /// In en, this message translates to:
+  /// **'Less scrolling. More living.'**
+  String get coachMessageLessScrolling;
+
+  /// No description provided for @coachMessageAttentionCurrency.
+  ///
+  /// In en, this message translates to:
+  /// **'Your attention is your most valuable currency.'**
+  String get coachMessageAttentionCurrency;
+
+  /// No description provided for @coachMessageBePresent.
+  ///
+  /// In en, this message translates to:
+  /// **'Be present.'**
+  String get coachMessageBePresent;
+
+  /// No description provided for @coachMessageOneDay.
+  ///
+  /// In en, this message translates to:
+  /// **'One day at a time.'**
+  String get coachMessageOneDay;
+
+  /// No description provided for @coachMessageSmallSteps.
+  ///
+  /// In en, this message translates to:
+  /// **'Small steps every day.'**
+  String get coachMessageSmallSteps;
+
+  /// No description provided for @coachMessageBuiltConsistency.
+  ///
+  /// In en, this message translates to:
+  /// **'Built by consistency.'**
+  String get coachMessageBuiltConsistency;
+
+  /// No description provided for @coachMessagePeacePriority.
+  ///
+  /// In en, this message translates to:
+  /// **'Peace is my priority.'**
+  String get coachMessagePeacePriority;
+
+  /// No description provided for @coachMessageDisciplineMotivation.
+  ///
+  /// In en, this message translates to:
+  /// **'Discipline over motivation.'**
+  String get coachMessageDisciplineMotivation;
+
+  /// No description provided for @coachMessageKeepGoing.
+  ///
+  /// In en, this message translates to:
+  /// **'Keep going anyway.'**
+  String get coachMessageKeepGoing;
+
+  /// No description provided for @coachMessageGrowthLooksGood.
+  ///
+  /// In en, this message translates to:
+  /// **'Growth looks good on you.'**
+  String get coachMessageGrowthLooksGood;
+
+  /// No description provided for @coachMessageShowingUp.
+  ///
+  /// In en, this message translates to:
+  /// **'Showing up for myself.'**
+  String get coachMessageShowingUp;
+
+  /// No description provided for @coachMessageQuietGrind.
+  ///
+  /// In en, this message translates to:
+  /// **'Quiet grind season.'**
+  String get coachMessageQuietGrind;
+
+  /// No description provided for @coachMessageSoftBoundaries.
+  ///
+  /// In en, this message translates to:
+  /// **'Soft life, strong boundaries.'**
+  String get coachMessageSoftBoundaries;
+
+  /// No description provided for @coachMessageMainCharacter.
+  ///
+  /// In en, this message translates to:
+  /// **'Main character energy.'**
+  String get coachMessageMainCharacter;
+
+  /// No description provided for @coachMessageHealingNotLinear.
+  ///
+  /// In en, this message translates to:
+  /// **'Healing is not linear.'**
+  String get coachMessageHealingNotLinear;
+
+  /// No description provided for @coachMessageDoItScared.
+  ///
+  /// In en, this message translates to:
+  /// **'Do it scared.'**
+  String get coachMessageDoItScared;
+
+  /// No description provided for @coachMessageComfortZones.
+  ///
+  /// In en, this message translates to:
+  /// **'Great things never come from comfort zones.'**
+  String get coachMessageComfortZones;
+
+  /// No description provided for @coachMessageDreamsDontWork.
+  ///
+  /// In en, this message translates to:
+  /// **'Dreams don\'t work unless you do.'**
+  String get coachMessageDreamsDontWork;
+
+  /// No description provided for @coachMessageBestTimeNow.
+  ///
+  /// In en, this message translates to:
+  /// **'The best time is now.'**
+  String get coachMessageBestTimeNow;
+
+  /// No description provided for @coachMessageBeYourself.
+  ///
+  /// In en, this message translates to:
+  /// **'Be yourself; everyone else is already taken.'**
+  String get coachMessageBeYourself;
+
+  /// No description provided for @coachMessageStayHard.
+  ///
+  /// In en, this message translates to:
+  /// **'Stay hard.'**
+  String get coachMessageStayHard;
+
+  /// No description provided for @coachMessageWhoYouBecome.
+  ///
+  /// In en, this message translates to:
+  /// **'It\'s not about the destination, it\'s who you become.'**
+  String get coachMessageWhoYouBecome;
+
+  /// No description provided for @coachMessageSilenceNoise.
+  ///
+  /// In en, this message translates to:
+  /// **'Silence the noise. Listen to yourself.'**
+  String get coachMessageSilenceNoise;
+
   /// No description provided for @coachPauseButton.
   ///
   /// In en, this message translates to:

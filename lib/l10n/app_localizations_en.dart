@@ -340,6 +340,186 @@ class AppLocalizationsEn extends AppLocalizations {
       'Protect the time you saved for what matters.';
 
   @override
+  String get coachMessageProtectPeace => 'Protect your peace.';
+
+  @override
+  String get coachMessageProtectEnergy => 'Protect your energy.';
+
+  @override
+  String get coachMessageTrustProcess => 'Trust the process.';
+
+  @override
+  String get coachMessageProgressOverPerfection => 'Progress over perfection.';
+
+  @override
+  String get coachMessageComparisonThief => 'Comparison is the thief of joy.';
+
+  @override
+  String get coachMessageDoneBetterPerfect => 'Done is better than perfect.';
+
+  @override
+  String get coachMessageDisciplineFreedom => 'Discipline equals freedom.';
+
+  @override
+  String get coachMessageStayHungry => 'Stay hungry. Stay foolish.';
+
+  @override
+  String get coachMessageBeSoGood => 'Be so good they can\'t ignore you.';
+
+  @override
+  String get coachMessageImpossibleUntilDone =>
+      'It always seems impossible until it\'s done.';
+
+  @override
+  String get coachMessageBelieveHalfway =>
+      'Believe you can and you\'re halfway there.';
+
+  @override
+  String get coachMessageGettingStarted =>
+      'The secret of getting ahead is getting started.';
+
+  @override
+  String get coachMessageShotsYouDontTake =>
+      'You miss 100% of the shots you don\'t take.';
+
+  @override
+  String get coachMessageFallSeven => 'Fall seven times, stand up eight.';
+
+  @override
+  String get coachMessageStartWhereYouAre =>
+      'Start where you are. Use what you have. Do what you can.';
+
+  @override
+  String get coachMessageRepeatedlyDo => 'We are what we repeatedly do.';
+
+  @override
+  String get coachMessageLittleByLittle =>
+      'Little by little, a little becomes a lot.';
+
+  @override
+  String get coachMessageProductiveNotBusy =>
+      'Focus on being productive instead of busy.';
+
+  @override
+  String get coachMessageHardWorkTalent =>
+      'Hard work beats talent when talent doesn\'t work hard.';
+
+  @override
+  String get coachMessageSuccessNotFinal =>
+      'Success is not final, failure is not fatal.';
+
+  @override
+  String get coachMessageSmallWins => 'Small wins still count.';
+
+  @override
+  String get coachMessageRestProductive => 'Rest is productive too.';
+
+  @override
+  String get coachMessageDisciplineSelfLove => 'Discipline is self-love.';
+
+  @override
+  String get coachMessageDecisionsDistractions =>
+      'Decisions over distractions.';
+
+  @override
+  String get coachMessageCameThisFar =>
+      'You didn\'t come this far to only come this far.';
+
+  @override
+  String get coachMessageMakeItExist =>
+      'Just make it exist first. You can make it good later.';
+
+  @override
+  String get coachMessageWholePoint =>
+      'Almost forgot this was the whole point.';
+
+  @override
+  String get coachMessageNextOpponent => 'Your next opponent is you.';
+
+  @override
+  String get coachMessageFearRespect => 'I fear no one, but respect everyone.';
+
+  @override
+  String get coachMessageEmptyCup => 'You can\'t pour from an empty cup.';
+
+  @override
+  String get coachMessageFocusControl => 'Focus on what you can control.';
+
+  @override
+  String get coachMessageLessScrolling => 'Less scrolling. More living.';
+
+  @override
+  String get coachMessageAttentionCurrency =>
+      'Your attention is your most valuable currency.';
+
+  @override
+  String get coachMessageBePresent => 'Be present.';
+
+  @override
+  String get coachMessageOneDay => 'One day at a time.';
+
+  @override
+  String get coachMessageSmallSteps => 'Small steps every day.';
+
+  @override
+  String get coachMessageBuiltConsistency => 'Built by consistency.';
+
+  @override
+  String get coachMessagePeacePriority => 'Peace is my priority.';
+
+  @override
+  String get coachMessageDisciplineMotivation => 'Discipline over motivation.';
+
+  @override
+  String get coachMessageKeepGoing => 'Keep going anyway.';
+
+  @override
+  String get coachMessageGrowthLooksGood => 'Growth looks good on you.';
+
+  @override
+  String get coachMessageShowingUp => 'Showing up for myself.';
+
+  @override
+  String get coachMessageQuietGrind => 'Quiet grind season.';
+
+  @override
+  String get coachMessageSoftBoundaries => 'Soft life, strong boundaries.';
+
+  @override
+  String get coachMessageMainCharacter => 'Main character energy.';
+
+  @override
+  String get coachMessageHealingNotLinear => 'Healing is not linear.';
+
+  @override
+  String get coachMessageDoItScared => 'Do it scared.';
+
+  @override
+  String get coachMessageComfortZones =>
+      'Great things never come from comfort zones.';
+
+  @override
+  String get coachMessageDreamsDontWork => 'Dreams don\'t work unless you do.';
+
+  @override
+  String get coachMessageBestTimeNow => 'The best time is now.';
+
+  @override
+  String get coachMessageBeYourself =>
+      'Be yourself; everyone else is already taken.';
+
+  @override
+  String get coachMessageStayHard => 'Stay hard.';
+
+  @override
+  String get coachMessageWhoYouBecome =>
+      'It\'s not about the destination, it\'s who you become.';
+
+  @override
+  String get coachMessageSilenceNoise =>
+      'Silence the noise. Listen to yourself.';
+
+  @override
   String get coachPauseButton => 'I\'ll pause';
 
   @override

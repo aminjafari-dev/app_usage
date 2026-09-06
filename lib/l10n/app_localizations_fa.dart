@@ -341,6 +341,186 @@ class AppLocalizationsFa extends AppLocalizations {
       'زمانی را که برای چیزهای مهم گذاشتی، حفظ کن.';
 
   @override
+  String get coachMessageProtectPeace => 'آرامش‌ات را حفظ کن.';
+
+  @override
+  String get coachMessageProtectEnergy => 'انرژی‌ات را حفظ کن.';
+
+  @override
+  String get coachMessageTrustProcess => 'به فرایند اعتماد کن.';
+
+  @override
+  String get coachMessageProgressOverPerfection => 'پیشرفت مهم‌تر از کمال است.';
+
+  @override
+  String get coachMessageComparisonThief => 'مقایسه، دزد شادی است.';
+
+  @override
+  String get coachMessageDoneBetterPerfect =>
+      'تمام‌کردن بهتر از کامل‌بودن است.';
+
+  @override
+  String get coachMessageDisciplineFreedom => 'انضباط برابر است با آزادی.';
+
+  @override
+  String get coachMessageStayHungry => 'گرسنه بمان. دیوانه‌وار بمان.';
+
+  @override
+  String get coachMessageBeSoGood => 'آن‌قدر خوب باش که نادیده‌ات نگیرند.';
+
+  @override
+  String get coachMessageImpossibleUntilDone =>
+      'همیشه غیرممکن به نظر می‌رسد تا وقتی انجام شود.';
+
+  @override
+  String get coachMessageBelieveHalfway =>
+      'باور کن که می‌توانی؛ نیمه‌ی راه را رفته‌ای.';
+
+  @override
+  String get coachMessageGettingStarted => 'راز پیشرفت، شروع‌کردن است.';
+
+  @override
+  String get coachMessageShotsYouDontTake =>
+      'از شوت‌هایی که نمی‌زنی، صددرصد از دست می‌دهی.';
+
+  @override
+  String get coachMessageFallSeven => 'هفت بار زمین بخور، هشت بار بلند شو.';
+
+  @override
+  String get coachMessageStartWhereYouAre =>
+      'از جایی که هستی شروع کن. با آنچه داری. هرچه می‌توانی انجام بده.';
+
+  @override
+  String get coachMessageRepeatedlyDo =>
+      'ما همان چیزی هستیم که مدام تکرار می‌کنیم.';
+
+  @override
+  String get coachMessageLittleByLittle => 'ذره‌ذره، ذره زیاد می‌شود.';
+
+  @override
+  String get coachMessageProductiveNotBusy =>
+      'روی مفیدبودن تمرکز کن، نه مشغول‌بودن.';
+
+  @override
+  String get coachMessageHardWorkTalent =>
+      'کار سخت، استعداد را شکست می‌دهد وقتی استعداد سخت کار نکند.';
+
+  @override
+  String get coachMessageSuccessNotFinal =>
+      'موفقیت پایان نیست، شکست هم مرگ نیست.';
+
+  @override
+  String get coachMessageSmallWins => 'پیروزی‌های کوچک هم حساب می‌شوند.';
+
+  @override
+  String get coachMessageRestProductive => 'استراحت هم سازنده است.';
+
+  @override
+  String get coachMessageDisciplineSelfLove => 'انضباط، عشق به خود است.';
+
+  @override
+  String get coachMessageDecisionsDistractions =>
+      'تصمیم‌ها مهم‌تر از حواس‌پرتی‌ها.';
+
+  @override
+  String get coachMessageCameThisFar =>
+      'تا اینجا نیامدی که فقط تا اینجا بیایی.';
+
+  @override
+  String get coachMessageMakeItExist => 'اول فقط بسازش. بعد می‌توانی خوبش کنی.';
+
+  @override
+  String get coachMessageWholePoint =>
+      'تقریباً یادم رفته بود اصل ماجرا همین است.';
+
+  @override
+  String get coachMessageNextOpponent => 'حریف بعدی‌ات خودتی.';
+
+  @override
+  String get coachMessageFearRespect =>
+      'از هیچ‌کس نمی‌ترسم، اما به همه احترام می‌گذارم.';
+
+  @override
+  String get coachMessageEmptyCup => 'از فنجان خالی نمی‌شود چیزی ریخت.';
+
+  @override
+  String get coachMessageFocusControl =>
+      'روی چیزی تمرکز کن که کنترلش دست توست.';
+
+  @override
+  String get coachMessageLessScrolling => 'کمتر اسکرول. بیشتر زندگی.';
+
+  @override
+  String get coachMessageAttentionCurrency =>
+      'توجه تو باارزش‌ترین سرمایه‌ات است.';
+
+  @override
+  String get coachMessageBePresent => 'در لحظه باش.';
+
+  @override
+  String get coachMessageOneDay => 'روز به روز.';
+
+  @override
+  String get coachMessageSmallSteps => 'هر روز قدم‌های کوچک.';
+
+  @override
+  String get coachMessageBuiltConsistency => 'ساخته‌شده با ثبات.';
+
+  @override
+  String get coachMessagePeacePriority => 'آرامش اولویت من است.';
+
+  @override
+  String get coachMessageDisciplineMotivation => 'انضباط مهم‌تر از انگیزه.';
+
+  @override
+  String get coachMessageKeepGoing => 'به هر حال ادامه بده.';
+
+  @override
+  String get coachMessageGrowthLooksGood => 'رشد بهت می‌آید.';
+
+  @override
+  String get coachMessageShowingUp => 'برای خودم حاضر می‌شوم.';
+
+  @override
+  String get coachMessageQuietGrind => 'فصل تلاش بی‌صدا.';
+
+  @override
+  String get coachMessageSoftBoundaries => 'زندگی نرم، مرزهای محکم.';
+
+  @override
+  String get coachMessageMainCharacter => 'انرژی شخصیت اصلی.';
+
+  @override
+  String get coachMessageHealingNotLinear => 'شفای درون خطی نیست.';
+
+  @override
+  String get coachMessageDoItScared => 'با ترس انجامش بده.';
+
+  @override
+  String get coachMessageComfortZones => 'چیزهای بزرگ از منطقه امن نمی‌آیند.';
+
+  @override
+  String get coachMessageDreamsDontWork =>
+      'رؤیاها کار نمی‌کنند مگر تو کار کنی.';
+
+  @override
+  String get coachMessageBestTimeNow => 'بهترین زمان، همین حالا است.';
+
+  @override
+  String get coachMessageBeYourself =>
+      'خودت باش؛ بقیه نقش‌ها قبلاً گرفته شده‌اند.';
+
+  @override
+  String get coachMessageStayHard => 'سخت بمان.';
+
+  @override
+  String get coachMessageWhoYouBecome =>
+      'مقصد مهم نیست؛ مهم این است که کی می‌شوی.';
+
+  @override
+  String get coachMessageSilenceNoise => 'هیاهو را خاموش کن. به خودت گوش بده.';
+
+  @override
   String get coachPauseButton => 'مکث می‌کنم';
 
   @override
