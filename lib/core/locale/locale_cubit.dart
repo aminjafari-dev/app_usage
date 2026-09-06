@@ -17,22 +17,22 @@ class LocaleCubit extends Cubit<Locale> {
   /// ```dart
   /// final cubit = LocaleCubit(prefs)..load();
   /// ```
-  LocaleCubit(this._prefs) : super(const Locale('en'));
+  LocaleCubit(this._prefs) : super(const Locale('fa'));
 
   static const _key = 'app_locale';
 
   final SharedPreferences _prefs;
 
-  /// Loads the saved locale or falls back to English.
+  /// Loads the saved locale or falls back to Persian.
   ///
   /// Useful at app startup before the first frame.
   void load() {
     final code = _prefs.getString(_key);
-    // If the user previously chose Persian, restore it on cold start.
-    if (code == 'fa') {
-      emit(const Locale('fa'));
-    } else {
+    // English only when the user explicitly chose it; otherwise Persian.
+    if (code == 'en') {
       emit(const Locale('en'));
+    } else {
+      emit(const Locale('fa'));
     }
   }
 

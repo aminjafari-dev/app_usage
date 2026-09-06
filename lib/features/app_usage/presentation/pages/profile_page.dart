@@ -38,7 +38,7 @@ class ProfilePage extends StatelessWidget {
           ),
           GGap.m(),
           GText(
-            l10n.appTitle,
+            l10n.profileName,
             style: Theme.of(context).textTheme.headlineMedium,
             textAlign: TextAlign.center,
           ),
@@ -52,8 +52,8 @@ class ProfilePage extends StatelessWidget {
           GGap.l(),
           GCard(
             child: GSettingsTile(
-              icon: Icons.info_outline_rounded,
-              iconColor: AppTheme.iconTeal,
+              icon: Icons.favorite_rounded,
+              iconColor: AppTheme.primary,
               title: l10n.appTitle,
               subtitle: 'v1.0.0',
             ),

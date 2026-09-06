@@ -1,30 +1,30 @@
 import 'package:flutter/material.dart';
 import 'package:google_fonts/google_fonts.dart';
 
-/// Central color and theme tokens — minimal soft-UI language from the
-/// shared profile / settings designs (32px cards, sky-blue accents).
+/// Central color and theme tokens — soft romantic UI for Shirin
+/// (32px cards, dusty-rose accents, locale-aware type).
 ///
 /// How to use:
 /// ```dart
 /// final color = AppTheme.primary;
-/// ThemeData theme = AppTheme.light();
+/// ThemeData theme = AppTheme.lightForLocale(locale);
 /// ```
 ///
 /// Always pull colors from here instead of hardcoding `Color(...)` in widgets.
 class AppTheme {
   AppTheme._();
 
-  /// Sky blue — primary CTAs, active tabs, links, section headers.
-  static const Color primary = Color(0xFF3390EC);
+  /// Dusty rose — primary CTAs, active tabs, links, section headers.
+  static const Color primary = Color(0xFFE891A0);
 
-  /// Slightly deeper blue for pressed / emphasis states.
-  static const Color primaryDark = Color(0xFF2481CC);
+  /// Slightly deeper rose for pressed / emphasis states.
+  static const Color primaryDark = Color(0xFFD47082);
 
-  /// Soft blue used behind active nav icons and selected chips.
-  static const Color primarySoft = Color(0xFFDCEEFF);
+  /// Soft blush used behind active nav icons and selected chips.
+  static const Color primarySoft = Color(0xFFFCE8EC);
 
-  /// Soft blue tint for primary button drop shadows.
-  static const Color primaryShadow = Color(0x663390EC);
+  /// Soft rose tint for primary button drop shadows.
+  static const Color primaryShadow = Color(0x66E891A0);
 
   /// Page canvas — light cool grey behind white cards.
   static const Color background = Color(0xFFF1F3F6);
@@ -84,11 +84,11 @@ class AppTheme {
   static const Color glassFill = Color(0xE6FFFFFF);
   static const Color glassBorder = Color(0x66FFFFFF);
   static const Color overlayText = Color(0xFF1A202C);
-  static const Color overlayAccent = Color(0xFF3390EC);
+  static const Color overlayAccent = Color(0xFFE891A0);
 
-  /// Minimal overlay timer chip — off-white pill + sage clock glyph.
+  /// Minimal overlay timer chip — off-white pill + soft rose clock glyph.
   static const Color overlayChipFill = Color(0xFFF4F4F4);
-  static const Color overlayChipIcon = Color(0xFFA8C69F);
+  static const Color overlayChipIcon = Color(0xFFE8A0AB);
   static const Color overlayChipText = Color(0xFF2D2D2D);
 
   /// Soft amber for the over-limit alert on the overlay chip.
@@ -112,7 +112,7 @@ class AppTheme {
         ),
       ];
 
-  /// Soft blue glow under primary CTAs (e.g. “Add a post”).
+  /// Soft rose glow under primary CTAs.
   static List<BoxShadow> get primaryButtonShadow => [
         BoxShadow(
           color: primaryShadow,
@@ -163,34 +163,32 @@ class AppTheme {
         : rowStripe;
   }
 
-  /// Builds the light Material theme used by [MaterialApp].
-  ///
-  /// Example:
-  /// ```dart
-  /// MaterialApp(theme: AppTheme.light());
-  /// ```
-  static ThemeData light() => _build(
+  /// Light theme with Inter (English).
+  static ThemeData light() => lightForLocale(const Locale('en'));
+
+  /// Dark theme with Inter (English).
+  static ThemeData dark() => darkForLocale(const Locale('en'));
+
+  /// Light theme — Baloo Bhaijaan 2 for Persian, Inter otherwise.
+  static ThemeData lightForLocale(Locale locale) => _build(
         brightness: Brightness.light,
         canvas: background,
         card: surface,
         ink: onSurface,
         line: divider,
         stripe: rowStripe,
+        usePersianFont: locale.languageCode == 'fa',
       );
 
-  /// Builds the dark Material theme used by [MaterialApp].
-  ///
-  /// Example:
-  /// ```dart
-  /// MaterialApp(darkTheme: AppTheme.dark());
-  /// ```
-  static ThemeData dark() => _build(
+  /// Dark theme — Baloo Bhaijaan 2 for Persian, Inter otherwise.
+  static ThemeData darkForLocale(Locale locale) => _build(
         brightness: Brightness.dark,
         canvas: backgroundDark,
         card: surfaceDark,
         ink: onSurfaceDark,
         line: dividerDark,
         stripe: rowStripeDark,
+        usePersianFont: locale.languageCode == 'fa',
       );
 
   static ThemeData _build({
@@ -200,6 +198,7 @@ class AppTheme {
     required Color ink,
     required Color line,
     required Color stripe,
+    required bool usePersianFont,
   }) {
     final base = ColorScheme.fromSeed(
       seedColor: primary,
@@ -210,71 +209,95 @@ class AppTheme {
       brightness: brightness,
     );
 
-    // Inter across the app — matches the Figma typeface.
-    final textTheme = GoogleFonts.interTextTheme(
-      TextTheme(
-        headlineLarge: TextStyle(
-          fontSize: 24,
-          fontWeight: FontWeight.w700,
-          color: ink,
-          height: 1.2,
-        ),
-        headlineMedium: TextStyle(
-          fontSize: 20,
-          fontWeight: FontWeight.w700,
-          color: ink,
-          height: 1.2,
-        ),
-        titleLarge: TextStyle(
-          fontSize: 17,
-          fontWeight: FontWeight.w600,
-          color: ink,
-          height: 1.25,
-        ),
-        titleMedium: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: ink,
-          height: 1.25,
-        ),
-        bodyLarge: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w400,
-          color: ink,
-          height: 1.35,
-        ),
-        bodyMedium: TextStyle(
-          fontSize: 14,
-          fontWeight: FontWeight.w400,
-          color: ink,
-          height: 1.35,
-        ),
-        bodySmall: const TextStyle(
-          fontSize: 12,
-          fontWeight: FontWeight.w400,
-          color: onSurfaceMuted,
-          height: 1.3,
-        ),
-        labelLarge: TextStyle(
-          fontSize: 15,
-          fontWeight: FontWeight.w600,
-          color: brightness == Brightness.dark ? ink : surface,
-          height: 1.2,
-        ),
-        labelMedium: const TextStyle(
-          fontSize: 13,
-          fontWeight: FontWeight.w600,
-          color: primary,
-          height: 1.2,
-        ),
+    final baseTextTheme = TextTheme(
+      headlineLarge: TextStyle(
+        fontSize: 24,
+        fontWeight: FontWeight.w700,
+        color: ink,
+        height: 1.2,
+      ),
+      headlineMedium: TextStyle(
+        fontSize: 20,
+        fontWeight: FontWeight.w700,
+        color: ink,
+        height: 1.2,
+      ),
+      titleLarge: TextStyle(
+        fontSize: 17,
+        fontWeight: FontWeight.w600,
+        color: ink,
+        height: 1.25,
+      ),
+      titleMedium: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: ink,
+        height: 1.25,
+      ),
+      bodyLarge: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w400,
+        color: ink,
+        height: 1.35,
+      ),
+      bodyMedium: TextStyle(
+        fontSize: 14,
+        fontWeight: FontWeight.w400,
+        color: ink,
+        height: 1.35,
+      ),
+      bodySmall: const TextStyle(
+        fontSize: 12,
+        fontWeight: FontWeight.w400,
+        color: onSurfaceMuted,
+        height: 1.3,
+      ),
+      labelLarge: TextStyle(
+        fontSize: 15,
+        fontWeight: FontWeight.w600,
+        color: brightness == Brightness.dark ? ink : surface,
+        height: 1.2,
+      ),
+      labelMedium: const TextStyle(
+        fontSize: 13,
+        fontWeight: FontWeight.w600,
+        color: primary,
+        height: 1.2,
       ),
     );
+
+    // Cute round Persian type for FA; Inter for English.
+    final textTheme = usePersianFont
+        ? GoogleFonts.balooBhaijaan2TextTheme(baseTextTheme)
+        : GoogleFonts.interTextTheme(baseTextTheme);
+
+    final fontFamily = usePersianFont
+        ? GoogleFonts.balooBhaijaan2().fontFamily
+        : GoogleFonts.inter().fontFamily;
+
+    TextStyle titledStyle({
+      required double fontSize,
+      required FontWeight fontWeight,
+      required Color color,
+    }) {
+      return usePersianFont
+          ? GoogleFonts.balooBhaijaan2(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: color,
+            )
+          : GoogleFonts.inter(
+              fontSize: fontSize,
+              fontWeight: fontWeight,
+              color: color,
+            );
+    }
 
     return ThemeData(
       useMaterial3: true,
       brightness: brightness,
       colorScheme: base,
-      fontFamily: GoogleFonts.inter().fontFamily,
+      fontFamily: fontFamily,
       textTheme: textTheme,
       primaryTextTheme: textTheme,
       scaffoldBackgroundColor: canvas,
@@ -285,7 +308,7 @@ class AppTheme {
         elevation: 0,
         scrolledUnderElevation: 0,
         centerTitle: false,
-        titleTextStyle: GoogleFonts.inter(
+        titleTextStyle: titledStyle(
           fontSize: 18,
           fontWeight: FontWeight.w600,
           color: ink,
@@ -316,9 +339,10 @@ class AppTheme {
       ),
       snackBarTheme: SnackBarThemeData(
         backgroundColor: ink,
-        contentTextStyle: GoogleFonts.inter(
-          color: brightness == Brightness.dark ? backgroundDark : surface,
+        contentTextStyle: titledStyle(
           fontSize: 14,
+          fontWeight: FontWeight.w400,
+          color: brightness == Brightness.dark ? backgroundDark : surface,
         ),
         behavior: SnackBarBehavior.floating,
         shape: RoundedRectangleBorder(

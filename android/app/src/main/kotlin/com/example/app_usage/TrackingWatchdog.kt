@@ -43,8 +43,8 @@ object TrackingWatchdog {
     private const val START_Y_DP = 40
 
     /** Notification copy used only before Dart ever cached its own. */
-    private const val DEFAULT_WINDOW_TITLE = "App Usage"
-    private const val DEFAULT_WINDOW_CONTENT = "Live usage counter is running"
+    private const val DEFAULT_WINDOW_TITLE = "تمرکز شیرین"
+    private const val DEFAULT_WINDOW_CONTENT = "شمارنده زنده روشن است"
 
     /// Call when live tracking starts so Recents-clear can recover the badge.
     fun start(context: Context) {
@@ -66,7 +66,7 @@ object TrackingWatchdog {
      * Remembers the exact window Dart passed to `showOverlay`.
      *
      * How to use from the keepalive channel whenever the overlay is shown:
-     * `cacheOverlayWindow(context, 420, 108, 'App Usage', '…')`.
+     * `cacheOverlayWindow(context, 420, 108, 'تمرکز شیرین', '…')`.
      *
      * Required because [restartOverlay] runs in a fresh process where the
      * plugin's static geometry is back to full screen.

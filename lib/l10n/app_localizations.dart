@@ -101,43 +101,43 @@ abstract class AppLocalizations {
   /// No description provided for @appTitle.
   ///
   /// In en, this message translates to:
-  /// **'App Usage'**
+  /// **'Shirin\'s Focus'**
   String get appTitle;
 
   /// No description provided for @homeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Today\'s usage'**
+  /// **'Your day, my love'**
   String get homeTitle;
 
   /// No description provided for @permissionsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Permissions'**
+  /// **'A few little permissions, Shirin jan'**
   String get permissionsTitle;
 
   /// No description provided for @permissionsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Allow permissions for a better experience'**
+  /// **'Just so I can look after your time, azizam'**
   String get permissionsSubtitle;
 
   /// No description provided for @permissionAllow.
   ///
   /// In en, this message translates to:
-  /// **'Allow'**
+  /// **'Okay, love'**
   String get permissionAllow;
 
   /// No description provided for @unsupportedTitle.
   ///
   /// In en, this message translates to:
-  /// **'Not supported'**
+  /// **'Aw… not this phone, joonam'**
   String get unsupportedTitle;
 
   /// No description provided for @unsupportedMessage.
   ///
   /// In en, this message translates to:
-  /// **'Live app usage tracking with a floating counter is only available on Android.'**
+  /// **'The live counter only works on Android — like a little gift meant for your phone.'**
   String get unsupportedMessage;
 
   /// No description provided for @usagePermissionTitle.
@@ -149,7 +149,7 @@ abstract class AppLocalizations {
   /// No description provided for @usagePermissionBody.
   ///
   /// In en, this message translates to:
-  /// **'To help you find balance, we gently monitor your app usage. No harsh locks — just awareness on this device.'**
+  /// **'Azizam, I just want to gently see how your day goes — no harsh locks, only love and awareness on this phone, made for you.'**
   String get usagePermissionBody;
 
   /// No description provided for @overlayPermissionTitle.
@@ -161,7 +161,7 @@ abstract class AppLocalizations {
   /// No description provided for @overlayPermissionBody.
   ///
   /// In en, this message translates to:
-  /// **'A small floating counter stays with you so you always know how much time you\'ve spent today.'**
+  /// **'A soft little badge stays beside you, ghashangam, so you always know how your time is going.'**
   String get overlayPermissionBody;
 
   /// No description provided for @batteryPermissionTitle.
@@ -173,13 +173,13 @@ abstract class AppLocalizations {
   /// No description provided for @batteryPermissionBody.
   ///
   /// In en, this message translates to:
-  /// **'Keep the counter alive after you clear Recents. Without this, Android may stop tracking to save battery.'**
+  /// **'Joonam, allow this so your counter doesn’t quietly disappear after you clear Recents — I want it to stay with you.'**
   String get batteryPermissionBody;
 
   /// No description provided for @grantAccess.
   ///
   /// In en, this message translates to:
-  /// **'Grant access'**
+  /// **'Let’s go, azizam'**
   String get grantAccess;
 
   /// No description provided for @grantUsageAccess.
@@ -203,13 +203,13 @@ abstract class AppLocalizations {
   /// No description provided for @permissionGranted.
   ///
   /// In en, this message translates to:
-  /// **'Granted'**
+  /// **'Well done, love 💕'**
   String get permissionGranted;
 
   /// No description provided for @permissionMissing.
   ///
   /// In en, this message translates to:
-  /// **'Required'**
+  /// **'Still needed, ghashangam'**
   String get permissionMissing;
 
   /// No description provided for @permissionStep.
@@ -221,61 +221,61 @@ abstract class AppLocalizations {
   /// No description provided for @continueNext.
   ///
   /// In en, this message translates to:
-  /// **'Continue'**
+  /// **'Continue, azizam'**
   String get continueNext;
 
   /// No description provided for @continueToHome.
   ///
   /// In en, this message translates to:
-  /// **'Continue — counter starts automatically'**
+  /// **'Let’s go home — your counter turns on with love'**
   String get continueToHome;
 
   /// No description provided for @learnMorePrivacy.
   ///
   /// In en, this message translates to:
-  /// **'Learn more about privacy'**
+  /// **'Learn more about your privacy'**
   String get learnMorePrivacy;
 
   /// No description provided for @startTracking.
   ///
   /// In en, this message translates to:
-  /// **'Enable live counter'**
+  /// **'Turn the counter on, ghashangam'**
   String get startTracking;
 
   /// No description provided for @stopTracking.
   ///
   /// In en, this message translates to:
-  /// **'Disable live counter'**
+  /// **'Turn it off for now'**
   String get stopTracking;
 
   /// No description provided for @trackingActive.
   ///
   /// In en, this message translates to:
-  /// **'Live counter is on — open any app to see it at the top'**
+  /// **'Counter is on, aziz delam — open any app and you’ll see it at the top'**
   String get trackingActive;
 
   /// No description provided for @trackingInactive.
   ///
   /// In en, this message translates to:
-  /// **'Live counter is off'**
+  /// **'Counter is off, joonam'**
   String get trackingInactive;
 
   /// No description provided for @noUsageYet.
   ///
   /// In en, this message translates to:
-  /// **'No usage yet...'**
+  /// **'Nothing logged yet, golam…'**
   String get noUsageYet;
 
   /// No description provided for @noUsageYetSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Open apps on your phone to start tracking today\'s screen time.'**
+  /// **'Open some apps so I can see how your day went, Shirin jan.'**
   String get noUsageYetSubtitle;
 
   /// No description provided for @currentApp.
   ///
   /// In en, this message translates to:
-  /// **'Current app'**
+  /// **'You’re here now'**
   String get currentApp;
 
   /// No description provided for @switchLanguage.
@@ -299,55 +299,55 @@ abstract class AppLocalizations {
   /// No description provided for @refresh.
   ///
   /// In en, this message translates to:
-  /// **'Refresh'**
+  /// **'Refresh, azizam'**
   String get refresh;
 
   /// No description provided for @errorGeneric.
   ///
   /// In en, this message translates to:
-  /// **'Something went wrong'**
+  /// **'Oops, something went wrong azizam — try again, love.'**
   String get errorGeneric;
 
   /// No description provided for @permissionsRequired.
   ///
   /// In en, this message translates to:
-  /// **'Usage access, overlay, and unrestricted battery are required for the live counter.'**
+  /// **'Azizam, the live counter needs usage, overlay, and unrestricted battery.'**
   String get permissionsRequired;
 
   /// No description provided for @permissionsRequiredHint.
   ///
   /// In en, this message translates to:
-  /// **'Grant the required access so the live counter can float over other apps.'**
+  /// **'Grant access so this little helper can stay beside you with love.'**
   String get permissionsRequiredHint;
 
   /// No description provided for @todaySectionHeader.
   ///
   /// In en, this message translates to:
-  /// **'Today'**
+  /// **'Your today'**
   String get todaySectionHeader;
 
   /// No description provided for @totalUsageLabel.
   ///
   /// In en, this message translates to:
-  /// **'Total usage today'**
+  /// **'Your total time today'**
   String get totalUsageLabel;
 
   /// No description provided for @trackingSectionHeader.
   ///
   /// In en, this message translates to:
-  /// **'Live counter'**
+  /// **'Loving counter'**
   String get trackingSectionHeader;
 
   /// No description provided for @statusOnline.
   ///
   /// In en, this message translates to:
-  /// **'Tracking'**
+  /// **'Watching over you'**
   String get statusOnline;
 
   /// No description provided for @statusOffline.
   ///
   /// In en, this message translates to:
-  /// **'Paused'**
+  /// **'Resting'**
   String get statusOffline;
 
   /// No description provided for @quickRefresh.
@@ -389,13 +389,13 @@ abstract class AppLocalizations {
   /// No description provided for @permissionsIntro.
   ///
   /// In en, this message translates to:
-  /// **'Allow the following so the floating counter can work like a Telegram overlay badge.'**
+  /// **'Allow these, ghashangam, so the floating badge can stay on your screen like a soft little kiss.'**
   String get permissionsIntro;
 
   /// No description provided for @footerHintPermissions.
   ///
   /// In en, this message translates to:
-  /// **'Only this device can read usage stats. Nothing is uploaded.'**
+  /// **'Don’t worry azizam — only this phone reads your usage. Nothing goes anywhere.'**
   String get footerHintPermissions;
 
   /// No description provided for @secondsFormat.
@@ -407,19 +407,19 @@ abstract class AppLocalizations {
   /// No description provided for @settingsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Settings'**
+  /// **'Your settings'**
   String get settingsTitle;
 
   /// No description provided for @settingsPreferencesSection.
   ///
   /// In en, this message translates to:
-  /// **'Preferences'**
+  /// **'Your preferences'**
   String get settingsPreferencesSection;
 
   /// No description provided for @settingsTrackerSection.
   ///
   /// In en, this message translates to:
-  /// **'Tracker'**
+  /// **'Looking after your time'**
   String get settingsTrackerSection;
 
   /// No description provided for @settingsTheme.
@@ -431,31 +431,31 @@ abstract class AppLocalizations {
   /// No description provided for @themeLight.
   ///
   /// In en, this message translates to:
-  /// **'Light'**
+  /// **'Soft light'**
   String get themeLight;
 
   /// No description provided for @themeDark.
   ///
   /// In en, this message translates to:
-  /// **'Dark'**
+  /// **'Calm night'**
   String get themeDark;
 
   /// No description provided for @badgeAppearanceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Badge Appearance'**
+  /// **'Little badge look'**
   String get badgeAppearanceTitle;
 
   /// No description provided for @badgeAppearanceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Size & Opacity'**
+  /// **'Size & opacity — however you like'**
   String get badgeAppearanceSubtitle;
 
   /// No description provided for @customizeBadgeTitle.
   ///
   /// In en, this message translates to:
-  /// **'Customize Badge'**
+  /// **'Make the badge pretty'**
   String get customizeBadgeTitle;
 
   /// No description provided for @badgeSizeLabel.
@@ -473,7 +473,7 @@ abstract class AppLocalizations {
   /// No description provided for @saveChanges.
   ///
   /// In en, this message translates to:
-  /// **'Save Changes'**
+  /// **'Save, azizam'**
   String get saveChanges;
 
   /// No description provided for @privacyPolicy.
@@ -515,31 +515,37 @@ abstract class AppLocalizations {
   /// No description provided for @pressBackAgainToExit.
   ///
   /// In en, this message translates to:
-  /// **'Press back again to exit'**
+  /// **'Press back again to leave, ghashangam'**
   String get pressBackAgainToExit;
 
   /// No description provided for @tabComingSoon.
   ///
   /// In en, this message translates to:
-  /// **'This section is coming soon.'**
+  /// **'This part is coming soon — wait for me, azizam.'**
   String get tabComingSoon;
+
+  /// No description provided for @profileName.
+  ///
+  /// In en, this message translates to:
+  /// **'Shirin joonam'**
+  String get profileName;
 
   /// No description provided for @profileSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Your profile and account details.'**
+  /// **'Made with all the love in the world — only for you, eshgham.'**
   String get profileSubtitle;
 
   /// No description provided for @timerPickAppHint.
   ///
   /// In en, this message translates to:
-  /// **'Choose an app to set a daily limit or block it when opened.'**
+  /// **'Pick an app so I can set a daily limit or lock it for you, aziz delam.'**
   String get timerPickAppHint;
 
   /// No description provided for @timerSetDailyLimit.
   ///
   /// In en, this message translates to:
-  /// **'Set daily usage limit'**
+  /// **'Set your daily limit'**
   String get timerSetDailyLimit;
 
   /// No description provided for @timerHoursLabel.
@@ -557,37 +563,37 @@ abstract class AppLocalizations {
   /// No description provided for @timerNotifyWhenReached.
   ///
   /// In en, this message translates to:
-  /// **'Remind me when limit reached'**
+  /// **'Remind me when I reach the limit, joonam'**
   String get timerNotifyWhenReached;
 
   /// No description provided for @timerSetButton.
   ///
   /// In en, this message translates to:
-  /// **'Set Timer'**
+  /// **'Set it, ghashangam'**
   String get timerSetButton;
 
   /// No description provided for @timerSaved.
   ///
   /// In en, this message translates to:
-  /// **'Daily limit saved.'**
+  /// **'Saved — I’m watching over your time, azizam.'**
   String get timerSaved;
 
   /// No description provided for @timerInvalidLimit.
   ///
   /// In en, this message translates to:
-  /// **'Choose a time greater than zero.'**
+  /// **'Choose more than zero, golam.'**
   String get timerInvalidLimit;
 
   /// No description provided for @timerEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No apps yet'**
+  /// **'No apps yet, Shirin jan'**
   String get timerEmptyTitle;
 
   /// No description provided for @timerEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use some apps today, then come back to set a limit.'**
+  /// **'Use some apps today, then come back and we’ll set it together.'**
   String get timerEmptySubtitle;
 
   /// No description provided for @timerLimitSummary.
@@ -599,469 +605,469 @@ abstract class AppLocalizations {
   /// No description provided for @timerBlockWhenOpened.
   ///
   /// In en, this message translates to:
-  /// **'Block this app when opened'**
+  /// **'Lock this app when opened'**
   String get timerBlockWhenOpened;
 
   /// No description provided for @timerBlockWhenOpenedHint.
   ///
   /// In en, this message translates to:
-  /// **'Shows a full-screen lock so the app cannot be used.'**
+  /// **'A soft full-screen lock appears to protect your time, azizam.'**
   String get timerBlockWhenOpenedHint;
 
   /// No description provided for @timerBlockedLabel.
   ///
   /// In en, this message translates to:
-  /// **'Blocked'**
+  /// **'Locked with love'**
   String get timerBlockedLabel;
 
   /// No description provided for @timerLimitAndBlockedSummary.
   ///
   /// In en, this message translates to:
-  /// **'Limit {hours}h {minutes}m · Blocked'**
+  /// **'Limit {hours}h {minutes}m · Locked'**
   String timerLimitAndBlockedSummary(int hours, int minutes);
 
   /// No description provided for @timerBlockSaved.
   ///
   /// In en, this message translates to:
-  /// **'App block updated.'**
+  /// **'Okay azizam, lock updated.'**
   String get timerBlockSaved;
 
   /// No description provided for @blockTitle.
   ///
   /// In en, this message translates to:
-  /// **'App blocked'**
+  /// **'Wait a second, ghashangam'**
   String get blockTitle;
 
   /// No description provided for @blockSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'{appName} is locked. Leave this app to continue.'**
+  /// **'{appName} is locked right now. Leave so your day stays calm, azizam.'**
   String blockSubtitle(String appName);
 
   /// No description provided for @blockLeaveButton.
   ///
   /// In en, this message translates to:
-  /// **'Leave app'**
+  /// **'Okay, I’m leaving'**
   String get blockLeaveButton;
 
   /// No description provided for @blockHint.
   ///
   /// In en, this message translates to:
-  /// **'You chose to block this app. It stays locked until you leave.'**
+  /// **'You asked for this lock to protect your time — it stays until you leave, joonam.'**
   String get blockHint;
 
   /// No description provided for @coachTitle.
   ///
   /// In en, this message translates to:
-  /// **'Time check'**
+  /// **'Hi eshgham'**
   String get coachTitle;
 
   /// No description provided for @coachOverLimitSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'You\'re {minutes} min over your daily limit.'**
+  /// **'Aziz delam, you’re {minutes} min past your daily limit.'**
   String coachOverLimitSubtitle(int minutes);
 
   /// No description provided for @coachMessageBoss.
   ///
   /// In en, this message translates to:
-  /// **'You\'re the boss of the phone — not the other way around.'**
+  /// **'Shirin joonam, you’re the boss of this phone — not the other way around, azizam.'**
   String get coachMessageBoss;
 
   /// No description provided for @coachMessageGoal.
   ///
   /// In en, this message translates to:
-  /// **'Follow your goal. This app can wait.'**
+  /// **'Follow your goal, ghashangam. This app can wait.'**
   String get coachMessageGoal;
 
   /// No description provided for @coachMessageAppsChange.
   ///
   /// In en, this message translates to:
-  /// **'Don\'t let an app rewrite your day.'**
+  /// **'Don’t let an app ruin your beautiful day, aziz delam.'**
   String get coachMessageAppsChange;
 
   /// No description provided for @coachMessagePause.
   ///
   /// In en, this message translates to:
-  /// **'One breath. Then decide if you still want to stay.'**
+  /// **'One soft breath, rooham. Then see if you still want to stay.'**
   String get coachMessagePause;
 
   /// No description provided for @coachMessageChoice.
   ///
   /// In en, this message translates to:
-  /// **'You chose a limit for a reason. Honor it.'**
+  /// **'You set this limit for yourself. Honor it, eshgham.'**
   String get coachMessageChoice;
 
   /// No description provided for @coachMessageProtect.
   ///
   /// In en, this message translates to:
-  /// **'Protect the time you saved for what matters.'**
+  /// **'Protect the time you saved for what matters, nazanin.'**
   String get coachMessageProtect;
 
   /// No description provided for @coachMessageProtectPeace.
   ///
   /// In en, this message translates to:
-  /// **'Protect your peace.'**
+  /// **'Your peace is gold, Shirin jan — keep it.'**
   String get coachMessageProtectPeace;
 
   /// No description provided for @coachMessageProtectEnergy.
   ///
   /// In en, this message translates to:
-  /// **'Protect your energy.'**
+  /// **'Your energy is yours, golam — don’t waste it.'**
   String get coachMessageProtectEnergy;
 
   /// No description provided for @coachMessageTrustProcess.
   ///
   /// In en, this message translates to:
-  /// **'Trust the process.'**
+  /// **'Trust yourself, azizam. You’re doing so beautifully.'**
   String get coachMessageTrustProcess;
 
   /// No description provided for @coachMessageProgressOverPerfection.
   ///
   /// In en, this message translates to:
-  /// **'Progress over perfection.'**
+  /// **'You don’t need to be perfect, joonam — just keep going.'**
   String get coachMessageProgressOverPerfection;
 
   /// No description provided for @coachMessageComparisonThief.
   ///
   /// In en, this message translates to:
-  /// **'Comparison is the thief of joy.'**
+  /// **'Don’t compare yourself to anyone, ghashangam — you’re one of a kind.'**
   String get coachMessageComparisonThief;
 
   /// No description provided for @coachMessageDoneBetterPerfect.
   ///
   /// In en, this message translates to:
-  /// **'Done is better than perfect.'**
+  /// **'Done is better than perfect, azizam.'**
   String get coachMessageDoneBetterPerfect;
 
   /// No description provided for @coachMessageDisciplineFreedom.
   ///
   /// In en, this message translates to:
-  /// **'Discipline equals freedom.'**
+  /// **'A soft bit of discipline means more freedom for you, eshgham.'**
   String get coachMessageDisciplineFreedom;
 
   /// No description provided for @coachMessageStayHungry.
   ///
   /// In en, this message translates to:
-  /// **'Stay hungry. Stay foolish.'**
+  /// **'Stay curious, stay kind to yourself, rooham.'**
   String get coachMessageStayHungry;
 
   /// No description provided for @coachMessageBeSoGood.
   ///
   /// In en, this message translates to:
-  /// **'Be so good they can\'t ignore you.'**
+  /// **'You’re already so good they can’t ignore you, Shirin joon.'**
   String get coachMessageBeSoGood;
 
   /// No description provided for @coachMessageImpossibleUntilDone.
   ///
   /// In en, this message translates to:
-  /// **'It always seems impossible until it\'s done.'**
+  /// **'It feels hard until you do it, ghashangam — and you can.'**
   String get coachMessageImpossibleUntilDone;
 
   /// No description provided for @coachMessageBelieveHalfway.
   ///
   /// In en, this message translates to:
-  /// **'Believe you can and you\'re halfway there.'**
+  /// **'Believe you can, aziz delam — you’re already halfway there.'**
   String get coachMessageBelieveHalfway;
 
   /// No description provided for @coachMessageGettingStarted.
   ///
   /// In en, this message translates to:
-  /// **'The secret of getting ahead is getting started.'**
+  /// **'The secret? Just starting, golam. Start, love.'**
   String get coachMessageGettingStarted;
 
   /// No description provided for @coachMessageShotsYouDontTake.
   ///
   /// In en, this message translates to:
-  /// **'You miss 100% of the shots you don\'t take.'**
+  /// **'What you never try, you lose — be brave, joonam.'**
   String get coachMessageShotsYouDontTake;
 
   /// No description provided for @coachMessageFallSeven.
   ///
   /// In en, this message translates to:
-  /// **'Fall seven times, stand up eight.'**
+  /// **'Fall seven times, stand up eight — I’m right here, eshgham.'**
   String get coachMessageFallSeven;
 
   /// No description provided for @coachMessageStartWhereYouAre.
   ///
   /// In en, this message translates to:
-  /// **'Start where you are. Use what you have. Do what you can.'**
+  /// **'Start right where you are, nazanin. With what you have.'**
   String get coachMessageStartWhereYouAre;
 
   /// No description provided for @coachMessageRepeatedlyDo.
   ///
   /// In en, this message translates to:
-  /// **'We are what we repeatedly do.'**
+  /// **'We become our little habits — so choose the pretty ones, azizam.'**
   String get coachMessageRepeatedlyDo;
 
   /// No description provided for @coachMessageLittleByLittle.
   ///
   /// In en, this message translates to:
-  /// **'Little by little, a little becomes a lot.'**
+  /// **'Little by little, ghashangam — slowly it grows.'**
   String get coachMessageLittleByLittle;
 
   /// No description provided for @coachMessageProductiveNotBusy.
   ///
   /// In en, this message translates to:
-  /// **'Focus on being productive instead of busy.'**
+  /// **'Busy isn’t the point — useful is, rooham.'**
   String get coachMessageProductiveNotBusy;
 
   /// No description provided for @coachMessageHardWorkTalent.
   ///
   /// In en, this message translates to:
-  /// **'Hard work beats talent when talent doesn\'t work hard.'**
+  /// **'Your effort is prettier than unused talent, Shirin jan.'**
   String get coachMessageHardWorkTalent;
 
   /// No description provided for @coachMessageSuccessNotFinal.
   ///
   /// In en, this message translates to:
-  /// **'Success is not final, failure is not fatal.'**
+  /// **'Success isn’t the end, failure isn’t either, azizam.'**
   String get coachMessageSuccessNotFinal;
 
   /// No description provided for @coachMessageSmallWins.
   ///
   /// In en, this message translates to:
-  /// **'Small wins still count.'**
+  /// **'Little wins still count with love, ghashangam.'**
   String get coachMessageSmallWins;
 
   /// No description provided for @coachMessageRestProductive.
   ///
   /// In en, this message translates to:
-  /// **'Rest is productive too.'**
+  /// **'Rest is love too — give yourself a break, joonam.'**
   String get coachMessageRestProductive;
 
   /// No description provided for @coachMessageDisciplineSelfLove.
   ///
   /// In en, this message translates to:
-  /// **'Discipline is self-love.'**
+  /// **'Looking after yourself is self-love — and you deserve that love, aziz delam.'**
   String get coachMessageDisciplineSelfLove;
 
   /// No description provided for @coachMessageDecisionsDistractions.
   ///
   /// In en, this message translates to:
-  /// **'Decisions over distractions.'**
+  /// **'Your sweet decisions matter more than mindless scrolling, eshgham.'**
   String get coachMessageDecisionsDistractions;
 
   /// No description provided for @coachMessageCameThisFar.
   ///
   /// In en, this message translates to:
-  /// **'You didn\'t come this far to only come this far.'**
+  /// **'You didn’t come this far just to stop here — keep going, azizam.'**
   String get coachMessageCameThisFar;
 
   /// No description provided for @coachMessageMakeItExist.
   ///
   /// In en, this message translates to:
-  /// **'Just make it exist first. You can make it good later.'**
+  /// **'Just start first, then make it pretty, golam.'**
   String get coachMessageMakeItExist;
 
   /// No description provided for @coachMessageWholePoint.
   ///
   /// In en, this message translates to:
-  /// **'Almost forgot this was the whole point.'**
+  /// **'Remember — you’re the point, not this screen, rooham.'**
   String get coachMessageWholePoint;
 
   /// No description provided for @coachMessageNextOpponent.
   ///
   /// In en, this message translates to:
-  /// **'Your next opponent is you.'**
+  /// **'Your main opponent is you — and you’re winning beautifully, Shirin joon.'**
   String get coachMessageNextOpponent;
 
   /// No description provided for @coachMessageFearRespect.
   ///
   /// In en, this message translates to:
-  /// **'I fear no one, but respect everyone.'**
+  /// **'Be strong, be kind — just like you are, nazanin.'**
   String get coachMessageFearRespect;
 
   /// No description provided for @coachMessageEmptyCup.
   ///
   /// In en, this message translates to:
-  /// **'You can\'t pour from an empty cup.'**
+  /// **'You can’t pour from an empty cup — fill yours first, azizam.'**
   String get coachMessageEmptyCup;
 
   /// No description provided for @coachMessageFocusControl.
   ///
   /// In en, this message translates to:
-  /// **'Focus on what you can control.'**
+  /// **'Focus on what you can hold, ghashangam.'**
   String get coachMessageFocusControl;
 
   /// No description provided for @coachMessageLessScrolling.
   ///
   /// In en, this message translates to:
-  /// **'Less scrolling. More living.'**
+  /// **'Less scrolling, more living — especially for you, eshgham.'**
   String get coachMessageLessScrolling;
 
   /// No description provided for @coachMessageAttentionCurrency.
   ///
   /// In en, this message translates to:
-  /// **'Your attention is your most valuable currency.'**
+  /// **'Your attention is your most precious gift, joonam — don’t waste it.'**
   String get coachMessageAttentionCurrency;
 
   /// No description provided for @coachMessageBePresent.
   ///
   /// In en, this message translates to:
-  /// **'Be present.'**
+  /// **'Be right here, my Shirin — this moment is yours.'**
   String get coachMessageBePresent;
 
   /// No description provided for @coachMessageOneDay.
   ///
   /// In en, this message translates to:
-  /// **'One day at a time.'**
+  /// **'Day by day, soft and with love, aziz delam.'**
   String get coachMessageOneDay;
 
   /// No description provided for @coachMessageSmallSteps.
   ///
   /// In en, this message translates to:
-  /// **'Small steps every day.'**
+  /// **'One little step every day, golam — that’s enough.'**
   String get coachMessageSmallSteps;
 
   /// No description provided for @coachMessageBuiltConsistency.
   ///
   /// In en, this message translates to:
-  /// **'Built by consistency.'**
+  /// **'You’re built by consistency, not rush, ghashangam.'**
   String get coachMessageBuiltConsistency;
 
   /// No description provided for @coachMessagePeacePriority.
   ///
   /// In en, this message translates to:
-  /// **'Peace is my priority.'**
+  /// **'Your peace is my priority for you, rooham.'**
   String get coachMessagePeacePriority;
 
   /// No description provided for @coachMessageDisciplineMotivation.
   ///
   /// In en, this message translates to:
-  /// **'Discipline over motivation.'**
+  /// **'When motivation fades, soft discipline helps, azizam.'**
   String get coachMessageDisciplineMotivation;
 
   /// No description provided for @coachMessageKeepGoing.
   ///
   /// In en, this message translates to:
-  /// **'Keep going anyway.'**
+  /// **'Keep going — I’m so proud of you, eshgham.'**
   String get coachMessageKeepGoing;
 
   /// No description provided for @coachMessageGrowthLooksGood.
   ///
   /// In en, this message translates to:
-  /// **'Growth looks good on you.'**
+  /// **'Growth looks so good on you, Shirin joon — prettier every day.'**
   String get coachMessageGrowthLooksGood;
 
   /// No description provided for @coachMessageShowingUp.
   ///
   /// In en, this message translates to:
-  /// **'Showing up for myself.'**
+  /// **'Show up for yourself — you deserve it, nazanin.'**
   String get coachMessageShowingUp;
 
   /// No description provided for @coachMessageQuietGrind.
   ///
   /// In en, this message translates to:
-  /// **'Quiet grind season.'**
+  /// **'Quiet soft grind season — you’re strong, joonam.'**
   String get coachMessageQuietGrind;
 
   /// No description provided for @coachMessageSoftBoundaries.
   ///
   /// In en, this message translates to:
-  /// **'Soft life, strong boundaries.'**
+  /// **'Soft life, strong boundaries — well done azizam.'**
   String get coachMessageSoftBoundaries;
 
   /// No description provided for @coachMessageMainCharacter.
   ///
   /// In en, this message translates to:
-  /// **'Main character energy.'**
+  /// **'You’re the main character of this story, ghashangam.'**
   String get coachMessageMainCharacter;
 
   /// No description provided for @coachMessageHealingNotLinear.
   ///
   /// In en, this message translates to:
-  /// **'Healing is not linear.'**
+  /// **'Healing isn’t a straight line — be gentle with yourself, rooham.'**
   String get coachMessageHealingNotLinear;
 
   /// No description provided for @coachMessageDoItScared.
   ///
   /// In en, this message translates to:
-  /// **'Do it scared.'**
+  /// **'Do it scared — you’re braver than you think, eshgham.'**
   String get coachMessageDoItScared;
 
   /// No description provided for @coachMessageComfortZones.
   ///
   /// In en, this message translates to:
-  /// **'Great things never come from comfort zones.'**
+  /// **'Great things live outside the comfort zone, golam — take one step.'**
   String get coachMessageComfortZones;
 
   /// No description provided for @coachMessageDreamsDontWork.
   ///
   /// In en, this message translates to:
-  /// **'Dreams don\'t work unless you do.'**
+  /// **'Dreams don’t work unless you do, Shirin jan.'**
   String get coachMessageDreamsDontWork;
 
   /// No description provided for @coachMessageBestTimeNow.
   ///
   /// In en, this message translates to:
-  /// **'The best time is now.'**
+  /// **'Best time? Right now, aziz delam.'**
   String get coachMessageBestTimeNow;
 
   /// No description provided for @coachMessageBeYourself.
   ///
   /// In en, this message translates to:
-  /// **'Be yourself; everyone else is already taken.'**
+  /// **'Be yourself — every other role is taken, ghashangam.'**
   String get coachMessageBeYourself;
 
   /// No description provided for @coachMessageStayHard.
   ///
   /// In en, this message translates to:
-  /// **'Stay hard.'**
+  /// **'Stay soft, stay strong — the way I love you, joonam.'**
   String get coachMessageStayHard;
 
   /// No description provided for @coachMessageWhoYouBecome.
   ///
   /// In en, this message translates to:
-  /// **'It\'s not about the destination, it\'s who you become.'**
+  /// **'It’s not the destination — it’s who you become, rooham.'**
   String get coachMessageWhoYouBecome;
 
   /// No description provided for @coachMessageSilenceNoise.
   ///
   /// In en, this message translates to:
-  /// **'Silence the noise. Listen to yourself.'**
+  /// **'Silence the noise. Listen to your heart, my Shirin.'**
   String get coachMessageSilenceNoise;
 
   /// No description provided for @coachPauseButton.
   ///
   /// In en, this message translates to:
-  /// **'I\'ll pause'**
+  /// **'Okay, I’ll pause azizam'**
   String get coachPauseButton;
 
   /// No description provided for @coachSnoozeButton.
   ///
   /// In en, this message translates to:
-  /// **'{minutes, plural, =1{1 more minute} other{{minutes} more minutes}}'**
+  /// **'{minutes, plural, =1{1 more minute, joonam} other{{minutes} more minutes, joonam}}'**
   String coachSnoozeButton(int minutes);
 
   /// No description provided for @coachMuteToday.
   ///
   /// In en, this message translates to:
-  /// **'Mute reminders for this app today'**
+  /// **'Mute this reminder for today, ghashangam'**
   String get coachMuteToday;
 
   /// No description provided for @coachSettingsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Limit reminders'**
+  /// **'Soft reminders'**
   String get coachSettingsTitle;
 
   /// No description provided for @coachSettingsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Gentle check-ins when you go past a daily app limit.'**
+  /// **'A loving check-in when you go past a daily limit.'**
   String get coachSettingsSubtitle;
 
   /// No description provided for @coachSettingsEnabled.
   ///
   /// In en, this message translates to:
-  /// **'Show limit reminders'**
+  /// **'Keep limit reminders on'**
   String get coachSettingsEnabled;
 
   /// No description provided for @coachSettingsEnabledHint.
   ///
   /// In en, this message translates to:
-  /// **'Alert on the badge when a timed app goes over its limit'**
+  /// **'I’ll nudge you on the badge when an app goes over, azizam'**
   String get coachSettingsEnabledHint;
 
   /// No description provided for @coachSettingsSnoozeLabel.
@@ -1073,19 +1079,19 @@ abstract class AppLocalizations {
   /// No description provided for @coachSettingsSnoozeHint.
   ///
   /// In en, this message translates to:
-  /// **'How long to wait after “more minutes”.'**
+  /// **'How long should I wait after “more minutes”, joonam.'**
   String get coachSettingsSnoozeHint;
 
   /// No description provided for @coachSettingsMaxNudgesLabel.
   ///
   /// In en, this message translates to:
-  /// **'Max reminders per app / day'**
+  /// **'Max reminders per day'**
   String get coachSettingsMaxNudgesLabel;
 
   /// No description provided for @coachSettingsMaxNudgesHint.
   ///
   /// In en, this message translates to:
-  /// **'Keeps reminders helpful instead of noisy.'**
+  /// **'Keep reminders sweet, not annoying.'**
   String get coachSettingsMaxNudgesHint;
 
   /// No description provided for @coachSettingsAllowMute.
@@ -1097,7 +1103,7 @@ abstract class AppLocalizations {
   /// No description provided for @coachSettingsAllowMuteHint.
   ///
   /// In en, this message translates to:
-  /// **'Show a button to silence one app until tomorrow'**
+  /// **'A button to silence one app until tomorrow'**
   String get coachSettingsAllowMuteHint;
 
   /// No description provided for @coachSettingsMinutes.
@@ -1115,19 +1121,19 @@ abstract class AppLocalizations {
   /// No description provided for @coachSettingsOff.
   ///
   /// In en, this message translates to:
-  /// **'Reminders turned off'**
+  /// **'Reminders are off, azizam'**
   String get coachSettingsOff;
 
   /// No description provided for @coachAppearanceTitle.
   ///
   /// In en, this message translates to:
-  /// **'Dialog Appearance'**
+  /// **'Dialog look'**
   String get coachAppearanceTitle;
 
   /// No description provided for @coachAppearanceSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Preview the over-limit quote'**
+  /// **'Preview the loving messages'**
   String get coachAppearanceSubtitle;
 
   /// No description provided for @coachAppearancePreviewApp.
@@ -1145,25 +1151,25 @@ abstract class AppLocalizations {
   /// No description provided for @coachLimitAlert.
   ///
   /// In en, this message translates to:
-  /// **'Daily limit reached'**
+  /// **'You hit your daily limit, ghashangam'**
   String get coachLimitAlert;
 
   /// No description provided for @holidaySettingsTitle.
   ///
   /// In en, this message translates to:
-  /// **'Holiday day'**
+  /// **'Shirin joon’s free day'**
   String get holidaySettingsTitle;
 
   /// No description provided for @holidaySettingsSubtitle.
   ///
   /// In en, this message translates to:
-  /// **'On this day, every blocked app is allowed to open freely.'**
+  /// **'On this day every lock opens — guilt-free scrolling, only for you eshgham.'**
   String get holidaySettingsSubtitle;
 
   /// No description provided for @holidaySettingsSummary.
   ///
   /// In en, this message translates to:
-  /// **'{day} · blocked apps unlock'**
+  /// **'{day} · unlock with love'**
   String holidaySettingsSummary(String day);
 
   /// No description provided for @weekdayMonday.

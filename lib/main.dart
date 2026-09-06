@@ -41,15 +41,15 @@ void overlayMain() async {
   DartPluginRegistrant.ensureInitialized();
 
   // Match the user's language so coach messages are localized even when the
-  // main activity is dead.
+  // main activity is dead. Missing preference defaults to Persian.
   final prefs = await SharedPreferences.getInstance();
   final code = prefs.getString('app_locale');
-  final locale = code == 'fa' ? const Locale('fa') : const Locale('en');
+  final locale = code == 'en' ? const Locale('en') : const Locale('fa');
 
   runApp(
     MaterialApp(
       debugShowCheckedModeBanner: false,
-      theme: AppTheme.light(),
+      theme: AppTheme.lightForLocale(locale),
       locale: locale,
       supportedLocales: AppLocalizations.supportedLocales,
       localizationsDelegates: const [
@@ -88,9 +88,9 @@ class AppUsageApp extends StatelessWidget {
             builder: (context, themeMode) {
               return MaterialApp(
                 debugShowCheckedModeBanner: false,
-                title: 'App Usage',
-                theme: AppTheme.light(),
-                darkTheme: AppTheme.dark(),
+                title: 'تمرکز شیرین',
+                theme: AppTheme.lightForLocale(locale),
+                darkTheme: AppTheme.darkForLocale(locale),
                 themeMode: themeMode,
                 locale: locale,
                 supportedLocales: AppLocalizations.supportedLocales,

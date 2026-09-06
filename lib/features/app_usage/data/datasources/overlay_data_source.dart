@@ -111,10 +111,10 @@ class OverlayWindowConfig {
 /// ```
 class OverlayDataSource {
   /// Notification title shown while the overlay foreground service runs.
-  static const String notificationTitle = 'App Usage';
+  static const String notificationTitle = 'تمرکز شیرین';
 
   /// Notification body shown while the overlay foreground service runs.
-  static const String notificationContent = 'Live usage counter is running';
+  static const String notificationContent = 'شمارنده زنده روشن است';
 
   /// Whether the user granted Display-over-other-apps.
   Future<bool> hasPermission() async {
