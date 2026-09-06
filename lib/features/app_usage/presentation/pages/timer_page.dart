@@ -35,47 +35,86 @@ class TimerPage extends StatelessWidget {
   }
 }
 
-class _TimerView extends StatefulWidget {
+class _TimerView extends StatelessWidget {
   const _TimerView();
 
-  @override
-  State<_TimerView> createState() => _TimerViewState();
-}
-
-class _TimerViewState extends State<_TimerView> {
-  AppUsageEntity? _selected;
-  int _hours = 1;
-  int _minutes = 30;
-  bool _notify = true;
-  bool _blocked = false;
-
-  void _selectApp(AppUsageEntity app) {
-    final saved = context.read<AppTimerCubit>().limitFor(app.packageName);
-    final blocked =
-        context.read<BlockedAppsCubit>().isBlocked(app.packageName);
-    setState(() {
-      _selected = app;
-      _blocked = blocked;
-      if (saved != null) {
-        _hours = saved.hours.clamp(0, 23);
-        _minutes = DurationWheelPicker.snapMinutes(saved.minutes);
-        _notify = saved.notify;
-      } else {
-        _hours = 1;
-        _minutes = 30;
-        _notify = true;
-      }
-    });
+  void _openEditor(BuildContext context, AppUsageEntity app) {
+    Navigator.of(context).push(
+      MaterialPageRoute<void>(
+        builder: (_) => TimerEditorPage(app: app),
+      ),
+    );
   }
 
-  void _clearSelection() {
-    setState(() => _selected = null);
+  @override
+  Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+
+    return GScaffold(
+      title: l10n.navTimer,
+      centerTitle: true,
+      body: BlocBuilder<UsageBloc, UsageState>(
+        builder: (context, state) {
+          return switch (state.todayUsage) {
+            TodayUsageOpInitial() || TodayUsageOpLoading() => const Center(
+                child: CircularProgressIndicator(color: AppTheme.primary),
+              ),
+            TodayUsageOpError(:final message) => Center(
+                child: Padding(
+                  padding: const EdgeInsets.all(32),
+                  child: GText(message, color: AppTheme.error),
+                ),
+              ),
+            TodayUsageOpCompleted(:final apps) => _AppPickerList(
+                apps: apps,
+                onSelect: (app) => _openEditor(context, app),
+              ),
+          };
+        },
+      ),
+    );
+  }
+}
+
+/// Full-screen editor for one app's daily limit / block settings.
+///
+/// Pushed above the main shell so the bottom nav is not visible.
+class TimerEditorPage extends StatefulWidget {
+  /// Creates the per-app timer editor.
+  const TimerEditorPage({super.key, required this.app});
+
+  /// App being configured.
+  final AppUsageEntity app;
+
+  @override
+  State<TimerEditorPage> createState() => _TimerEditorPageState();
+}
+
+class _TimerEditorPageState extends State<TimerEditorPage> {
+  late int _hours;
+  late int _minutes;
+  late bool _notify;
+  late bool _blocked;
+
+  @override
+  void initState() {
+    super.initState();
+    final saved =
+        context.read<AppTimerCubit>().limitFor(widget.app.packageName);
+    _blocked =
+        context.read<BlockedAppsCubit>().isBlocked(widget.app.packageName);
+    if (saved != null) {
+      _hours = saved.hours.clamp(0, 23);
+      _minutes = DurationWheelPicker.snapMinutes(saved.minutes);
+      _notify = saved.notify;
+    } else {
+      _hours = 1;
+      _minutes = 30;
+      _notify = true;
+    }
   }
 
   Future<void> _saveTimer() async {
-    final app = _selected;
-    if (app == null) return;
-
     final totalMinutes = _hours * 60 + _minutes;
     if (totalMinutes <= 0 && !_blocked) {
       ScaffoldMessenger.of(context).showSnackBar(
@@ -89,18 +128,19 @@ class _TimerViewState extends State<_TimerView> {
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
     final blocked = _blocked;
+    final packageName = widget.app.packageName;
 
     if (totalMinutes > 0) {
       await timerCubit.setLimit(
         AppTimerLimit(
-          packageName: app.packageName,
+          packageName: packageName,
           limitMinutes: totalMinutes,
           notify: _notify,
         ),
       );
     }
 
-    await blockedCubit.setBlocked(app.packageName, blocked);
+    await blockedCubit.setBlocked(packageName, blocked);
 
     if (!mounted) return;
     messenger.showSnackBar(
@@ -108,76 +148,92 @@ class _TimerViewState extends State<_TimerView> {
         content: Text(blocked ? l10n.timerBlockSaved : l10n.timerSaved),
       ),
     );
-    setState(() => _selected = null);
+    Navigator.of(context).pop();
   }
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final selected = _selected;
+    final app = widget.app;
 
     return GScaffold(
       title: l10n.navTimer,
       centerTitle: true,
-      leading: selected == null
-          ? null
-          : Padding(
-              padding: const EdgeInsetsDirectional.only(start: 12),
-              child: Center(
-                child: Material(
-                  color: AppTheme.surfaceOf(context),
-                  shape: const CircleBorder(),
-                  child: InkWell(
-                    customBorder: const CircleBorder(),
-                    onTap: _clearSelection,
-                    child: Container(
-                      width: 40,
-                      height: 40,
-                      decoration: BoxDecoration(
-                        shape: BoxShape.circle,
-                        border: Border.all(color: AppTheme.dividerOf(context)),
-                      ),
-                      child: Icon(
-                        Icons.arrow_back_ios_new_rounded,
-                        size: 16,
-                        color: AppTheme.onSurfaceOf(context),
-                      ),
-                    ),
+      circularBackButton: true,
+      body: ListView(
+        padding: const EdgeInsets.fromLTRB(16, 8, 16, 32),
+        children: [
+          Column(
+            children: [
+              GGap.s(),
+              AppLogo(iconBytes: app.iconBytes, size: 72),
+              GGap.m(),
+              GText(
+                app.appName,
+                style: Theme.of(context).textTheme.headlineMedium,
+                textAlign: TextAlign.center,
+              ),
+              GGap.xs(),
+              GText(
+                l10n.timerSetDailyLimit,
+                style: Theme.of(context).textTheme.bodyMedium,
+                color: AppTheme.onSurfaceMuted,
+                textAlign: TextAlign.center,
+              ),
+            ],
+          ),
+          GGap.l(),
+          DurationWheelPicker(
+            hours: _hours,
+            minutes: _minutes,
+            hoursLabel: l10n.timerHoursLabel,
+            minutesLabel: l10n.timerMinutesLabel,
+            onHoursChanged: (v) => setState(() => _hours = v),
+            onMinutesChanged: (v) => setState(() => _minutes = v),
+          ),
+          GGap.m(),
+          GCard(
+            child: Column(
+              children: [
+                GSettingsTile(
+                  icon: Icons.notifications_rounded,
+                  iconColor: AppTheme.iconTeal,
+                  title: l10n.timerNotifyWhenReached,
+                  trailing: Switch.adaptive(
+                    value: _notify,
+                    activeTrackColor: AppTheme.primary,
+                    onChanged: (v) => setState(() => _notify = v),
                   ),
                 ),
-              ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 72),
+                  child: Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: AppTheme.dividerOf(context),
+                  ),
+                ),
+                GSettingsTile(
+                  icon: Icons.block_rounded,
+                  iconColor: AppTheme.iconRed,
+                  title: l10n.timerBlockWhenOpened,
+                  subtitle: l10n.timerBlockWhenOpenedHint,
+                  trailing: Switch.adaptive(
+                    value: _blocked,
+                    activeTrackColor: AppTheme.error,
+                    onChanged: (v) => setState(() => _blocked = v),
+                  ),
+                ),
+              ],
             ),
-      body: BlocBuilder<UsageBloc, UsageState>(
-        builder: (context, state) {
-          return switch (state.todayUsage) {
-            TodayUsageOpInitial() || TodayUsageOpLoading() => const Center(
-                child: CircularProgressIndicator(color: AppTheme.primary),
-              ),
-            TodayUsageOpError(:final message) => Center(
-                child: Padding(
-                  padding: const EdgeInsets.all(32),
-                  child: GText(message, color: AppTheme.error),
-                ),
-              ),
-            TodayUsageOpCompleted(:final apps) => selected == null
-                ? _AppPickerList(
-                    apps: apps,
-                    onSelect: _selectApp,
-                  )
-                : _TimerEditor(
-                    app: selected,
-                    hours: _hours,
-                    minutes: _minutes,
-                    notify: _notify,
-                    blocked: _blocked,
-                    onHoursChanged: (v) => setState(() => _hours = v),
-                    onMinutesChanged: (v) => setState(() => _minutes = v),
-                    onNotifyChanged: (v) => setState(() => _notify = v),
-                    onBlockedChanged: (v) => setState(() => _blocked = v),
-                    onSave: _saveTimer,
-                  ),
-          };
-        },
+          ),
+          GGap.l(),
+          GButton(
+            label: l10n.timerSetButton,
+            icon: Icons.timer_rounded,
+            onPressed: _saveTimer,
+          ),
+        ],
       ),
     );
   }
@@ -351,114 +407,6 @@ class _AppLimitTile extends StatelessWidget {
               color: AppTheme.dividerOf(context),
             ),
           ),
-      ],
-    );
-  }
-}
-
-/// Hours / minutes wheel + notify / block toggles + save CTA for one app.
-class _TimerEditor extends StatelessWidget {
-  const _TimerEditor({
-    required this.app,
-    required this.hours,
-    required this.minutes,
-    required this.notify,
-    required this.blocked,
-    required this.onHoursChanged,
-    required this.onMinutesChanged,
-    required this.onNotifyChanged,
-    required this.onBlockedChanged,
-    required this.onSave,
-  });
-
-  final AppUsageEntity app;
-  final int hours;
-  final int minutes;
-  final bool notify;
-  final bool blocked;
-  final ValueChanged<int> onHoursChanged;
-  final ValueChanged<int> onMinutesChanged;
-  final ValueChanged<bool> onNotifyChanged;
-  final ValueChanged<bool> onBlockedChanged;
-  final VoidCallback onSave;
-
-  @override
-  Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-      children: [
-        Column(
-          children: [
-            GGap.s(),
-            AppLogo(iconBytes: app.iconBytes, size: 72),
-            GGap.m(),
-            GText(
-              app.appName,
-              style: Theme.of(context).textTheme.headlineMedium,
-              textAlign: TextAlign.center,
-            ),
-            GGap.xs(),
-            GText(
-              l10n.timerSetDailyLimit,
-              style: Theme.of(context).textTheme.bodyMedium,
-              color: AppTheme.onSurfaceMuted,
-              textAlign: TextAlign.center,
-            ),
-          ],
-        ),
-        GGap.l(),
-        DurationWheelPicker(
-          hours: hours,
-          minutes: minutes,
-          hoursLabel: l10n.timerHoursLabel,
-          minutesLabel: l10n.timerMinutesLabel,
-          onHoursChanged: onHoursChanged,
-          onMinutesChanged: onMinutesChanged,
-        ),
-        GGap.m(),
-        GCard(
-          child: Column(
-            children: [
-              GSettingsTile(
-                icon: Icons.notifications_rounded,
-                iconColor: AppTheme.iconTeal,
-                title: l10n.timerNotifyWhenReached,
-                trailing: Switch.adaptive(
-                  value: notify,
-                  activeTrackColor: AppTheme.primary,
-                  onChanged: onNotifyChanged,
-                ),
-              ),
-              Padding(
-                padding: const EdgeInsetsDirectional.only(start: 72),
-                child: Divider(
-                  height: 1,
-                  thickness: 0.5,
-                  color: AppTheme.dividerOf(context),
-                ),
-              ),
-              GSettingsTile(
-                icon: Icons.block_rounded,
-                iconColor: AppTheme.iconRed,
-                title: l10n.timerBlockWhenOpened,
-                subtitle: l10n.timerBlockWhenOpenedHint,
-                trailing: Switch.adaptive(
-                  value: blocked,
-                  activeTrackColor: AppTheme.error,
-                  onChanged: onBlockedChanged,
-                ),
-              ),
-            ],
-          ),
-        ),
-        GGap.l(),
-        GButton(
-          label: l10n.timerSetButton,
-          icon: Icons.timer_rounded,
-          onPressed: onSave,
-        ),
       ],
     );
   }
