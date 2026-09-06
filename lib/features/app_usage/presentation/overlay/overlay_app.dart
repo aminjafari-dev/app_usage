@@ -292,6 +292,11 @@ class _OverlayAppState extends State<OverlayApp> {
           _coachMarkedShown = false;
         });
       }
+      // Expand twice with a frame in between so MediaQuery sees the new
+      // fullscreen size before UsageBlockCard lays out (avoids badge-size overflow).
+      await _expandForFullscreen();
+      if (!mounted) return;
+      await WidgetsBinding.instance.endOfFrame;
       await _expandForFullscreen();
       if (!mounted) return;
       setState(() => _blocking = true);
@@ -437,7 +442,15 @@ class _OverlayAppState extends State<OverlayApp> {
       final height = logical.height.round().clamp(480, 5000);
       _lastOverlayWidth = width;
       _lastOverlayHeight = height;
-      await FlutterOverlayWindow.resizeOverlay(width, height, false);
+      // Badge uses topCenter gravity — switch to center so the dialog sits
+      // in the middle of the screen instead of pinned under the status bar.
+      await FlutterOverlayWindow.updateAlignment(OverlayAlignment.center);
+      // MATCH_PARENT avoids badge-sized windows when logical metrics lag.
+      await FlutterOverlayWindow.resizeOverlay(
+        WindowSize.matchParent,
+        WindowSize.matchParent,
+        false,
+      );
       await FlutterOverlayWindow.moveOverlay(const OverlayPosition(0, 0));
     } catch (_) {
       // Card may still paint inside a smaller window.
@@ -447,6 +460,7 @@ class _OverlayAppState extends State<OverlayApp> {
   /// Restores the small draggable badge window after fullscreen UI closes.
   Future<void> _collapseToBadge() async {
     try {
+      await FlutterOverlayWindow.updateAlignment(OverlayAlignment.topCenter);
       await _resizeOverlay(_appearance, force: true);
       await FlutterOverlayWindow.moveOverlay(const OverlayPosition(0, 40));
     } catch (_) {

@@ -145,6 +145,9 @@ public class OverlayService extends Service implements View.OnTouchListener {
                 resizeOverlay(width, height, enableDrag, result);
             } else if (call.method.equals("goHome")) {
                 goHome(result);
+            } else if (call.method.equals("updateAlignment")) {
+                String alignment = call.argument("alignment");
+                updateOverlayAlignment(result, alignment != null ? alignment : "center");
             } else {
                 result.notImplemented();
             }
@@ -242,6 +245,19 @@ public class OverlayService extends Service implements View.OnTouchListener {
         }
     }
 
+    /** Updates window gravity so fullscreen dialogs can sit in the screen center. */
+    private void updateOverlayAlignment(MethodChannel.Result result, String alignment) {
+        if (windowManager != null && flutterView != null) {
+            WindowSetup.setGravityFromAlignment(alignment);
+            WindowManager.LayoutParams params = (WindowManager.LayoutParams) flutterView.getLayoutParams();
+            params.gravity = WindowSetup.gravity;
+            windowManager.updateViewLayout(flutterView, params);
+            result.success(true);
+        } else {
+            result.success(false);
+        }
+    }
+
     private void updateOverlayFlag(MethodChannel.Result result, String flag) {
         if (windowManager != null) {
             WindowSetup.setFlag(flag);
@@ -265,7 +281,7 @@ public class OverlayService extends Service implements View.OnTouchListener {
         if (windowManager != null) {
             WindowManager.LayoutParams params = (WindowManager.LayoutParams) flutterView.getLayoutParams();
             params.width = (width == -1999 || width == -1) ? -1 : dpToPx(width);
-            params.height = (height != 1999 || height != -1) ? dpToPx(height) : height;
+            params.height = (height == -1999 || height == -1) ? -1 : dpToPx(height);
             WindowSetup.enableDrag = enableDrag;
             clampToVisibleDisplay(params);
             windowManager.updateViewLayout(flutterView, params);

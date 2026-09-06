@@ -175,6 +175,23 @@ class FlutterOverlayWindow {
     }
   }
 
+  /// Updates overlay gravity while the window is active (overlay isolate only).
+  ///
+  /// How to use: switch to [OverlayAlignment.center] before showing a dialog,
+  /// then restore [OverlayAlignment.topCenter] when collapsing back to the badge.
+  static Future<bool> updateAlignment(OverlayAlignment alignment) async {
+    try {
+      return await _overlayChannel.invokeMethod<bool>(
+            'updateAlignment',
+            {'alignment': alignment.name},
+          ) ??
+          false;
+    } on PlatformException catch (error) {
+      log("Error updateAlignment: $error");
+      return false;
+    }
+  }
+
   /// Dispose overlay stream
   static void disposeOverlayListener() {
     _controller.close();
