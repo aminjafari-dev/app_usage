@@ -132,7 +132,9 @@
   },
   "timerBlockWhenOpened": "Lock this app when opened",
   "timerBlockWhenOpenedHint": "A soft full-screen lock appears to protect your time, azizam.",
+  "timerBlockLockedHint": "This app is always locked and can’t be changed.",
   "timerBlockedLabel": "Locked with love",
+  "timerAlwaysBlockedLabel": "Always locked",
   "timerLimitAndBlockedSummary": "Limit {hours}h {minutes}m · Locked",
   "@timerLimitAndBlockedSummary": {
     "placeholders": {

@@ -644,11 +644,23 @@ abstract class AppLocalizations {
   /// **'A soft full-screen lock appears to protect your time, azizam.'**
   String get timerBlockWhenOpenedHint;
 
+  /// No description provided for @timerBlockLockedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'This app is always locked and can’t be changed.'**
+  String get timerBlockLockedHint;
+
   /// No description provided for @timerBlockedLabel.
   ///
   /// In en, this message translates to:
   /// **'Locked with love'**
   String get timerBlockedLabel;
+
+  /// No description provided for @timerAlwaysBlockedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Always locked'**
+  String get timerAlwaysBlockedLabel;
 
   /// No description provided for @timerLimitAndBlockedSummary.
   ///

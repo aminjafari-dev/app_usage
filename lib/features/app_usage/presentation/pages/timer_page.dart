@@ -95,14 +95,16 @@ class _TimerEditorPageState extends State<TimerEditorPage> {
   late int _minutes;
   late bool _notify;
   late bool _blocked;
+  late bool _blockLocked;
 
   @override
   void initState() {
     super.initState();
-    final saved =
-        context.read<AppTimerCubit>().limitFor(widget.app.packageName);
+    final packageName = widget.app.packageName;
+    final saved = context.read<AppTimerCubit>().limitFor(packageName);
+    _blockLocked = BlockedAppsCubit.isLockedDefault(packageName);
     _blocked =
-        context.read<BlockedAppsCubit>().isBlocked(widget.app.packageName);
+        _blockLocked || context.read<BlockedAppsCubit>().isBlocked(packageName);
     if (saved != null) {
       _hours = saved.hours.clamp(0, 23);
       _minutes = DurationWheelPicker.snapMinutes(saved.minutes);
@@ -127,8 +129,9 @@ class _TimerEditorPageState extends State<TimerEditorPage> {
     final blockedCubit = context.read<BlockedAppsCubit>();
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
-    final blocked = _blocked;
     final packageName = widget.app.packageName;
+    // Locked defaults stay blocked; only persist the switch for other apps.
+    final blocked = _blockLocked ? true : _blocked;
 
     if (totalMinutes > 0) {
       await timerCubit.setLimit(
@@ -140,7 +143,9 @@ class _TimerEditorPageState extends State<TimerEditorPage> {
       );
     }
 
-    await blockedCubit.setBlocked(packageName, blocked);
+    if (!_blockLocked) {
+      await blockedCubit.setBlocked(packageName, blocked);
+    }
 
     if (!mounted) return;
     messenger.showSnackBar(
@@ -217,11 +222,15 @@ class _TimerEditorPageState extends State<TimerEditorPage> {
                   icon: Icons.block_rounded,
                   iconColor: AppTheme.iconRed,
                   title: l10n.timerBlockWhenOpened,
-                  subtitle: l10n.timerBlockWhenOpenedHint,
+                  subtitle: _blockLocked
+                      ? l10n.timerBlockLockedHint
+                      : l10n.timerBlockWhenOpenedHint,
                   trailing: Switch.adaptive(
                     value: _blocked,
                     activeTrackColor: AppTheme.error,
-                    onChanged: (v) => setState(() => _blocked = v),
+                    onChanged: _blockLocked
+                        ? null
+                        : (v) => setState(() => _blocked = v),
                   ),
                 ),
               ],
@@ -302,7 +311,10 @@ class _AppPickerList extends StatelessWidget {
                 _AppLimitTile(
                   app: apps[i],
                   limit: limits[apps[i].packageName],
-                  blocked: blocked.contains(apps[i].packageName),
+                  blocked: BlockedAppsCubit.isLockedDefault(apps[i].packageName) ||
+                      blocked.contains(apps[i].packageName),
+                  alwaysBlocked:
+                      BlockedAppsCubit.isLockedDefault(apps[i].packageName),
                   showDivider: i < apps.length - 1,
                   onTap: () => onSelect(apps[i]),
                 ),
@@ -320,12 +332,14 @@ class _AppLimitTile extends StatelessWidget {
     required this.limit,
     required this.blocked,
     required this.onTap,
+    this.alwaysBlocked = false,
     this.showDivider = false,
   });
 
   final AppUsageEntity app;
   final AppTimerLimit? limit;
   final bool blocked;
+  final bool alwaysBlocked;
   final VoidCallback onTap;
   final bool showDivider;
 
@@ -333,7 +347,11 @@ class _AppLimitTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final String subtitle;
-    if (limit != null && blocked) {
+    if (alwaysBlocked && limit != null) {
+      subtitle = l10n.timerLimitAndBlockedSummary(limit!.hours, limit!.minutes);
+    } else if (alwaysBlocked) {
+      subtitle = l10n.timerAlwaysBlockedLabel;
+    } else if (limit != null && blocked) {
       subtitle = l10n.timerLimitAndBlockedSummary(limit!.hours, limit!.minutes);
     } else if (blocked) {
       subtitle = l10n.timerBlockedLabel;

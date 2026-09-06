@@ -132,7 +132,9 @@
   },
   "timerBlockWhenOpened": "وقتی باز شد قفلش کن",
   "timerBlockWhenOpenedHint": "یه قفل نرم تمام‌صفحه می‌آد تا از وقتت محافظت کنه، عزیزم.",
+  "timerBlockLockedHint": "این برنامه همیشه قفل است و قابل تغییر نیست.",
   "timerBlockedLabel": "قفل شده با عشق",
+  "timerAlwaysBlockedLabel": "همیشه قفل",
   "timerLimitAndBlockedSummary": "حد {hours}س {minutes}د · قفل",
   "@timerLimitAndBlockedSummary": {
     "placeholders": {

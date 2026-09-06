@@ -307,7 +307,14 @@ class AppLocalizationsFa extends AppLocalizations {
       'یه قفل نرم تمام‌صفحه می‌آد تا از وقتت محافظت کنه، عزیزم.';
 
   @override
+  String get timerBlockLockedHint =>
+      'این برنامه همیشه قفل است و قابل تغییر نیست.';
+
+  @override
   String get timerBlockedLabel => 'قفل شده با عشق';
+
+  @override
+  String get timerAlwaysBlockedLabel => 'همیشه قفل';
 
   @override
   String timerLimitAndBlockedSummary(int hours, int minutes) {

@@ -310,7 +310,14 @@ class AppLocalizationsEn extends AppLocalizations {
       'A soft full-screen lock appears to protect your time, azizam.';
 
   @override
+  String get timerBlockLockedHint =>
+      'This app is always locked and can’t be changed.';
+
+  @override
   String get timerBlockedLabel => 'Locked with love';
+
+  @override
+  String get timerAlwaysBlockedLabel => 'Always locked';
 
   @override
   String timerLimitAndBlockedSummary(int hours, int minutes) {
