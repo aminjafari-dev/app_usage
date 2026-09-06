@@ -6,9 +6,11 @@ import 'package:flutter_overlay_window/flutter_overlay_window.dart';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/settings/usage_coach.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_live_tracker.dart';
+import 'package:app_usage/features/app_usage/presentation/overlay/usage_block_card.dart';
 import 'package:app_usage/features/app_usage/presentation/overlay/usage_coach_card.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
@@ -19,7 +21,9 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// window starts. Owns [OverlayLiveTracker] so the badge keeps counting even
 /// when the main application is backgrounded or removed from Recents.
 ///
-/// When a per-app daily limit is exceeded:
+/// When a package is on the block list, a full-screen [UsageBlockCard] covers
+/// the app until the user leaves. Otherwise, when a per-app daily limit is
+/// exceeded:
 /// 1. A full-screen [UsageCoachCard] nudge appears (subject to snooze / mute /
 ///    daily caps from [UsageCoach.evaluate]).
 /// 2. After that card is dismissed, the badge stays in over-limit mode with an
@@ -76,6 +80,7 @@ class _OverlayAppState extends State<OverlayApp> {
   Timer? _coachTimeoutTimer;
 
   UsageCoach? _coach;
+  SharedPreferences? _prefs;
 
   /// Active coach decision currently on screen (null = badge mode).
   CoachDecision? _coachDecision;
@@ -85,6 +90,9 @@ class _OverlayAppState extends State<OverlayApp> {
 
   /// Prevent overlapping expand/collapse animations.
   bool _resizingForCoach = false;
+
+  /// True while a hard block dialog covers the foreground app.
+  bool _blocking = false;
 
   /// True while the foreground app is past its daily cap.
   bool _overLimit = false;
@@ -101,6 +109,8 @@ class _OverlayAppState extends State<OverlayApp> {
   /// Last measured quote bubble size, used while the overlay window is expanded.
   Size? _quoteBubbleSize;
 
+  bool get _fullscreenMode => _blocking || _coachDecision != null;
+
   @override
   void initState() {
     super.initState();
@@ -114,61 +124,7 @@ class _OverlayAppState extends State<OverlayApp> {
     // Start self-contained tracking in this isolate (survives main-app death).
     _tracker.start(
       onTick: (OverlayTickPayload? payload) {
-        if (!mounted) return;
-        // Null payload = home / lock / launcher — hide badge + close overlays.
-        if (payload == null) {
-          final previous = _packageName;
-          setState(() {
-            _visible = false;
-            _packageName = null;
-            _playIntro = false;
-            _overLimit = false;
-            _quoteOpen = false;
-          });
-          unawaited(_coach?.onAppSwitched(previous));
-          if (_coachDecision != null) {
-            unawaited(_dismissCoach());
-          }
-          return;
-        }
-
-        final switched = payload.packageName != _packageName;
-        final previous = _packageName;
-        // Sync multiplier before rebuild so the first 1.5× intro frame cannot
-        // race a concurrent resize that still thinks we are at 1.0.
-        if (switched) {
-          _sizeMultiplier = 1.5;
-        }
-        setState(() {
-          _visible = true;
-          _appName = payload.appName.isEmpty ? 'App' : payload.appName;
-          _todaySeconds = payload.todaySeconds;
-          if (payload.iconBytes != null) {
-            _iconBytes = payload.iconBytes;
-          }
-          if (switched) {
-            _packageName = payload.packageName;
-            _playIntro = true;
-            _quoteOpen = false;
-            _quoteIndex = 0;
-            _hasShownQuote = false;
-            _quoteBubbleSize = null;
-          }
-        });
-
-        if (switched) {
-          unawaited(_coach?.onAppSwitched(previous));
-          // Leaving a limited app while coach is open → collapse back to badge.
-          if (_coachDecision != null &&
-              _coachDecision!.packageName != payload.packageName) {
-            unawaited(_dismissCoach());
-          } else if (_coachDecision == null) {
-            unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
-          }
-        }
-
-        unawaited(_updateOverLimit(payload));
-        unawaited(_evaluateCoach(payload));
+        unawaited(_handleTick(payload));
       },
     );
 
@@ -189,7 +145,7 @@ class _OverlayAppState extends State<OverlayApp> {
         final sizeChanged = next.sizeScale != _appearance.sizeScale;
         if (!mounted) return;
         setState(() => _appearance = next);
-        if (sizeChanged && _coachDecision == null) {
+        if (sizeChanged && !_fullscreenMode) {
           unawaited(_resizeOverlay(next));
         }
         return;
@@ -197,47 +153,88 @@ class _OverlayAppState extends State<OverlayApp> {
 
       if (_tracker.isRunning) return;
       final payload = OverlayTickPayload.fromMap(event);
-      if (!mounted) return;
-      if (payload.packageName.isEmpty) {
-        setState(() => _visible = false);
-        return;
-      }
-      final switched = payload.packageName != _packageName;
-      if (switched) {
-        _sizeMultiplier = 1.5;
-      }
+      unawaited(_handleTick(payload));
+    });
+  }
+
+  Future<void> _handleTick(OverlayTickPayload? payload) async {
+    if (!mounted) return;
+    // Null payload = home / lock / launcher — hide badge + close overlays.
+    if (payload == null) {
+      final previous = _packageName;
       setState(() {
-        _visible = true;
-        _appName = payload.appName.isEmpty ? 'App' : payload.appName;
-        _todaySeconds = payload.todaySeconds;
-        if (payload.iconBytes != null) {
-          _iconBytes = payload.iconBytes;
-        }
-        if (switched) {
-          _packageName = payload.packageName;
-          _playIntro = true;
-          _quoteOpen = false;
-          _quoteIndex = 0;
-          _hasShownQuote = false;
-          _quoteBubbleSize = null;
-        }
+        _visible = false;
+        _packageName = null;
+        _playIntro = false;
+        _overLimit = false;
+        _quoteOpen = false;
       });
-      if (switched && _coachDecision == null) {
+      unawaited(_coach?.onAppSwitched(previous));
+      if (_blocking) {
+        await _dismissBlock();
+      } else if (_coachDecision != null) {
+        await _dismissCoach();
+      }
+      return;
+    }
+
+    if (payload.packageName.isEmpty) {
+      setState(() => _visible = false);
+      return;
+    }
+
+    final switched = payload.packageName != _packageName;
+    final previous = _packageName;
+    // Sync multiplier before rebuild so the first 1.5× intro frame cannot
+    // race a concurrent resize that still thinks we are at 1.0.
+    if (switched) {
+      _sizeMultiplier = 1.5;
+    }
+    setState(() {
+      _visible = true;
+      _appName = payload.appName.isEmpty ? 'App' : payload.appName;
+      _todaySeconds = payload.todaySeconds;
+      if (payload.iconBytes != null) {
+        _iconBytes = payload.iconBytes;
+      }
+      if (switched) {
+        _packageName = payload.packageName;
+        _playIntro = true;
+        _quoteOpen = false;
+        _quoteIndex = 0;
+        _hasShownQuote = false;
+        _quoteBubbleSize = null;
+      }
+    });
+
+    if (switched) {
+      unawaited(_coach?.onAppSwitched(previous));
+      // Block mode is owned by [_evaluateBlock] so we don't flicker when
+      // switching between two blocked packages.
+      if (_coachDecision != null &&
+          _coachDecision!.packageName != payload.packageName) {
+        unawaited(_dismissCoach());
+      } else if (!_fullscreenMode) {
         unawaited(_resizeOverlay(_appearance, sizeMultiplier: 1.5));
       }
-      unawaited(_updateOverLimit(payload));
-      unawaited(_evaluateCoach(payload));
-    });
+    }
+
+    // Await block first — it takes priority over coach / over-limit chrome.
+    await _evaluateBlock(payload);
+    if (!mounted || _packageName != payload.packageName) return;
+    unawaited(_updateOverLimit(payload));
+    unawaited(_evaluateCoach(payload));
   }
 
   Future<void> _bootstrap() async {
     final prefs = await SharedPreferences.getInstance();
     if (!mounted) return;
     setState(() {
+      _prefs = prefs;
       _appearance = BadgeAppearanceCubit.readFrom(prefs);
       _coach = UsageCoach(prefs);
     });
-    // Limits may already be exceeded when the overlay boots.
+    // Limits / blocks may already apply when the overlay boots.
     final package = _packageName;
     if (package != null) {
       final payload = OverlayTickPayload(
@@ -246,14 +243,77 @@ class _OverlayAppState extends State<OverlayApp> {
         todaySeconds: _todaySeconds,
         iconBytes: _iconBytes,
       );
+      unawaited(_evaluateBlock(payload));
       unawaited(_updateOverLimit(payload));
       unawaited(_evaluateCoach(payload));
     }
   }
 
+  Future<bool> _isPackageBlocked(String packageName) async {
+    if (packageName.isEmpty) return false;
+    final prefs = _prefs;
+    if (prefs == null) return false;
+    try {
+      await prefs.reload();
+    } catch (_) {
+      // Continue with in-memory prefs if reload fails.
+    }
+    return BlockedAppsCubit.readFrom(prefs).contains(packageName);
+  }
+
+  Future<void> _evaluateBlock(OverlayTickPayload payload) async {
+    final blocked = await _isPackageBlocked(payload.packageName);
+    if (!mounted) return;
+    if (_packageName != payload.packageName) return;
+
+    if (blocked) {
+      if (_blocking) return;
+      await _showBlock();
+      return;
+    }
+
+    if (_blocking) {
+      await _dismissBlock();
+    }
+  }
+
+  Future<void> _showBlock() async {
+    if (_resizingForCoach || _blocking) return;
+    _resizingForCoach = true;
+    try {
+      // Block replaces coach / quote chrome.
+      _coachTimeoutTimer?.cancel();
+      _coachTimeoutTimer = null;
+      if (_quoteOpen || _coachDecision != null) {
+        setState(() {
+          _quoteOpen = false;
+          _quoteBubbleSize = null;
+          _coachDecision = null;
+          _coachMarkedShown = false;
+        });
+      }
+      await _expandForFullscreen();
+      if (!mounted) return;
+      setState(() => _blocking = true);
+    } finally {
+      _resizingForCoach = false;
+    }
+  }
+
+  Future<void> _dismissBlock() async {
+    if (!mounted) return;
+    setState(() => _blocking = false);
+    if (_coachDecision != null) return;
+    await _collapseToBadge();
+  }
+
+  Future<void> _onLeaveBlockedApp() async {
+    await FlutterOverlayWindow.goHome();
+  }
+
   Future<void> _updateOverLimit(OverlayTickPayload payload) async {
     final coach = _coach;
-    if (coach == null) return;
+    if (coach == null || _blocking) return;
 
     final over = await coach.isOverLimit(
       packageName: payload.packageName,
@@ -261,7 +321,7 @@ class _OverlayAppState extends State<OverlayApp> {
     );
     if (!mounted) return;
     // Foreground may have changed while we awaited prefs.
-    if (_packageName != payload.packageName) return;
+    if (_packageName != payload.packageName || _blocking) return;
     if (over == _overLimit) return;
 
     if (over) {
@@ -269,7 +329,7 @@ class _OverlayAppState extends State<OverlayApp> {
       if (_coachDecision == null) {
         await _resizeOverlay(_appearance, overLimit: true, force: true);
       }
-      if (!mounted || _packageName != payload.packageName) return;
+      if (!mounted || _packageName != payload.packageName || _blocking) return;
       setState(() => _overLimit = true);
       return;
     }
@@ -279,9 +339,9 @@ class _OverlayAppState extends State<OverlayApp> {
       _quoteOpen = false;
       _quoteBubbleSize = null;
     });
-    if (_coachDecision != null) return;
+    if (_coachDecision != null || _blocking) return;
     await Future<void>.delayed(_quoteCollapseDelay);
-    if (!mounted || _coachDecision != null) return;
+    if (!mounted || _coachDecision != null || _blocking) return;
     await _resizeOverlay(
       _appearance,
       overLimit: false,
@@ -292,7 +352,7 @@ class _OverlayAppState extends State<OverlayApp> {
 
   Future<void> _evaluateCoach(OverlayTickPayload payload) async {
     final coach = _coach;
-    if (coach == null) return;
+    if (coach == null || _blocking) return;
     // Already showing a card for this package — keep it.
     if (_coachDecision != null) return;
 
@@ -300,7 +360,7 @@ class _OverlayAppState extends State<OverlayApp> {
       packageName: payload.packageName,
       todaySeconds: payload.todaySeconds,
     );
-    if (!mounted || !decision.shouldShow) return;
+    if (!mounted || !decision.shouldShow || _blocking) return;
     // Foreground may have changed while we awaited prefs.
     if (_packageName != decision.packageName) return;
 
@@ -308,7 +368,7 @@ class _OverlayAppState extends State<OverlayApp> {
   }
 
   Future<void> _showCoach(CoachDecision decision) async {
-    if (_resizingForCoach || _coachDecision != null) return;
+    if (_resizingForCoach || _coachDecision != null || _blocking) return;
     _resizingForCoach = true;
     try {
       // Close the docked quote so we don't fight two expand modes.
@@ -318,8 +378,8 @@ class _OverlayAppState extends State<OverlayApp> {
           _quoteBubbleSize = null;
         });
       }
-      await _expandForCoach();
-      if (!mounted) return;
+      await _expandForFullscreen();
+      if (!mounted || _blocking) return;
       setState(() {
         _coachDecision = decision;
         _coachMarkedShown = false;
@@ -348,6 +408,7 @@ class _OverlayAppState extends State<OverlayApp> {
       _coachDecision = null;
       _coachMarkedShown = false;
     });
+    if (_blocking) return;
     await _collapseToBadge();
   }
 
@@ -367,8 +428,8 @@ class _OverlayAppState extends State<OverlayApp> {
     await _dismissCoach();
   }
 
-  /// Grows the native overlay to cover the screen for the bottom coach card.
-  Future<void> _expandForCoach() async {
+  /// Grows the native overlay to cover the screen for block / coach UI.
+  Future<void> _expandForFullscreen() async {
     try {
       final view = PlatformDispatcher.instance.views.first;
       final logical = view.physicalSize / view.devicePixelRatio;
@@ -383,7 +444,7 @@ class _OverlayAppState extends State<OverlayApp> {
     }
   }
 
-  /// Restores the small draggable badge window after the coach card closes.
+  /// Restores the small draggable badge window after fullscreen UI closes.
   Future<void> _collapseToBadge() async {
     try {
       await _resizeOverlay(_appearance, force: true);
@@ -394,7 +455,7 @@ class _OverlayAppState extends State<OverlayApp> {
   }
 
   Future<void> _onAlertTap() async {
-    if (_quoteOpen || _coachDecision != null) return;
+    if (_quoteOpen || _fullscreenMode) return;
     var nextIndex = _quoteIndex;
     if (_hasShownQuote && UsageCoach.messageIds.isNotEmpty) {
       nextIndex = (_quoteIndex + 1) % UsageCoach.messageIds.length;
@@ -428,7 +489,7 @@ class _OverlayAppState extends State<OverlayApp> {
       _quoteBubbleSize = null;
     });
     await Future<void>.delayed(_quoteCollapseDelay);
-    if (!mounted || _coachDecision != null) return;
+    if (!mounted || _fullscreenMode) return;
     await _resizeOverlay(_appearance, quoteOpen: false, force: true);
   }
 
@@ -451,8 +512,8 @@ class _OverlayAppState extends State<OverlayApp> {
     bool? quoteOpen,
     Size? quoteBubbleSize,
   }) async {
-    // Full-screen coach owns the native window while visible.
-    if (_coachDecision != null || _resizingForCoach) return;
+    // Full-screen block / coach owns the native window while visible.
+    if (_fullscreenMode || _resizingForCoach) return;
     try {
       final multiplier = sizeMultiplier ?? _sizeMultiplier;
       _sizeMultiplier = multiplier;
@@ -487,8 +548,8 @@ class _OverlayAppState extends State<OverlayApp> {
   /// silently swallowing every touch on the device.
   Future<void> _ensureWindowMatchesMode() async {
     if (!mounted || _resizingForCoach) return;
-    if (_coachDecision != null) {
-      await _expandForCoach();
+    if (_fullscreenMode) {
+      await _expandForFullscreen();
       return;
     }
     await _resizeOverlay(
@@ -499,7 +560,7 @@ class _OverlayAppState extends State<OverlayApp> {
   }
 
   void _onIntroSizeBoost(double sizeBoost) {
-    if (!mounted || _coachDecision != null) return;
+    if (!mounted || _fullscreenMode) return;
     unawaited(_resizeOverlay(_appearance, sizeMultiplier: sizeBoost));
   }
 
@@ -514,8 +575,16 @@ class _OverlayAppState extends State<OverlayApp> {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final decision = _coachDecision;
 
+    if (_blocking) {
+      return UsageBlockCard(
+        appName: _appName,
+        iconBytes: _iconBytes,
+        onLeave: () => unawaited(_onLeaveBlockedApp()),
+      );
+    }
+
+    final decision = _coachDecision;
     if (decision != null) {
       return Material(
         type: MaterialType.transparency,

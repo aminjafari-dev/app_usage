@@ -3,6 +3,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/settings/app_timer_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
@@ -18,7 +19,7 @@ import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart'
 import 'package:app_usage/features/app_usage/presentation/widgets/duration_wheel_picker.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
-/// Timer tab — pick an app and set a daily usage limit.
+/// Timer tab — pick an app and set a daily usage limit or hard block.
 ///
 /// How to use: hosted inside [MainShellPage] via [IndexedStack].
 class TimerPage extends StatelessWidget {
@@ -46,11 +47,15 @@ class _TimerViewState extends State<_TimerView> {
   int _hours = 1;
   int _minutes = 30;
   bool _notify = true;
+  bool _blocked = false;
 
   void _selectApp(AppUsageEntity app) {
     final saved = context.read<AppTimerCubit>().limitFor(app.packageName);
+    final blocked =
+        context.read<BlockedAppsCubit>().isBlocked(app.packageName);
     setState(() {
       _selected = app;
+      _blocked = blocked;
       if (saved != null) {
         _hours = saved.hours.clamp(0, 23);
         _minutes = DurationWheelPicker.snapMinutes(saved.minutes);
@@ -72,24 +77,36 @@ class _TimerViewState extends State<_TimerView> {
     if (app == null) return;
 
     final totalMinutes = _hours * 60 + _minutes;
-    if (totalMinutes <= 0) {
+    if (totalMinutes <= 0 && !_blocked) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context).timerInvalidLimit)),
       );
       return;
     }
 
-    await context.read<AppTimerCubit>().setLimit(
-          AppTimerLimit(
-            packageName: app.packageName,
-            limitMinutes: totalMinutes,
-            notify: _notify,
-          ),
-        );
+    final timerCubit = context.read<AppTimerCubit>();
+    final blockedCubit = context.read<BlockedAppsCubit>();
+    final messenger = ScaffoldMessenger.of(context);
+    final l10n = AppLocalizations.of(context);
+    final blocked = _blocked;
+
+    if (totalMinutes > 0) {
+      await timerCubit.setLimit(
+        AppTimerLimit(
+          packageName: app.packageName,
+          limitMinutes: totalMinutes,
+          notify: _notify,
+        ),
+      );
+    }
+
+    await blockedCubit.setBlocked(app.packageName, blocked);
 
     if (!mounted) return;
-    ScaffoldMessenger.of(context).showSnackBar(
-      SnackBar(content: Text(AppLocalizations.of(context).timerSaved)),
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(blocked ? l10n.timerBlockSaved : l10n.timerSaved),
+      ),
     );
     setState(() => _selected = null);
   }
@@ -152,9 +169,11 @@ class _TimerViewState extends State<_TimerView> {
                     hours: _hours,
                     minutes: _minutes,
                     notify: _notify,
+                    blocked: _blocked,
                     onHoursChanged: (v) => setState(() => _hours = v),
                     onMinutesChanged: (v) => setState(() => _minutes = v),
                     onNotifyChanged: (v) => setState(() => _notify = v),
+                    onBlockedChanged: (v) => setState(() => _blocked = v),
                     onSave: _saveTimer,
                   ),
           };
@@ -164,7 +183,7 @@ class _TimerViewState extends State<_TimerView> {
   }
 }
 
-/// Choose which app gets a daily limit.
+/// Choose which app gets a daily limit / block.
 class _AppPickerList extends StatelessWidget {
   const _AppPickerList({
     required this.apps,
@@ -178,6 +197,7 @@ class _AppPickerList extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final limits = context.watch<AppTimerCubit>().state;
+    final blocked = context.watch<BlockedAppsCubit>().state;
 
     if (apps.isEmpty) {
       return Center(
@@ -226,6 +246,7 @@ class _AppPickerList extends StatelessWidget {
                 _AppLimitTile(
                   app: apps[i],
                   limit: limits[apps[i].packageName],
+                  blocked: blocked.contains(apps[i].packageName),
                   showDivider: i < apps.length - 1,
                   onTap: () => onSelect(apps[i]),
                 ),
@@ -241,21 +262,32 @@ class _AppLimitTile extends StatelessWidget {
   const _AppLimitTile({
     required this.app,
     required this.limit,
+    required this.blocked,
     required this.onTap,
     this.showDivider = false,
   });
 
   final AppUsageEntity app;
   final AppTimerLimit? limit;
+  final bool blocked;
   final VoidCallback onTap;
   final bool showDivider;
 
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
-    final subtitle = limit == null
-        ? formatUsageDuration(app.todaySeconds)
-        : l10n.timerLimitSummary(limit!.hours, limit!.minutes);
+    final String subtitle;
+    if (limit != null && blocked) {
+      subtitle = l10n.timerLimitAndBlockedSummary(limit!.hours, limit!.minutes);
+    } else if (blocked) {
+      subtitle = l10n.timerBlockedLabel;
+    } else if (limit != null) {
+      subtitle = l10n.timerLimitSummary(limit!.hours, limit!.minutes);
+    } else {
+      subtitle = formatUsageDuration(app.todaySeconds);
+    }
+
+    final accent = limit != null || blocked;
 
     return Column(
       mainAxisSize: MainAxisSize.min,
@@ -284,8 +316,8 @@ class _AppLimitTile extends StatelessWidget {
                         GText(
                           subtitle,
                           style: Theme.of(context).textTheme.bodySmall,
-                          color: limit != null
-                              ? AppTheme.primary
+                          color: accent
+                              ? (blocked ? AppTheme.error : AppTheme.primary)
                               : AppTheme.onSurfaceMuted,
                           maxLines: 1,
                           overflow: TextOverflow.ellipsis,
@@ -293,6 +325,14 @@ class _AppLimitTile extends StatelessWidget {
                       ],
                     ),
                   ),
+                  if (blocked) ...[
+                    const Icon(
+                      Icons.block_rounded,
+                      size: 18,
+                      color: AppTheme.error,
+                    ),
+                    const SizedBox(width: 6),
+                  ],
                   const Icon(
                     Icons.chevron_right_rounded,
                     color: AppTheme.onSurfaceMuted,
@@ -316,16 +356,18 @@ class _AppLimitTile extends StatelessWidget {
   }
 }
 
-/// Hours / minutes wheel + notify toggle + save CTA for one app.
+/// Hours / minutes wheel + notify / block toggles + save CTA for one app.
 class _TimerEditor extends StatelessWidget {
   const _TimerEditor({
     required this.app,
     required this.hours,
     required this.minutes,
     required this.notify,
+    required this.blocked,
     required this.onHoursChanged,
     required this.onMinutesChanged,
     required this.onNotifyChanged,
+    required this.onBlockedChanged,
     required this.onSave,
   });
 
@@ -333,9 +375,11 @@ class _TimerEditor extends StatelessWidget {
   final int hours;
   final int minutes;
   final bool notify;
+  final bool blocked;
   final ValueChanged<int> onHoursChanged;
   final ValueChanged<int> onMinutesChanged;
   final ValueChanged<bool> onNotifyChanged;
+  final ValueChanged<bool> onBlockedChanged;
   final VoidCallback onSave;
 
   @override
@@ -375,15 +419,38 @@ class _TimerEditor extends StatelessWidget {
         ),
         GGap.m(),
         GCard(
-          child: GSettingsTile(
-            icon: Icons.notifications_rounded,
-            iconColor: AppTheme.iconTeal,
-            title: l10n.timerNotifyWhenReached,
-            trailing: Switch.adaptive(
-              value: notify,
-              activeTrackColor: AppTheme.primary,
-              onChanged: onNotifyChanged,
-            ),
+          child: Column(
+            children: [
+              GSettingsTile(
+                icon: Icons.notifications_rounded,
+                iconColor: AppTheme.iconTeal,
+                title: l10n.timerNotifyWhenReached,
+                trailing: Switch.adaptive(
+                  value: notify,
+                  activeTrackColor: AppTheme.primary,
+                  onChanged: onNotifyChanged,
+                ),
+              ),
+              Padding(
+                padding: const EdgeInsetsDirectional.only(start: 72),
+                child: Divider(
+                  height: 1,
+                  thickness: 0.5,
+                  color: AppTheme.dividerOf(context),
+                ),
+              ),
+              GSettingsTile(
+                icon: Icons.block_rounded,
+                iconColor: AppTheme.iconRed,
+                title: l10n.timerBlockWhenOpened,
+                subtitle: l10n.timerBlockWhenOpenedHint,
+                trailing: Switch.adaptive(
+                  value: blocked,
+                  activeTrackColor: AppTheme.error,
+                  onChanged: onBlockedChanged,
+                ),
+              ),
+            ],
           ),
         ),
         GGap.l(),

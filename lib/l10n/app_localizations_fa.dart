@@ -232,6 +232,9 @@ class AppLocalizationsFa extends AppLocalizations {
   String get navProfile => 'پروفایل';
 
   @override
+  String get pressBackAgainToExit => 'برای خروج دوباره بازگشت را بزنید';
+
+  @override
   String get tabComingSoon => 'این بخش به‌زودی اضافه می‌شود.';
 
   @override
@@ -239,7 +242,7 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get timerPickAppHint =>
-      'برنامه‌ای را برای تنظیم محدودیت روزانه انتخاب کنید.';
+      'برنامه‌ای را برای محدودیت روزانه یا مسدودسازی هنگام باز شدن انتخاب کنید.';
 
   @override
   String get timerSetDailyLimit => 'محدودیت استفاده روزانه را تنظیم کنید';
@@ -273,6 +276,39 @@ class AppLocalizationsFa extends AppLocalizations {
   String timerLimitSummary(int hours, int minutes) {
     return 'محدودیت $hoursس $minutesد';
   }
+
+  @override
+  String get timerBlockWhenOpened => 'مسدود کردن این برنامه هنگام باز شدن';
+
+  @override
+  String get timerBlockWhenOpenedHint =>
+      'قفل تمام‌صفحه نشان می‌دهد تا نتوان از برنامه استفاده کرد.';
+
+  @override
+  String get timerBlockedLabel => 'مسدود شده';
+
+  @override
+  String timerLimitAndBlockedSummary(int hours, int minutes) {
+    return 'محدودیت $hoursس $minutesد · مسدود';
+  }
+
+  @override
+  String get timerBlockSaved => 'مسدودسازی برنامه به‌روز شد.';
+
+  @override
+  String get blockTitle => 'برنامه مسدود است';
+
+  @override
+  String blockSubtitle(String appName) {
+    return '$appName قفل شده است. برای ادامه، این برنامه را ترک کنید.';
+  }
+
+  @override
+  String get blockLeaveButton => 'ترک برنامه';
+
+  @override
+  String get blockHint =>
+      'شما این برنامه را مسدود کرده‌اید. تا زمانی که خارج نشوید قفل می‌ماند.';
 
   @override
   String get coachTitle => 'زمان بررسی';

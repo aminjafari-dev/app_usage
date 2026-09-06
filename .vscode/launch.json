@@ -1,0 +1,45 @@
+{
+    // Use IntelliSense to learn about possible attributes.
+    // Hover to view descriptions of existing attributes.
+    // For more information, visit: https://go.microsoft.com/fwlink/?linkid=830387
+    "version": "0.2.0",
+    "configurations": [
+        {
+            "name": "app_usage",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "app_usage (profile mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "app_usage (release mode)",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        },
+        {
+            "name": "flutter_overlay_window",
+            "cwd": "packages/flutter_overlay_window",
+            "request": "launch",
+            "type": "dart"
+        },
+        {
+            "name": "flutter_overlay_window (profile mode)",
+            "cwd": "packages/flutter_overlay_window",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "profile"
+        },
+        {
+            "name": "flutter_overlay_window (release mode)",
+            "cwd": "packages/flutter_overlay_window",
+            "request": "launch",
+            "type": "dart",
+            "flutterMode": "release"
+        }
+    ]
+}

@@ -93,9 +93,10 @@
   "navTimer": "Timer",
   "navSettings": "Settings",
   "navProfile": "Profile",
+  "pressBackAgainToExit": "Press back again to exit",
   "tabComingSoon": "This section is coming soon.",
   "profileSubtitle": "Your profile and account details.",
-  "timerPickAppHint": "Choose an app to set a daily usage limit.",
+  "timerPickAppHint": "Choose an app to set a daily limit or block it when opened.",
   "timerSetDailyLimit": "Set daily usage limit",
   "timerHoursLabel": "HOURS",
   "timerMinutesLabel": "MINUTES",
@@ -116,6 +117,32 @@
       }
     }
   },
+  "timerBlockWhenOpened": "Block this app when opened",
+  "timerBlockWhenOpenedHint": "Shows a full-screen lock so the app cannot be used.",
+  "timerBlockedLabel": "Blocked",
+  "timerLimitAndBlockedSummary": "Limit {hours}h {minutes}m · Blocked",
+  "@timerLimitAndBlockedSummary": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timerBlockSaved": "App block updated.",
+  "blockTitle": "App blocked",
+  "blockSubtitle": "{appName} is locked. Leave this app to continue.",
+  "@blockSubtitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "blockLeaveButton": "Leave app",
+  "blockHint": "You chose to block this app. It stays locked until you leave.",
   "coachTitle": "Time check",
   "coachOverLimitSubtitle": "You're {minutes} min over your daily limit.",
   "@coachOverLimitSubtitle": {

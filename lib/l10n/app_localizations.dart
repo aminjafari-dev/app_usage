@@ -512,6 +512,12 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
+  /// No description provided for @pressBackAgainToExit.
+  ///
+  /// In en, this message translates to:
+  /// **'Press back again to exit'**
+  String get pressBackAgainToExit;
+
   /// No description provided for @tabComingSoon.
   ///
   /// In en, this message translates to:
@@ -527,7 +533,7 @@ abstract class AppLocalizations {
   /// No description provided for @timerPickAppHint.
   ///
   /// In en, this message translates to:
-  /// **'Choose an app to set a daily usage limit.'**
+  /// **'Choose an app to set a daily limit or block it when opened.'**
   String get timerPickAppHint;
 
   /// No description provided for @timerSetDailyLimit.
@@ -589,6 +595,60 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Limit {hours}h {minutes}m'**
   String timerLimitSummary(int hours, int minutes);
+
+  /// No description provided for @timerBlockWhenOpened.
+  ///
+  /// In en, this message translates to:
+  /// **'Block this app when opened'**
+  String get timerBlockWhenOpened;
+
+  /// No description provided for @timerBlockWhenOpenedHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Shows a full-screen lock so the app cannot be used.'**
+  String get timerBlockWhenOpenedHint;
+
+  /// No description provided for @timerBlockedLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Blocked'**
+  String get timerBlockedLabel;
+
+  /// No description provided for @timerLimitAndBlockedSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'Limit {hours}h {minutes}m · Blocked'**
+  String timerLimitAndBlockedSummary(int hours, int minutes);
+
+  /// No description provided for @timerBlockSaved.
+  ///
+  /// In en, this message translates to:
+  /// **'App block updated.'**
+  String get timerBlockSaved;
+
+  /// No description provided for @blockTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'App blocked'**
+  String get blockTitle;
+
+  /// No description provided for @blockSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'{appName} is locked. Leave this app to continue.'**
+  String blockSubtitle(String appName);
+
+  /// No description provided for @blockLeaveButton.
+  ///
+  /// In en, this message translates to:
+  /// **'Leave app'**
+  String get blockLeaveButton;
+
+  /// No description provided for @blockHint.
+  ///
+  /// In en, this message translates to:
+  /// **'You chose to block this app. It stays locked until you leave.'**
+  String get blockHint;
 
   /// No description provided for @coachTitle.
   ///

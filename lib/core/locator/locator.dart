@@ -4,6 +4,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 import 'package:app_usage/core/locale/locale_cubit.dart';
 import 'package:app_usage/core/settings/app_timer_cubit.dart';
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/settings/coach_settings_cubit.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/features/app_usage/di/app_usage_di.dart';
@@ -37,6 +38,9 @@ Future<void> setupLocator() async {
   );
   locator.registerLazySingleton<AppTimerCubit>(
     () => AppTimerCubit(locator())..load(),
+  );
+  locator.registerLazySingleton<BlockedAppsCubit>(
+    () => BlockedAppsCubit(locator())..load(),
   );
   locator.registerLazySingleton<CoachSettingsCubit>(
     () => CoachSettingsCubit(locator())..load(),

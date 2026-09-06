@@ -232,13 +232,17 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
+  String get pressBackAgainToExit => 'Press back again to exit';
+
+  @override
   String get tabComingSoon => 'This section is coming soon.';
 
   @override
   String get profileSubtitle => 'Your profile and account details.';
 
   @override
-  String get timerPickAppHint => 'Choose an app to set a daily usage limit.';
+  String get timerPickAppHint =>
+      'Choose an app to set a daily limit or block it when opened.';
 
   @override
   String get timerSetDailyLimit => 'Set daily usage limit';
@@ -272,6 +276,39 @@ class AppLocalizationsEn extends AppLocalizations {
   String timerLimitSummary(int hours, int minutes) {
     return 'Limit ${hours}h ${minutes}m';
   }
+
+  @override
+  String get timerBlockWhenOpened => 'Block this app when opened';
+
+  @override
+  String get timerBlockWhenOpenedHint =>
+      'Shows a full-screen lock so the app cannot be used.';
+
+  @override
+  String get timerBlockedLabel => 'Blocked';
+
+  @override
+  String timerLimitAndBlockedSummary(int hours, int minutes) {
+    return 'Limit ${hours}h ${minutes}m · Blocked';
+  }
+
+  @override
+  String get timerBlockSaved => 'App block updated.';
+
+  @override
+  String get blockTitle => 'App blocked';
+
+  @override
+  String blockSubtitle(String appName) {
+    return '$appName is locked. Leave this app to continue.';
+  }
+
+  @override
+  String get blockLeaveButton => 'Leave app';
+
+  @override
+  String get blockHint =>
+      'You chose to block this app. It stays locked until you leave.';
 
   @override
   String get coachTitle => 'Time check';

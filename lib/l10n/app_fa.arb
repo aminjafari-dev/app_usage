@@ -93,9 +93,10 @@
   "navTimer": "تایمر",
   "navSettings": "تنظیمات",
   "navProfile": "پروفایل",
+  "pressBackAgainToExit": "برای خروج دوباره بازگشت را بزنید",
   "tabComingSoon": "این بخش به‌زودی اضافه می‌شود.",
   "profileSubtitle": "جزئیات پروفایل و حساب شما.",
-  "timerPickAppHint": "برنامه‌ای را برای تنظیم محدودیت روزانه انتخاب کنید.",
+  "timerPickAppHint": "برنامه‌ای را برای محدودیت روزانه یا مسدودسازی هنگام باز شدن انتخاب کنید.",
   "timerSetDailyLimit": "محدودیت استفاده روزانه را تنظیم کنید",
   "timerHoursLabel": "ساعت",
   "timerMinutesLabel": "دقیقه",
@@ -116,6 +117,32 @@
       }
     }
   },
+  "timerBlockWhenOpened": "مسدود کردن این برنامه هنگام باز شدن",
+  "timerBlockWhenOpenedHint": "قفل تمام‌صفحه نشان می‌دهد تا نتوان از برنامه استفاده کرد.",
+  "timerBlockedLabel": "مسدود شده",
+  "timerLimitAndBlockedSummary": "محدودیت {hours}س {minutes}د · مسدود",
+  "@timerLimitAndBlockedSummary": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timerBlockSaved": "مسدودسازی برنامه به‌روز شد.",
+  "blockTitle": "برنامه مسدود است",
+  "blockSubtitle": "{appName} قفل شده است. برای ادامه، این برنامه را ترک کنید.",
+  "@blockSubtitle": {
+    "placeholders": {
+      "appName": {
+        "type": "String"
+      }
+    }
+  },
+  "blockLeaveButton": "ترک برنامه",
+  "blockHint": "شما این برنامه را مسدود کرده‌اید. تا زمانی که خارج نشوید قفل می‌ماند.",
   "coachTitle": "زمان بررسی",
   "coachOverLimitSubtitle": "شما {minutes} دقیقه از محدودیت روزانه عبور کرده‌اید.",
   "@coachOverLimitSubtitle": {

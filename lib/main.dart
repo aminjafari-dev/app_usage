@@ -12,6 +12,7 @@ import 'package:app_usage/core/router/page_name.dart';
 import 'package:app_usage/core/router/page_router.dart';
 import 'package:app_usage/core/settings/app_timer_cubit.dart';
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/settings/coach_settings_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
@@ -76,6 +77,7 @@ class AppUsageApp extends StatelessWidget {
         BlocProvider.value(value: locator<ThemeCubit>()),
         BlocProvider.value(value: locator<BadgeAppearanceCubit>()),
         BlocProvider.value(value: locator<AppTimerCubit>()),
+        BlocProvider.value(value: locator<BlockedAppsCubit>()),
         BlocProvider.value(value: locator<CoachSettingsCubit>()),
       ],
       child: BlocBuilder<LocaleCubit, Locale>(

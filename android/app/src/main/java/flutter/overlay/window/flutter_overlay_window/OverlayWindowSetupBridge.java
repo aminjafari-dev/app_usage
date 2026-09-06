@@ -51,7 +51,7 @@ public final class OverlayWindowSetupBridge {
         }
         WindowSetup.width = widthPx;
         WindowSetup.height = heightPx;
-        WindowSetup.gravity = Gravity.TOP;
+        WindowSetup.gravity = Gravity.TOP | Gravity.CENTER_HORIZONTAL;
         WindowSetup.flag = WindowManager.LayoutParams.FLAG_NOT_FOCUSABLE;
         WindowSetup.enableDrag = true;
         WindowSetup.positionGravity = "none";
