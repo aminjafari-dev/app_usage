@@ -1,0 +1,17 @@
+{
+  "name": "app-usage-drive-sync",
+  "version": "1.0.0",
+  "private": true,
+  "main": "src/index.js",
+  "engines": {
+    "node": ">=16"
+  },
+  "scripts": {
+    "start": "functions-framework --target=syncUsage --port=8080",
+    "check-folder": "node src/check_folder.js"
+  },
+  "dependencies": {
+    "@google-cloud/functions-framework": "^3.4.5",
+    "googleapis": "^148.0.0"
+  }
+}

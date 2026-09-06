@@ -15,6 +15,7 @@ import 'package:app_usage/features/app_usage/domain/usecases/request_usage_permi
 import 'package:app_usage/features/app_usage/domain/usecases/start_live_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/stop_live_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/presentation/bloc/usage_bloc.dart';
+import 'package:app_usage/features/drive_sync/di/drive_sync_di.dart';
 
 /// Registers app_usage feature dependencies into [locator].
 ///
@@ -25,12 +26,17 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
     UsageStatsDataSource.new,
   );
   locator.registerLazySingleton<UsageLocalDataSource>(
-    () => UsageLocalDataSource(locator()),
+    () => UsageLocalDataSource(
+      locator(),
+      pendingStore: locator(),
+    ),
   );
   locator.registerLazySingleton<OverlayDataSource>(OverlayDataSource.new);
   locator.registerLazySingleton<BatteryOptimizationDataSource>(
     BatteryOptimizationDataSource.new,
   );
+
+  registerDriveSyncService(locator);
 
   // Repository
   locator.registerLazySingleton<AppUsageRepository>(

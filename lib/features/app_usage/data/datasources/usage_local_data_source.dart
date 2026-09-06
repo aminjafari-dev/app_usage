@@ -3,6 +3,7 @@ import 'dart:convert';
 import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_usage/core/utils/duration_format.dart';
+import 'package:app_usage/features/drive_sync/data/usage_pending_store.dart';
 
 /// Local cache of today's seconds keyed by date + package.
 ///
@@ -16,13 +17,17 @@ import 'package:app_usage/core/utils/duration_format.dart';
 /// can resume from the last known totals.
 class UsageLocalDataSource {
   /// Creates a cache backed by [SharedPreferences].
-  UsageLocalDataSource(this._prefs);
+  ///
+  /// When [pendingStore] is provided, yesterday's bucket is archived for Drive
+  /// upload before it is cleared on day rollover.
+  UsageLocalDataSource(this._prefs, {UsagePendingStore? this._pendingStore});
 
   static const _secondsPrefix = 'usage_seconds_';
   static const _dateKey = 'usage_cache_date';
   static const _autoTrackingKey = 'auto_tracking_enabled';
 
   final SharedPreferences _prefs;
+  final UsagePendingStore? _pendingStore;
 
   /// Reloads native prefs so this isolate sees writes from the overlay isolate.
   ///
@@ -68,13 +73,22 @@ class UsageLocalDataSource {
     );
   }
 
-  /// If the stored date is not today, wipe yesterday's bucket reference.
+  /// If the stored date is not today, archive then wipe yesterday's bucket.
   Future<void> _ensureTodayBucket() async {
     final today = todayDateKey();
     final stored = _prefs.getString(_dateKey);
     // When the calendar day rolls over, start a fresh cache bucket.
     if (stored != today) {
       if (stored != null) {
+        final raw = _prefs.getString('$_secondsPrefix$stored');
+        final pending = _pendingStore;
+        if (pending != null && raw != null && raw.isNotEmpty) {
+          final decoded = jsonDecode(raw) as Map<String, dynamic>;
+          final map = decoded.map(
+            (key, value) => MapEntry(key, (value as num).toInt()),
+          );
+          await pending.enqueueDay(stored, map);
+        }
         await _prefs.remove('$_secondsPrefix$stored');
       }
       await _prefs.setString(_dateKey, today);

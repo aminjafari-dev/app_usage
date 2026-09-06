@@ -18,12 +18,20 @@ import 'package:app_usage/core/settings/holiday_settings_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/features/app_usage/presentation/overlay/overlay_app.dart';
+import 'package:app_usage/features/drive_sync/domain/drive_sync_service.dart';
+import 'package:app_usage/features/drive_sync/drive_sync_scheduler.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
 /// App entrypoint.
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   await setupLocator();
+
+  // Catch up any missed noon uploads, then schedule the next daily attempt.
+  // ignore: unawaited_futures
+  locator<DriveSyncService>().syncNow();
+  await scheduleDailyDriveSync();
+
   runApp(const AppUsageApp());
 }
 

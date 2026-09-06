@@ -97,6 +97,18 @@
   "tabComingSoon": "This part is coming soon — wait for me, azizam.",
   "profileName": "Shirin joonam",
   "profileSubtitle": "Made with all the love in the world — only for you, eshgham.",
+  "profileSyncTitle": "Cloud backup",
+  "profileSyncSubtitle": "User id: {userId}",
+  "@profileSyncSubtitle": {
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSyncNow": "Sync to Drive now",
+  "profileSyncOk": "Synced, azizam 💕",
+  "profileSyncFail": "Couldn’t sync yet — will retry later",
   "timerPickAppHint": "Pick an app so I can set a daily limit or lock it for you, aziz delam.",
   "timerSetDailyLimit": "Set your daily limit",
   "timerHoursLabel": "HOURS",

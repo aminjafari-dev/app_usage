@@ -248,6 +248,23 @@ class AppLocalizationsEn extends AppLocalizations {
       'Made with all the love in the world — only for you, eshgham.';
 
   @override
+  String get profileSyncTitle => 'Cloud backup';
+
+  @override
+  String profileSyncSubtitle(String userId) {
+    return 'User id: $userId';
+  }
+
+  @override
+  String get profileSyncNow => 'Sync to Drive now';
+
+  @override
+  String get profileSyncOk => 'Synced, azizam 💕';
+
+  @override
+  String get profileSyncFail => 'Couldn’t sync yet — will retry later';
+
+  @override
   String get timerPickAppHint =>
       'Pick an app so I can set a daily limit or lock it for you, aziz delam.';
 

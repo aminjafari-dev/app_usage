@@ -9,6 +9,7 @@ import 'package:app_usage/core/settings/coach_settings_cubit.dart';
 import 'package:app_usage/core/settings/holiday_settings_cubit.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/features/app_usage/di/app_usage_di.dart';
+import 'package:app_usage/features/drive_sync/di/drive_sync_di.dart';
 
 /// Global service locator instance.
 ///
@@ -27,6 +28,10 @@ final GetIt locator = GetIt.instance;
 /// ```
 Future<void> setupLocator() async {
   final prefs = await SharedPreferences.getInstance();
+  if (locator.isRegistered<SharedPreferences>()) {
+    // Background isolates may call setup again; keep the first graph.
+    return;
+  }
   locator.registerSingleton<SharedPreferences>(prefs);
   locator.registerLazySingleton<LocaleCubit>(
     () => LocaleCubit(locator())..load(),
@@ -49,6 +54,9 @@ Future<void> setupLocator() async {
   locator.registerLazySingleton<HolidaySettingsCubit>(
     () => HolidaySettingsCubit(locator())..load(),
   );
+
+  // Pending queue + user id before usage local cache (day archive).
+  await setupDriveSyncLocator(locator);
 
   // Feature modules register their own graph.
   await setupAppUsageLocator(locator);

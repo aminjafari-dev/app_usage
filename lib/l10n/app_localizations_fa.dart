@@ -246,6 +246,23 @@ class AppLocalizationsFa extends AppLocalizations {
       'با تمام عشق دنیا، فقط برای تو ساخته شده — عشقم.';
 
   @override
+  String get profileSyncTitle => 'پشتیبان ابری';
+
+  @override
+  String profileSyncSubtitle(String userId) {
+    return 'شناسه کاربر: $userId';
+  }
+
+  @override
+  String get profileSyncNow => 'الان همگام‌سازی با Drive';
+
+  @override
+  String get profileSyncOk => 'همگام شد، عزیزم 💕';
+
+  @override
+  String get profileSyncFail => 'فعلاً نشد — بعداً دوباره تلاش می‌کنم';
+
+  @override
   String get timerPickAppHint =>
       'برنامه‌ای انتخاب کن که برات محدودیت بذارم یا قفلش کنم، عزیز دلم.';
 

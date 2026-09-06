@@ -8,6 +8,7 @@ import 'package:app_usage/core/utils/usage_time_calculator.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_local_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_stats_data_source.dart';
+import 'package:app_usage/features/drive_sync/data/usage_pending_store.dart';
 
 /// Callback fired whenever the overlay badge should redraw or hide.
 ///
@@ -97,7 +98,11 @@ class OverlayLiveTracker {
 
     _onTick = onTick;
     final prefs = await SharedPreferences.getInstance();
-    _local = UsageLocalDataSource(prefs);
+    // Archive yesterday into the Drive pending queue before clearing the bucket.
+    _local = UsageLocalDataSource(
+      prefs,
+      pendingStore: UsagePendingStore(prefs),
+    );
 
     await _hydrateToday();
     // Main may finish writing prefs a moment after showOverlay — pick that up.

@@ -1,6 +1,8 @@
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:tools="http://schemas.android.com/tools">
 
+    <uses-permission android:name="android.permission.INTERNET" />
+
     <!-- Usage Access: required to read foreground app + today's totals -->
     <uses-permission
         android:name="android.permission.PACKAGE_USAGE_STATS"

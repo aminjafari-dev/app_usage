@@ -97,6 +97,18 @@
   "tabComingSoon": "این بخش به‌زودی می‌آد، صبر کن عزیزم.",
   "profileName": "شیرین جونم",
   "profileSubtitle": "با تمام عشق دنیا، فقط برای تو ساخته شده — عشقم.",
+  "profileSyncTitle": "پشتیبان ابری",
+  "profileSyncSubtitle": "شناسه کاربر: {userId}",
+  "@profileSyncSubtitle": {
+    "placeholders": {
+      "userId": {
+        "type": "String"
+      }
+    }
+  },
+  "profileSyncNow": "الان همگام‌سازی با Drive",
+  "profileSyncOk": "همگام شد، عزیزم 💕",
+  "profileSyncFail": "فعلاً نشد — بعداً دوباره تلاش می‌کنم",
   "timerPickAppHint": "برنامه‌ای انتخاب کن که برات محدودیت بذارم یا قفلش کنم، عزیز دلم.",
   "timerSetDailyLimit": "محدودیت روزانه‌ات رو تنظیم کن",
   "timerHoursLabel": "ساعت",

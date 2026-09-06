@@ -536,6 +536,36 @@ abstract class AppLocalizations {
   /// **'Made with all the love in the world — only for you, eshgham.'**
   String get profileSubtitle;
 
+  /// No description provided for @profileSyncTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Cloud backup'**
+  String get profileSyncTitle;
+
+  /// No description provided for @profileSyncSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'User id: {userId}'**
+  String profileSyncSubtitle(String userId);
+
+  /// No description provided for @profileSyncNow.
+  ///
+  /// In en, this message translates to:
+  /// **'Sync to Drive now'**
+  String get profileSyncNow;
+
+  /// No description provided for @profileSyncOk.
+  ///
+  /// In en, this message translates to:
+  /// **'Synced, azizam 💕'**
+  String get profileSyncOk;
+
+  /// No description provided for @profileSyncFail.
+  ///
+  /// In en, this message translates to:
+  /// **'Couldn’t sync yet — will retry later'**
+  String get profileSyncFail;
+
   /// No description provided for @timerPickAppHint.
   ///
   /// In en, this message translates to:
