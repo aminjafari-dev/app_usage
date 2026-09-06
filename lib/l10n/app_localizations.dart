@@ -1147,6 +1147,66 @@ abstract class AppLocalizations {
   /// In en, this message translates to:
   /// **'Daily limit reached'**
   String get coachLimitAlert;
+
+  /// No description provided for @holidaySettingsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Holiday day'**
+  String get holidaySettingsTitle;
+
+  /// No description provided for @holidaySettingsSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'On this day, every blocked app is allowed to open freely.'**
+  String get holidaySettingsSubtitle;
+
+  /// No description provided for @holidaySettingsSummary.
+  ///
+  /// In en, this message translates to:
+  /// **'{day} · blocked apps unlock'**
+  String holidaySettingsSummary(String day);
+
+  /// No description provided for @weekdayMonday.
+  ///
+  /// In en, this message translates to:
+  /// **'Monday'**
+  String get weekdayMonday;
+
+  /// No description provided for @weekdayTuesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Tuesday'**
+  String get weekdayTuesday;
+
+  /// No description provided for @weekdayWednesday.
+  ///
+  /// In en, this message translates to:
+  /// **'Wednesday'**
+  String get weekdayWednesday;
+
+  /// No description provided for @weekdayThursday.
+  ///
+  /// In en, this message translates to:
+  /// **'Thursday'**
+  String get weekdayThursday;
+
+  /// No description provided for @weekdayFriday.
+  ///
+  /// In en, this message translates to:
+  /// **'Friday'**
+  String get weekdayFriday;
+
+  /// No description provided for @weekdaySaturday.
+  ///
+  /// In en, this message translates to:
+  /// **'Saturday'**
+  String get weekdaySaturday;
+
+  /// No description provided for @weekdaySunday.
+  ///
+  /// In en, this message translates to:
+  /// **'Sunday'**
+  String get weekdaySunday;
 }
 
 class _AppLocalizationsDelegate

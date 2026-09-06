@@ -598,4 +598,37 @@ class AppLocalizationsEn extends AppLocalizations {
 
   @override
   String get coachLimitAlert => 'Daily limit reached';
+
+  @override
+  String get holidaySettingsTitle => 'Holiday day';
+
+  @override
+  String get holidaySettingsSubtitle =>
+      'On this day, every blocked app is allowed to open freely.';
+
+  @override
+  String holidaySettingsSummary(String day) {
+    return '$day · blocked apps unlock';
+  }
+
+  @override
+  String get weekdayMonday => 'Monday';
+
+  @override
+  String get weekdayTuesday => 'Tuesday';
+
+  @override
+  String get weekdayWednesday => 'Wednesday';
+
+  @override
+  String get weekdayThursday => 'Thursday';
+
+  @override
+  String get weekdayFriday => 'Friday';
+
+  @override
+  String get weekdaySaturday => 'Saturday';
+
+  @override
+  String get weekdaySunday => 'Sunday';
 }

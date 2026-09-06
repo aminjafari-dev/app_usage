@@ -256,5 +256,22 @@
   "coachAppearanceSubtitle": "Preview the over-limit quote",
   "coachAppearancePreviewApp": "Sample app",
   "coachQuoteClose": "Close",
-  "coachLimitAlert": "Daily limit reached"
+  "coachLimitAlert": "Daily limit reached",
+  "holidaySettingsTitle": "Holiday day",
+  "holidaySettingsSubtitle": "On this day, every blocked app is allowed to open freely.",
+  "holidaySettingsSummary": "{day} · blocked apps unlock",
+  "@holidaySettingsSummary": {
+    "placeholders": {
+      "day": {
+        "type": "String"
+      }
+    }
+  },
+  "weekdayMonday": "Monday",
+  "weekdayTuesday": "Tuesday",
+  "weekdayWednesday": "Wednesday",
+  "weekdayThursday": "Thursday",
+  "weekdayFriday": "Friday",
+  "weekdaySaturday": "Saturday",
+  "weekdaySunday": "Sunday"
 }

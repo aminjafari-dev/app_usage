@@ -4,6 +4,7 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/locale/locale_cubit.dart';
 import 'package:app_usage/core/settings/coach_settings_cubit.dart';
+import 'package:app_usage/core/settings/holiday_settings_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/theme/theme_cubit.dart';
 import 'package:app_usage/core/widgets/g_blur_sheet.dart';
@@ -14,10 +15,11 @@ import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/usage_glass_counter.dart';
 import 'package:app_usage/features/settings/presentation/widgets/badge_appearance_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/coach_settings_sheet.dart';
+import 'package:app_usage/features/settings/presentation/widgets/holiday_settings_sheet.dart';
 import 'package:app_usage/features/settings/presentation/widgets/settings_choice_segment.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
-/// App settings: language, theme, badge appearance, and coach reminders.
+/// App settings: language, theme, badge appearance, holiday unlock, and coach.
 ///
 /// How to use:
 /// ```dart
@@ -151,6 +153,30 @@ class SettingsPage extends StatelessWidget {
                         color: AppTheme.onSurfaceMuted,
                       ),
                       onTap: () => showCoachSettingsSheet(context),
+                    );
+                  },
+                ),
+                Padding(
+                  padding: const EdgeInsetsDirectional.only(start: 72),
+                  child: Divider(
+                    height: 1,
+                    thickness: 0.5,
+                    color: AppTheme.dividerOf(context),
+                  ),
+                ),
+                BlocBuilder<HolidaySettingsCubit, HolidaySettings>(
+                  builder: (context, holiday) {
+                    final dayName = weekdayLabel(l10n, holiday.weekday);
+                    return GSettingsTile(
+                      icon: Icons.beach_access_rounded,
+                      iconColor: AppTheme.iconOrange,
+                      title: l10n.holidaySettingsTitle,
+                      subtitle: l10n.holidaySettingsSummary(dayName),
+                      trailing: const Icon(
+                        Icons.chevron_right_rounded,
+                        color: AppTheme.onSurfaceMuted,
+                      ),
+                      onTap: () => showHolidaySettingsSheet(context),
                     );
                   },
                 ),

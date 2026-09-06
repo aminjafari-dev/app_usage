@@ -7,6 +7,7 @@ import 'package:shared_preferences/shared_preferences.dart';
 
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
+import 'package:app_usage/core/settings/holiday_settings_cubit.dart';
 import 'package:app_usage/core/settings/usage_coach.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/overlay_live_tracker.dart';
@@ -258,6 +259,8 @@ class _OverlayAppState extends State<OverlayApp> {
     } catch (_) {
       // Continue with in-memory prefs if reload fails.
     }
+    // On the configured holiday, every blocked app is temporarily allowed.
+    if (HolidaySettingsCubit.readFrom(prefs).isActiveToday()) return false;
     return BlockedAppsCubit.readFrom(prefs).contains(packageName);
   }
 

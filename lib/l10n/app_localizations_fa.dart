@@ -593,4 +593,37 @@ class AppLocalizationsFa extends AppLocalizations {
 
   @override
   String get coachLimitAlert => 'به محدودیت روزانه رسیدی';
+
+  @override
+  String get holidaySettingsTitle => 'روز تعطیل';
+
+  @override
+  String get holidaySettingsSubtitle =>
+      'در این روز همه برنامه‌های مسدودشده آزادانه باز می‌شوند.';
+
+  @override
+  String holidaySettingsSummary(String day) {
+    return '$day · آزادسازی برنامه‌های مسدود';
+  }
+
+  @override
+  String get weekdayMonday => 'دوشنبه';
+
+  @override
+  String get weekdayTuesday => 'سه‌شنبه';
+
+  @override
+  String get weekdayWednesday => 'چهارشنبه';
+
+  @override
+  String get weekdayThursday => 'پنج‌شنبه';
+
+  @override
+  String get weekdayFriday => 'جمعه';
+
+  @override
+  String get weekdaySaturday => 'شنبه';
+
+  @override
+  String get weekdaySunday => 'یکشنبه';
 }
