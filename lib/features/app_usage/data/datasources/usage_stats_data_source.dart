@@ -19,8 +19,34 @@ class UsageInfoModel {
 
   final String packageName;
   final String appName;
+
+  /// Foreground seconds inside the queried range (not only "today").
   final int todaySeconds;
   final Uint8List? iconBytes;
+}
+
+/// One calendar-day total returned with a range query.
+class DailyUsageBucketModel {
+  /// Creates a raw daily bucket from event math.
+  const DailyUsageBucketModel({
+    required this.day,
+    required this.totalSeconds,
+  });
+
+  final DateTime day;
+  final int totalSeconds;
+}
+
+/// Per-app + daily totals for an arbitrary local-time window.
+class RangeUsageResult {
+  /// Creates a combined range query result.
+  const RangeUsageResult({
+    required this.apps,
+    required this.dailyBuckets,
+  });
+
+  final List<UsageInfoModel> apps;
+  final List<DailyUsageBucketModel> dailyBuckets;
 }
 
 /// Talks to the `usage_stats` plugin for permissions, events, and aggregates.
@@ -101,8 +127,32 @@ class UsageStatsDataSource {
   Future<List<UsageInfoModel>> queryTodayAggregates() async {
     final end = DateTime.now();
     final start = startOfToday(end);
-    // Look back before midnight so a session that crossed 00:00 is detected and
-    // then clipped — only the post-midnight slice counts toward today.
+    final result = await queryUsageForRange(start: start, end: end);
+    return result.apps;
+  }
+
+  /// Foreground totals + per-day bars for [[start], [end]] using the same
+  /// resume/pause event math as Digital Wellbeing.
+  ///
+  /// How to use:
+  /// ```dart
+  /// final result = await ds.queryUsageForRange(
+  ///   start: startOfToday().subtract(const Duration(days: 6)),
+  ///   end: DateTime.now(),
+  /// );
+  /// ```
+  ///
+  /// [start] should be local midnight of the first day. Sessions that cross
+  /// that boundary are clipped so only the in-range slice counts.
+  Future<RangeUsageResult> queryUsageForRange({
+    required DateTime start,
+    required DateTime end,
+  }) async {
+    if (!end.isAfter(start)) {
+      return const RangeUsageResult(apps: [], dailyBuckets: []);
+    }
+
+    // Look back so a session that crossed [start] is detected, then clipped.
     final lookback = start.subtract(const Duration(hours: 6));
     final rawEvents = await UsageStats.queryEvents(lookback, end);
 
@@ -111,7 +161,6 @@ class UsageStatsDataSource {
       final pkg = event.packageName;
       final type = event.eventTypeValue;
       final time = int.tryParse(event.timeStamp ?? '') ?? 0;
-      // Drop malformed plugin rows before the pure calculator runs.
       if (pkg == null || pkg.isEmpty || type == null || time <= 0) continue;
       points.add(
         UsageEventPoint(
@@ -130,16 +179,14 @@ class UsageStatsDataSource {
       isTransientSystemPackage: _isTransientSystemPackage,
     );
 
-    final results = <UsageInfoModel>[];
+    final apps = <UsageInfoModel>[];
     for (final entry in msByPackage.entries) {
-      final packageName = entry.key;
       final seconds = entry.value ~/ 1000;
-      // Skip apps with no meaningful foreground time today.
       if (seconds <= 0) continue;
-
+      final packageName = entry.key;
       final appName = await resolveAppName(packageName);
       final icon = await resolveIcon(packageName);
-      results.add(
+      apps.add(
         UsageInfoModel(
           packageName: packageName,
           appName: appName,
@@ -148,7 +195,38 @@ class UsageStatsDataSource {
         ),
       );
     }
-    return results;
+    apps.sort((a, b) => b.todaySeconds.compareTo(a.todaySeconds));
+
+    final dailyBuckets = <DailyUsageBucketModel>[];
+    var day = DateTime(start.year, start.month, start.day);
+    final lastDay = DateTime(end.year, end.month, end.day);
+    while (!day.isAfter(lastDay)) {
+      final dayStartMs = day.millisecondsSinceEpoch;
+      final nextMidnight = day.add(const Duration(days: 1));
+      final dayEndMs = nextMidnight.isAfter(end)
+          ? end.millisecondsSinceEpoch
+          : nextMidnight.millisecondsSinceEpoch;
+      final dayMs = sumForegroundMsByPackage(
+        events: points,
+        rangeStartMs: dayStartMs,
+        rangeEndMs: dayEndMs,
+        isIgnoredPackage: _isIgnoredPackage,
+        isTransientSystemPackage: _isTransientSystemPackage,
+      );
+      var totalMs = 0;
+      for (final value in dayMs.values) {
+        totalMs += value;
+      }
+      dailyBuckets.add(
+        DailyUsageBucketModel(
+          day: day,
+          totalSeconds: totalMs ~/ 1000,
+        ),
+      );
+      day = nextMidnight;
+    }
+
+    return RangeUsageResult(apps: apps, dailyBuckets: dailyBuckets);
   }
 
   /// Detects the current foreground package from recent usage events.
@@ -224,6 +302,52 @@ class UsageStatsDataSource {
   /// Whether a resume for [packageName] is system chrome over the current app.
   bool _isTransientSystemPackage(String packageName) =>
       _transientSystemPackages.contains(packageName);
+
+  /// Returns every installed user app the host is allowed to see.
+  ///
+  /// How to use: Timer tab — pick any app for a daily limit / block, not only
+  /// packages that already have usage today.
+  ///
+  /// System apps are excluded. Icons load in parallel; [todaySeconds] is 0
+  /// because this is a catalog, not a usage snapshot.
+  Future<List<UsageInfoModel>> queryInstalledApps() async {
+    final installed = await UsageStats.queryInstalledApps(includeSystem: false);
+    final filtered = installed.where((app) {
+      if (!app.enabled) return false;
+      if (app.packageName.isEmpty) return false;
+      if (_isIgnoredPackage(app.packageName)) return false;
+      return true;
+    }).toList();
+
+    filtered.sort((a, b) {
+      final left = (a.appName?.isNotEmpty == true
+              ? a.appName!
+              : humanizePackageName(a.packageName))
+          .toLowerCase();
+      final right = (b.appName?.isNotEmpty == true
+              ? b.appName!
+              : humanizePackageName(b.packageName))
+          .toLowerCase();
+      return left.compareTo(right);
+    });
+
+    return Future.wait(
+      filtered.map((app) async {
+        final packageName = app.packageName;
+        final label = app.appName;
+        final appName = (label != null && label.isNotEmpty)
+            ? label
+            : humanizePackageName(packageName);
+        final icon = await resolveIcon(packageName);
+        return UsageInfoModel(
+          packageName: packageName,
+          appName: appName,
+          todaySeconds: 0,
+          iconBytes: icon,
+        );
+      }),
+    );
+  }
 
   /// Resolves a human-readable label for [packageName].
   Future<String> resolveAppName(String packageName) async {

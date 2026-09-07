@@ -4,12 +4,15 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import 'package:app_usage/core/settings/app_timer_cubit.dart';
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart';
+import 'package:app_usage/features/app_usage/presentation/widgets/app_timer_limit_sheet.dart';
+import 'package:app_usage/l10n/app_localizations.dart';
 
 /// Minimal timer chip — foreground app logo + bold mm:ss (or h:mm:ss).
 ///
@@ -759,31 +762,60 @@ class _ChipAppLogo extends StatelessWidget {
   }
 }
 
-/// List tile for one app — avatar + name + duration pill.
+/// List tile for one app — avatar, name, usage, and a clickable hourglass
+/// that opens the daily-limit sheet (Digital Wellbeing-style row).
 ///
 /// How to use inside a ListView / card with [AppUsageEntity] items.
 class UsageAppTile extends StatelessWidget {
-  /// Creates a row showing icon, name, and today's time.
+  /// Creates a row showing icon, name, usage, and hourglass limit action.
   const UsageAppTile({
     super.key,
     required this.entity,
     this.isActive = false,
     this.showDivider = true,
+    this.limit,
+    this.blocked = false,
   });
 
   final AppUsageEntity entity;
   final bool isActive;
   final bool showDivider;
 
+  /// Daily limit configured for this app, if any.
+  final AppTimerLimit? limit;
+
+  /// Whether this app is hard-blocked when opened.
+  final bool blocked;
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final hasLimit = limit != null;
+    final Color accent;
+    if (blocked) {
+      accent = AppTheme.error;
+    } else if (hasLimit) {
+      accent = AppTheme.primary;
+    } else {
+      accent = AppTheme.onSurfaceMuted;
+    }
+
+    final String subtitle;
+    if (blocked && hasLimit) {
+      subtitle = l10n.timerLimitAndBlockedSummary(limit!.hours, limit!.minutes);
+    } else if (blocked) {
+      subtitle = l10n.timerBlockedLabel;
+    } else {
+      subtitle = formatUsageDuration(entity.todaySeconds);
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
         ColoredBox(
           color: isActive ? AppTheme.primarySoft : Colors.transparent,
           child: Padding(
-            padding: const EdgeInsets.symmetric(horizontal: 16, vertical: 12),
+            padding: const EdgeInsets.symmetric(horizontal: 12, vertical: 10),
             child: Row(
               children: [
                 AppLogo(iconBytes: entity.iconBytes, size: 44),
@@ -800,9 +832,11 @@ class UsageAppTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       GText(
-                        entity.packageName,
+                        subtitle,
                         style: Theme.of(context).textTheme.bodySmall,
-                        color: AppTheme.onSurfaceMuted,
+                        color: blocked
+                            ? AppTheme.error
+                            : AppTheme.onSurfaceMuted,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -810,24 +844,100 @@ class UsageAppTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                 GText(
-                    formatUsageDuration(entity.todaySeconds),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    color: isActive ? AppTheme.surface : AppTheme.onSurfaceMuted,
+                SizedBox(
+                  height: 44,
+                  child: VerticalDivider(
+                    width: 1,
+                    thickness: 1,
+                    color: AppTheme.dividerOf(context),
                   ),
-                
+                ),
+                _HourglassLimitButton(
+                  hasLimit: hasLimit,
+                  blocked: blocked,
+                  accent: accent,
+                  limitLabel: hasLimit && !blocked
+                      ? l10n.timerLimitCompact(limit!.hours, limit!.minutes)
+                      : null,
+                  onTap: () => showAppTimerLimitSheet(context, app: entity),
+                ),
               ],
             ),
           ),
         ),
         if (showDivider)
-          const Padding(
-            padding: EdgeInsetsDirectional.only(start: 72),
-            child: Divider(height: 1, thickness: 0.5, color: AppTheme.divider),
+          Padding(
+            padding: const EdgeInsetsDirectional.only(start: 72),
+            child: Divider(
+              height: 1,
+              thickness: 0.5,
+              color: AppTheme.dividerOf(context),
+            ),
           ),
       ],
+    );
+  }
+}
+
+/// Right-side control: hourglass for limits, banned icon when blocked.
+class _HourglassLimitButton extends StatelessWidget {
+  const _HourglassLimitButton({
+    required this.hasLimit,
+    required this.blocked,
+    required this.accent,
+    required this.onTap,
+    this.limitLabel,
+  });
+
+  final bool hasLimit;
+  final bool blocked;
+  final Color accent;
+  final String? limitLabel;
+  final VoidCallback onTap;
+
+  @override
+  Widget build(BuildContext context) {
+    final IconData icon;
+    if (blocked) {
+      icon = Icons.block_rounded;
+    } else if (hasLimit) {
+      icon = Icons.hourglass_bottom_rounded;
+    } else {
+      icon = Icons.hourglass_empty_rounded;
+    }
+
+    return Material(
+      color: Colors.transparent,
+      child: InkWell(
+        onTap: onTap,
+        borderRadius: BorderRadius.circular(AppTheme.radiusPill),
+        child: Padding(
+          padding: const EdgeInsets.symmetric(horizontal: 10, vertical: 4),
+          child: ConstrainedBox(
+            constraints: const BoxConstraints(minWidth: 48),
+            child: Column(
+              mainAxisSize: MainAxisSize.min,
+              children: [
+                Icon(icon, size: 22, color: accent),
+                if (limitLabel != null) ...[
+                  const SizedBox(height: 2),
+                  GText(
+                    limitLabel!,
+                    style: Theme.of(context).textTheme.labelSmall?.copyWith(
+                          fontWeight: FontWeight.w600,
+                          fontSize: 11,
+                          height: 1.1,
+                        ),
+                    color: accent,
+                    textAlign: TextAlign.center,
+                    maxLines: 1,
+                  ),
+                ],
+              ],
+            ),
+          ),
+        ),
+      ),
     );
   }
 }

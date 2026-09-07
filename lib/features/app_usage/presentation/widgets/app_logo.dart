@@ -12,7 +12,10 @@ import 'package:app_usage/core/theme/app_theme.dart';
 /// ```
 ///
 /// Shared by Home and Timer lists so app marks match the timer editor treatment.
-class AppLogo extends StatelessWidget {
+///
+/// Caches a [MemoryImage] so parent [setState] rebuilds (timer wheel / switches)
+/// do not re-decode the icon and flash.
+class AppLogo extends StatefulWidget {
   /// Creates a rounded app logo at [size].
   const AppLogo({
     super.key,
@@ -27,26 +30,62 @@ class AppLogo extends StatelessWidget {
   final double size;
 
   @override
+  State<AppLogo> createState() => _AppLogoState();
+}
+
+class _AppLogoState extends State<AppLogo> {
+  MemoryImage? _image;
+
+  @override
+  void initState() {
+    super.initState();
+    _syncImage();
+  }
+
+  @override
+  void didUpdateWidget(covariant AppLogo oldWidget) {
+    super.didUpdateWidget(oldWidget);
+    if (!identical(oldWidget.iconBytes, widget.iconBytes)) {
+      _syncImage();
+    }
+  }
+
+  void _syncImage() {
+    final bytes = widget.iconBytes;
+    if (bytes == null || bytes.isEmpty) {
+      _image = null;
+      return;
+    }
+    final data = bytes is Uint8List ? bytes : Uint8List.fromList(bytes);
+    _image = MemoryImage(data);
+  }
+
+  @override
   Widget build(BuildContext context) {
-    final bytes = iconBytes;
-    final radius = size * 0.28;
+    final radius = widget.size * 0.28;
+    final image = _image;
 
     final Widget child;
-    if (bytes != null && bytes.isNotEmpty) {
-      child = Image.memory(
-        Uint8List.fromList(bytes),
-        width: size,
-        height: size,
+    if (image != null) {
+      child = Image(
+        image: image,
+        width: widget.size,
+        height: widget.size,
         fit: BoxFit.cover,
-        errorBuilder: (_, _, _) => _fallback(size),
+        gaplessPlayback: true,
+        errorBuilder: (_, _, _) => _fallback(widget.size),
       );
     } else {
-      child = _fallback(size);
+      child = _fallback(widget.size);
     }
 
     return ClipRRect(
       borderRadius: BorderRadius.circular(radius),
-      child: SizedBox(width: size, height: size, child: child),
+      child: SizedBox(
+        width: widget.size,
+        height: widget.size,
+        child: child,
+      ),
     );
   }
 

@@ -232,6 +232,42 @@ class AppLocalizationsFa extends AppLocalizations {
   String get navProfile => 'پروفایل';
 
   @override
+  String get navAnalytics => 'آمار';
+
+  @override
+  String get analyticsTitle => 'آمار';
+
+  @override
+  String get analyticsPeriodThreeDays => '۳ روز';
+
+  @override
+  String get analyticsPeriodWeek => 'هفته';
+
+  @override
+  String get analyticsPeriodTenDays => '۱۰ روز';
+
+  @override
+  String get analyticsTotalLabel => 'مجموع زمان صفحه';
+
+  @override
+  String analyticsAveragePerDay(String duration) {
+    return 'میانگین $duration در روز';
+  }
+
+  @override
+  String get analyticsChartHeader => 'روند استفاده';
+
+  @override
+  String get analyticsAppsHeader => 'برنامه‌ها';
+
+  @override
+  String get analyticsNoData => 'در این بازه استفاده‌ای نیست';
+
+  @override
+  String get analyticsNoDataSubtitle =>
+      'از برنامه‌ها استفاده کنید، سپس برای تازه‌سازی بکشید.';
+
+  @override
   String get pressBackAgainToExit =>
       'یه بار دیگه برگشت بزن تا بری بیرون، قشنگم';
 
@@ -295,9 +331,35 @@ class AppLocalizationsFa extends AppLocalizations {
       'امروز یه کم از برنامه‌ها استفاده کن، بعد برگرد تا برات تنظیم کنیم.';
 
   @override
+  String get timerSearchHint => 'جستجوی برنامه‌ها';
+
+  @override
+  String get timerSearchEmptyTitle => 'برنامه‌ای پیدا نشد';
+
+  @override
+  String get timerSearchEmptySubtitle => 'نام یا بسته دیگری را امتحان کنید.';
+
+  @override
+  String get timerNoLimitSet => 'بدون محدودیت';
+
+  @override
+  String get timerOtherAppsHeader => 'سایر برنامه‌ها';
+
+  @override
   String timerLimitSummary(int hours, int minutes) {
     return 'حد $hoursس $minutesد';
   }
+
+  @override
+  String timerLimitCompact(int hours, int minutes) {
+    return '$hoursس $minutesد';
+  }
+
+  @override
+  String get timerClearLimit => 'حذف محدودیت';
+
+  @override
+  String get timerLimitCleared => 'محدودیت روزانه حذف شد.';
 
   @override
   String get timerBlockWhenOpened => 'وقتی باز شد قفلش کن';

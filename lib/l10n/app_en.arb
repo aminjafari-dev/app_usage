@@ -93,6 +93,24 @@
   "navTimer": "Timer",
   "navSettings": "Settings",
   "navProfile": "Profile",
+  "navAnalytics": "Analytics",
+  "analyticsTitle": "Analytics",
+  "analyticsPeriodThreeDays": "3 Days",
+  "analyticsPeriodWeek": "Week",
+  "analyticsPeriodTenDays": "10 Days",
+  "analyticsTotalLabel": "Total screen time",
+  "analyticsAveragePerDay": "Avg {duration} / day",
+  "@analyticsAveragePerDay": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsChartHeader": "Usage over time",
+  "analyticsAppsHeader": "Apps",
+  "analyticsNoData": "No usage in this period",
+  "analyticsNoDataSubtitle": "Use apps on this phone, then pull to refresh.",
   "pressBackAgainToExit": "Press back again to leave, ghashangam",
   "tabComingSoon": "This part is coming soon — wait for me, azizam.",
   "profileName": "Shirin joonam",
@@ -119,6 +137,11 @@
   "timerInvalidLimit": "Choose more than zero, golam.",
   "timerEmptyTitle": "No apps yet, Shirin jan",
   "timerEmptySubtitle": "Use some apps today, then come back and we’ll set it together.",
+  "timerSearchHint": "Search apps",
+  "timerSearchEmptyTitle": "No matching apps",
+  "timerSearchEmptySubtitle": "Try a different name or package.",
+  "timerNoLimitSet": "No limit set",
+  "timerOtherAppsHeader": "Other apps",
   "timerLimitSummary": "Limit {hours}h {minutes}m",
   "@timerLimitSummary": {
     "placeholders": {
@@ -130,6 +153,19 @@
       }
     }
   },
+  "timerLimitCompact": "{hours}h {minutes}m",
+  "@timerLimitCompact": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timerClearLimit": "Remove limit",
+  "timerLimitCleared": "Daily limit removed.",
   "timerBlockWhenOpened": "Lock this app when opened",
   "timerBlockWhenOpenedHint": "A soft full-screen lock appears to protect your time, azizam.",
   "timerBlockLockedHint": "This app is always locked and can’t be changed.",

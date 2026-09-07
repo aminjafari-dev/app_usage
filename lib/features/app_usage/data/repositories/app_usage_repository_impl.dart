@@ -10,7 +10,9 @@ import 'package:app_usage/features/app_usage/data/datasources/battery_optimizati
 import 'package:app_usage/features/app_usage/data/datasources/overlay_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_local_data_source.dart';
 import 'package:app_usage/features/app_usage/data/datasources/usage_stats_data_source.dart';
+import 'package:app_usage/features/app_usage/domain/entities/analytics_period.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
+import 'package:app_usage/features/app_usage/domain/entities/period_usage_snapshot.dart';
 import 'package:app_usage/features/app_usage/domain/repositories/app_usage_repository.dart';
 
 /// Concrete [AppUsageRepository] that owns overlay lifecycle + Home sync.
@@ -71,6 +73,69 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
     try {
       await _hydrateToday();
       return Right(_sortedToday());
+    } catch (e) {
+      return Left(PlatformFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, List<AppUsageEntity>>> getInstalledApps() async {
+    try {
+      final models = await _usageStats.queryInstalledApps();
+      final apps = models
+          .map(
+            (model) => AppUsageEntity(
+              packageName: model.packageName,
+              appName: model.appName,
+              todaySeconds: model.todaySeconds,
+              iconBytes: model.iconBytes,
+            ),
+          )
+          .toList();
+      return Right(apps);
+    } catch (e) {
+      return Left(PlatformFailure(e.toString()));
+    }
+  }
+
+  @override
+  Future<Either<Failure, PeriodUsageSnapshot>> getUsageForPeriod(
+    AnalyticsPeriod period,
+  ) async {
+    try {
+      final range = period.rangeEndingAt(DateTime.now());
+      final result = await _usageStats.queryUsageForRange(
+        start: range.start,
+        end: range.end,
+      );
+
+      final apps = result.apps
+          .map(
+            (model) => AppUsageEntity(
+              packageName: model.packageName,
+              appName: model.appName,
+              todaySeconds: model.todaySeconds,
+              iconBytes: model.iconBytes,
+            ),
+          )
+          .toList();
+      final buckets = result.dailyBuckets
+          .map(
+            (b) => DailyUsageBucket(
+              day: b.day,
+              totalSeconds: b.totalSeconds,
+            ),
+          )
+          .toList();
+      final total = apps.fold<int>(0, (sum, app) => sum + app.todaySeconds);
+      return Right(
+        PeriodUsageSnapshot(
+          period: period,
+          apps: apps,
+          dailyBuckets: buckets,
+          totalSeconds: total,
+        ),
+      );
     } catch (e) {
       return Left(PlatformFailure(e.toString()));
     }

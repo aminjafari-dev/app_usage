@@ -235,6 +235,42 @@ class AppLocalizationsEn extends AppLocalizations {
   String get navProfile => 'Profile';
 
   @override
+  String get navAnalytics => 'Analytics';
+
+  @override
+  String get analyticsTitle => 'Analytics';
+
+  @override
+  String get analyticsPeriodThreeDays => '3 Days';
+
+  @override
+  String get analyticsPeriodWeek => 'Week';
+
+  @override
+  String get analyticsPeriodTenDays => '10 Days';
+
+  @override
+  String get analyticsTotalLabel => 'Total screen time';
+
+  @override
+  String analyticsAveragePerDay(String duration) {
+    return 'Avg $duration / day';
+  }
+
+  @override
+  String get analyticsChartHeader => 'Usage over time';
+
+  @override
+  String get analyticsAppsHeader => 'Apps';
+
+  @override
+  String get analyticsNoData => 'No usage in this period';
+
+  @override
+  String get analyticsNoDataSubtitle =>
+      'Use apps on this phone, then pull to refresh.';
+
+  @override
   String get pressBackAgainToExit => 'Press back again to leave, ghashangam';
 
   @override
@@ -298,9 +334,35 @@ class AppLocalizationsEn extends AppLocalizations {
       'Use some apps today, then come back and we’ll set it together.';
 
   @override
+  String get timerSearchHint => 'Search apps';
+
+  @override
+  String get timerSearchEmptyTitle => 'No matching apps';
+
+  @override
+  String get timerSearchEmptySubtitle => 'Try a different name or package.';
+
+  @override
+  String get timerNoLimitSet => 'No limit set';
+
+  @override
+  String get timerOtherAppsHeader => 'Other apps';
+
+  @override
   String timerLimitSummary(int hours, int minutes) {
     return 'Limit ${hours}h ${minutes}m';
   }
+
+  @override
+  String timerLimitCompact(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String get timerClearLimit => 'Remove limit';
+
+  @override
+  String get timerLimitCleared => 'Daily limit removed.';
 
   @override
   String get timerBlockWhenOpened => 'Lock this app when opened';

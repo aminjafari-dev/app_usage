@@ -93,6 +93,24 @@
   "navTimer": "تایمر",
   "navSettings": "تنظیمات",
   "navProfile": "پروفایل",
+  "navAnalytics": "آمار",
+  "analyticsTitle": "آمار",
+  "analyticsPeriodThreeDays": "۳ روز",
+  "analyticsPeriodWeek": "هفته",
+  "analyticsPeriodTenDays": "۱۰ روز",
+  "analyticsTotalLabel": "مجموع زمان صفحه",
+  "analyticsAveragePerDay": "میانگین {duration} در روز",
+  "@analyticsAveragePerDay": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsChartHeader": "روند استفاده",
+  "analyticsAppsHeader": "برنامه‌ها",
+  "analyticsNoData": "در این بازه استفاده‌ای نیست",
+  "analyticsNoDataSubtitle": "از برنامه‌ها استفاده کنید، سپس برای تازه‌سازی بکشید.",
   "pressBackAgainToExit": "یه بار دیگه برگشت بزن تا بری بیرون، قشنگم",
   "tabComingSoon": "این بخش به‌زودی می‌آد، صبر کن عزیزم.",
   "profileName": "شیرین جونم",
@@ -119,6 +137,11 @@
   "timerInvalidLimit": "یه وقت بیشتر از صفر انتخاب کن، گلم.",
   "timerEmptyTitle": "هنوز برنامه‌ای نیست، شیرین جان",
   "timerEmptySubtitle": "امروز یه کم از برنامه‌ها استفاده کن، بعد برگرد تا برات تنظیم کنیم.",
+  "timerSearchHint": "جستجوی برنامه‌ها",
+  "timerSearchEmptyTitle": "برنامه‌ای پیدا نشد",
+  "timerSearchEmptySubtitle": "نام یا بسته دیگری را امتحان کنید.",
+  "timerNoLimitSet": "بدون محدودیت",
+  "timerOtherAppsHeader": "سایر برنامه‌ها",
   "timerLimitSummary": "حد {hours}س {minutes}د",
   "@timerLimitSummary": {
     "placeholders": {
@@ -130,6 +153,19 @@
       }
     }
   },
+  "timerLimitCompact": "{hours}س {minutes}د",
+  "@timerLimitCompact": {
+    "placeholders": {
+      "hours": {
+        "type": "int"
+      },
+      "minutes": {
+        "type": "int"
+      }
+    }
+  },
+  "timerClearLimit": "حذف محدودیت",
+  "timerLimitCleared": "محدودیت روزانه حذف شد.",
   "timerBlockWhenOpened": "وقتی باز شد قفلش کن",
   "timerBlockWhenOpenedHint": "یه قفل نرم تمام‌صفحه می‌آد تا از وقتت محافظت کنه، عزیزم.",
   "timerBlockLockedHint": "این برنامه همیشه قفل است و قابل تغییر نیست.",
