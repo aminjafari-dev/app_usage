@@ -340,7 +340,7 @@ class AppLocalizationsFa extends AppLocalizations {
   String get timerLimitCleared => 'محدودیت روزانه حذف شد.';
 
   @override
-  String get timerBlockWhenOpened => 'مسدود کردن این برنامه هنگام باز شدن';
+  String get timerBlockWhenOpened => 'مسدود کردن این برنامه';
 
   @override
   String get timerBlockWhenOpenedHint =>
