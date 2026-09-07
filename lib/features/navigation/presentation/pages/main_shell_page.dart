@@ -3,8 +3,8 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
 import 'package:app_usage/core/theme/app_theme.dart';
+import 'package:app_usage/features/app_usage/presentation/pages/analytics_page.dart';
 import 'package:app_usage/features/app_usage/presentation/pages/home_page.dart';
-import 'package:app_usage/features/app_usage/presentation/pages/profile_page.dart';
 import 'package:app_usage/features/app_usage/presentation/pages/timer_page.dart';
 import 'package:app_usage/features/settings/presentation/pages/settings_page.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
@@ -17,6 +17,7 @@ import 'package:app_usage/l10n/app_localizations.dart';
 /// ```
 ///
 /// Child pages can switch tabs via [MainShellScope.of].
+/// Tabs: Home, Analytics, Timer, Settings.
 class MainShellPage extends StatefulWidget {
   /// Creates the main tab shell.
   const MainShellPage({super.key});
@@ -107,9 +108,9 @@ class _MainShellPageState extends State<MainShellPage> {
                   index: _index,
                   children: const [
                     HomePage(),
+                    AnalyticsPage(),
                     TimerPage(),
                     SettingsPage(embedded: true),
-                    ProfilePage(),
                   ],
                 ),
                 // Overlay (not Scaffold.bottomNavigationBar) so no fixed strip
@@ -147,6 +148,15 @@ class _MainShellPageState extends State<MainShellPage> {
                       ),
                       BottomBarItem(
                         inActiveItem:
+                            Icon(Icons.insights_outlined, color: inactive),
+                        activeItem: const Icon(
+                          Icons.insights_rounded,
+                          color: AppTheme.primary,
+                        ),
+                        itemLabel: l10n.navAnalytics,
+                      ),
+                      BottomBarItem(
+                        inActiveItem:
                             Icon(Icons.timer_outlined, color: inactive),
                         activeItem: const Icon(
                           Icons.timer_rounded,
@@ -162,27 +172,6 @@ class _MainShellPageState extends State<MainShellPage> {
                           color: AppTheme.primary,
                         ),
                         itemLabel: l10n.navSettings,
-                      ),
-                      BottomBarItem(
-                        inActiveItem: CircleAvatar(
-                          radius: 12,
-                          backgroundColor: AppTheme.primarySoft,
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 16,
-                            color: inactive,
-                          ),
-                        ),
-                        activeItem: const CircleAvatar(
-                          radius: 12,
-                          backgroundColor: AppTheme.primarySoft,
-                          child: Icon(
-                            Icons.person_rounded,
-                            size: 16,
-                            color: AppTheme.primary,
-                          ),
-                        ),
-                        itemLabel: l10n.navProfile,
                       ),
                     ],
                     onTap: (index) {
@@ -218,14 +207,14 @@ class MainShellScope extends InheritedWidget {
   /// Home tab index.
   static const int homeTab = 0;
 
+  /// Analytics tab index.
+  static const int analyticsTab = 1;
+
   /// Timer tab index.
-  static const int timerTab = 1;
+  static const int timerTab = 2;
 
   /// Settings tab index.
-  static const int settingsTab = 2;
-
-  /// Profile tab index.
-  static const int profileTab = 3;
+  static const int settingsTab = 3;
 
   /// Returns the nearest shell scope, or null outside the shell.
   static MainShellScope? maybeOf(BuildContext context) {

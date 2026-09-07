@@ -1,7 +1,9 @@
 import 'package:dartz/dartz.dart';
 
 import 'package:app_usage/core/error/failures.dart';
+import 'package:app_usage/features/app_usage/domain/entities/analytics_period.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
+import 'package:app_usage/features/app_usage/domain/entities/period_usage_snapshot.dart';
 
 /// Contract for live app-usage tracking and permission helpers.
 ///
@@ -14,6 +16,11 @@ import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.da
 abstract class AppUsageRepository {
   /// Returns today's usage list sorted by descending seconds.
   Future<Either<Failure, List<AppUsageEntity>>> getTodayUsage();
+
+  /// Returns per-app + daily totals for [period] (3 days / week / 10 days).
+  Future<Either<Failure, PeriodUsageSnapshot>> getUsageForPeriod(
+    AnalyticsPeriod period,
+  );
 
   /// Checks usage-access, overlay, and battery-unrestricted permissions.
   Future<Either<Failure, PermissionsStatus>> checkPermissions();

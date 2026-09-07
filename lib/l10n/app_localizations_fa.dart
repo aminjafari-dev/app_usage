@@ -232,6 +232,42 @@ class AppLocalizationsFa extends AppLocalizations {
   String get navProfile => 'پروفایل';
 
   @override
+  String get navAnalytics => 'آمار';
+
+  @override
+  String get analyticsTitle => 'آمار';
+
+  @override
+  String get analyticsPeriodThreeDays => '۳ روز';
+
+  @override
+  String get analyticsPeriodWeek => 'هفته';
+
+  @override
+  String get analyticsPeriodTenDays => '۱۰ روز';
+
+  @override
+  String get analyticsTotalLabel => 'مجموع زمان صفحه';
+
+  @override
+  String analyticsAveragePerDay(String duration) {
+    return 'میانگین $duration در روز';
+  }
+
+  @override
+  String get analyticsChartHeader => 'روند استفاده';
+
+  @override
+  String get analyticsAppsHeader => 'برنامه‌ها';
+
+  @override
+  String get analyticsNoData => 'در این بازه استفاده‌ای نیست';
+
+  @override
+  String get analyticsNoDataSubtitle =>
+      'از برنامه‌ها استفاده کنید، سپس برای تازه‌سازی بکشید.';
+
+  @override
   String get pressBackAgainToExit => 'برای خروج دوباره بازگشت را بزنید';
 
   @override

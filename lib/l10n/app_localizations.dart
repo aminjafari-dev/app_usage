@@ -512,6 +512,72 @@ abstract class AppLocalizations {
   /// **'Profile'**
   String get navProfile;
 
+  /// No description provided for @navAnalytics.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get navAnalytics;
+
+  /// No description provided for @analyticsTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Analytics'**
+  String get analyticsTitle;
+
+  /// No description provided for @analyticsPeriodThreeDays.
+  ///
+  /// In en, this message translates to:
+  /// **'3 Days'**
+  String get analyticsPeriodThreeDays;
+
+  /// No description provided for @analyticsPeriodWeek.
+  ///
+  /// In en, this message translates to:
+  /// **'Week'**
+  String get analyticsPeriodWeek;
+
+  /// No description provided for @analyticsPeriodTenDays.
+  ///
+  /// In en, this message translates to:
+  /// **'10 Days'**
+  String get analyticsPeriodTenDays;
+
+  /// No description provided for @analyticsTotalLabel.
+  ///
+  /// In en, this message translates to:
+  /// **'Total screen time'**
+  String get analyticsTotalLabel;
+
+  /// No description provided for @analyticsAveragePerDay.
+  ///
+  /// In en, this message translates to:
+  /// **'Avg {duration} / day'**
+  String analyticsAveragePerDay(String duration);
+
+  /// No description provided for @analyticsChartHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Usage over time'**
+  String get analyticsChartHeader;
+
+  /// No description provided for @analyticsAppsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Apps'**
+  String get analyticsAppsHeader;
+
+  /// No description provided for @analyticsNoData.
+  ///
+  /// In en, this message translates to:
+  /// **'No usage in this period'**
+  String get analyticsNoData;
+
+  /// No description provided for @analyticsNoDataSubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Use apps on this phone, then pull to refresh.'**
+  String get analyticsNoDataSubtitle;
+
   /// No description provided for @pressBackAgainToExit.
   ///
   /// In en, this message translates to:

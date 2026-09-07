@@ -9,7 +9,7 @@
 class PageName {
   PageName._();
 
-  /// Main shell with floating bottom navigation (Home, Timer, Settings, Profile).
+  /// Main shell with floating bottom navigation (Home, Analytics, Timer, Settings).
   static const String home = '/home';
 
   /// Permission onboarding for usage access + overlay.

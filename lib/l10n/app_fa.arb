@@ -93,6 +93,24 @@
   "navTimer": "تایمر",
   "navSettings": "تنظیمات",
   "navProfile": "پروفایل",
+  "navAnalytics": "آمار",
+  "analyticsTitle": "آمار",
+  "analyticsPeriodThreeDays": "۳ روز",
+  "analyticsPeriodWeek": "هفته",
+  "analyticsPeriodTenDays": "۱۰ روز",
+  "analyticsTotalLabel": "مجموع زمان صفحه",
+  "analyticsAveragePerDay": "میانگین {duration} در روز",
+  "@analyticsAveragePerDay": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsChartHeader": "روند استفاده",
+  "analyticsAppsHeader": "برنامه‌ها",
+  "analyticsNoData": "در این بازه استفاده‌ای نیست",
+  "analyticsNoDataSubtitle": "از برنامه‌ها استفاده کنید، سپس برای تازه‌سازی بکشید.",
   "pressBackAgainToExit": "برای خروج دوباره بازگشت را بزنید",
   "tabComingSoon": "این بخش به‌زودی اضافه می‌شود.",
   "profileSubtitle": "جزئیات پروفایل و حساب شما.",

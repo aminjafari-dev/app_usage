@@ -93,6 +93,24 @@
   "navTimer": "Timer",
   "navSettings": "Settings",
   "navProfile": "Profile",
+  "navAnalytics": "Analytics",
+  "analyticsTitle": "Analytics",
+  "analyticsPeriodThreeDays": "3 Days",
+  "analyticsPeriodWeek": "Week",
+  "analyticsPeriodTenDays": "10 Days",
+  "analyticsTotalLabel": "Total screen time",
+  "analyticsAveragePerDay": "Avg {duration} / day",
+  "@analyticsAveragePerDay": {
+    "placeholders": {
+      "duration": {
+        "type": "String"
+      }
+    }
+  },
+  "analyticsChartHeader": "Usage over time",
+  "analyticsAppsHeader": "Apps",
+  "analyticsNoData": "No usage in this period",
+  "analyticsNoDataSubtitle": "Use apps on this phone, then pull to refresh.",
   "pressBackAgainToExit": "Press back again to exit",
   "tabComingSoon": "This section is coming soon.",
   "profileSubtitle": "Your profile and account details.",
