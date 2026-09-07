@@ -79,6 +79,26 @@ class AppUsageRepositoryImpl implements AppUsageRepository {
   }
 
   @override
+  Future<Either<Failure, List<AppUsageEntity>>> getInstalledApps() async {
+    try {
+      final models = await _usageStats.queryInstalledApps();
+      final apps = models
+          .map(
+            (model) => AppUsageEntity(
+              packageName: model.packageName,
+              appName: model.appName,
+              todaySeconds: model.todaySeconds,
+              iconBytes: model.iconBytes,
+            ),
+          )
+          .toList();
+      return Right(apps);
+    } catch (e) {
+      return Left(PlatformFailure(e.toString()));
+    }
+  }
+
+  @override
   Future<Either<Failure, PeriodUsageSnapshot>> getUsageForPeriod(
     AnalyticsPeriod period,
   ) async {

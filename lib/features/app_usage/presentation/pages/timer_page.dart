@@ -12,9 +12,7 @@ import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_scaffold.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
-import 'package:app_usage/features/app_usage/presentation/bloc/usage_bloc.dart';
-import 'package:app_usage/features/app_usage/presentation/bloc/usage_event.dart';
-import 'package:app_usage/features/app_usage/presentation/bloc/usage_state.dart';
+import 'package:app_usage/features/app_usage/presentation/bloc/timer_cubit.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/duration_wheel_picker.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
@@ -29,7 +27,7 @@ class TimerPage extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return BlocProvider(
-      create: (_) => locator<UsageBloc>()..add(const UsageEvent.started()),
+      create: (_) => locator<TimerCubit>()..load(),
       child: const _TimerView(),
     );
   }
@@ -53,20 +51,38 @@ class _TimerView extends StatelessWidget {
     return GScaffold(
       title: l10n.navTimer,
       centerTitle: true,
-      body: BlocBuilder<UsageBloc, UsageState>(
+      body: BlocBuilder<TimerCubit, TimerState>(
         builder: (context, state) {
-          return switch (state.todayUsage) {
-            TodayUsageOpInitial() || TodayUsageOpLoading() => const Center(
+          return switch (state.status) {
+            TimerStatus.initial || TimerStatus.loading => const Center(
                 child: CircularProgressIndicator(color: AppTheme.primary),
               ),
-            TodayUsageOpError(:final message) => Center(
+            TimerStatus.error => Center(
                 child: Padding(
                   padding: const EdgeInsets.all(32),
-                  child: GText(message, color: AppTheme.error),
+                  child: Column(
+                    mainAxisSize: MainAxisSize.min,
+                    children: [
+                      GText(
+                        state.errorMessage ?? l10n.errorGeneric,
+                        color: AppTheme.error,
+                        textAlign: TextAlign.center,
+                      ),
+                      GGap.m(),
+                      GButton(
+                        label: l10n.refresh,
+                        icon: Icons.refresh_rounded,
+                        onPressed: () => context.read<TimerCubit>().load(),
+                      ),
+                    ],
+                  ),
                 ),
               ),
-            TodayUsageOpCompleted(:final apps) => _AppPickerList(
-                apps: apps,
+            TimerStatus.loaded => _AppPickerList(
+                mostUsedApps: state.mostUsedApps,
+                otherApps: state.otherApps,
+                searchQuery: state.searchQuery,
+                onSearchChanged: context.read<TimerCubit>().search,
                 onSelect: (app) => _openEditor(context, app),
               ),
           };
@@ -242,11 +258,17 @@ class _TimerEditorPageState extends State<TimerEditorPage> {
 /// Choose which app gets a daily limit / block.
 class _AppPickerList extends StatelessWidget {
   const _AppPickerList({
-    required this.apps,
+    required this.mostUsedApps,
+    required this.otherApps,
+    required this.searchQuery,
+    required this.onSearchChanged,
     required this.onSelect,
   });
 
-  final List<AppUsageEntity> apps;
+  final List<AppUsageEntity> mostUsedApps;
+  final List<AppUsageEntity> otherApps;
+  final String searchQuery;
+  final ValueChanged<String> onSearchChanged;
   final ValueChanged<AppUsageEntity> onSelect;
 
   @override
@@ -254,62 +276,219 @@ class _AppPickerList extends StatelessWidget {
     final l10n = AppLocalizations.of(context);
     final limits = context.watch<AppTimerCubit>().state;
     final blocked = context.watch<BlockedAppsCubit>().state;
+    final hasQuery = searchQuery.trim().isNotEmpty;
+    final isEmpty = mostUsedApps.isEmpty && otherApps.isEmpty;
 
-    if (apps.isEmpty) {
-      return Center(
-        child: Padding(
-          padding: const EdgeInsets.fromLTRB(32, 24, 32, 120),
+    return Column(
+      crossAxisAlignment: CrossAxisAlignment.stretch,
+      children: [
+        Padding(
+          padding: const EdgeInsets.fromLTRB(16, 8, 16, 0),
           child: Column(
-            mainAxisSize: MainAxisSize.min,
+            crossAxisAlignment: CrossAxisAlignment.start,
             children: [
-              Icon(
-                Icons.timer_outlined,
-                size: 48,
+              GText(
+                l10n.timerPickAppHint,
+                style: Theme.of(context).textTheme.bodyMedium,
                 color: AppTheme.onSurfaceMuted,
               ),
               GGap.m(),
-              GText(
-                l10n.timerEmptyTitle,
-                style: Theme.of(context).textTheme.headlineMedium,
-                textAlign: TextAlign.center,
-              ),
-              GGap.s(),
-              GText(
-                l10n.timerEmptySubtitle,
-                style: Theme.of(context).textTheme.bodyMedium,
-                color: AppTheme.onSurfaceMuted,
-                textAlign: TextAlign.center,
+              _AppSearchField(
+                hintText: l10n.timerSearchHint,
+                onChanged: onSearchChanged,
               ),
             ],
           ),
-        ),
-      );
-    }
-
-    return ListView(
-      padding: const EdgeInsets.fromLTRB(16, 8, 16, 120),
-      children: [
-        GText(
-          l10n.timerPickAppHint,
-          style: Theme.of(context).textTheme.bodyMedium,
-          color: AppTheme.onSurfaceMuted,
         ),
         GGap.m(),
-        GCard(
-          child: Column(
-            children: [
-              for (var i = 0; i < apps.length; i++)
-                _AppLimitTile(
-                  app: apps[i],
-                  limit: limits[apps[i].packageName],
-                  blocked: blocked.contains(apps[i].packageName),
-                  showDivider: i < apps.length - 1,
-                  onTap: () => onSelect(apps[i]),
+        Expanded(
+          child: isEmpty
+              ? Center(
+                  child: Padding(
+                    padding: const EdgeInsets.fromLTRB(32, 24, 32, 120),
+                    child: Column(
+                      mainAxisSize: MainAxisSize.min,
+                      children: [
+                        Icon(
+                          hasQuery
+                              ? Icons.search_off_rounded
+                              : Icons.apps_outlined,
+                          size: 48,
+                          color: AppTheme.onSurfaceMuted,
+                        ),
+                        GGap.m(),
+                        GText(
+                          hasQuery
+                              ? l10n.timerSearchEmptyTitle
+                              : l10n.timerEmptyTitle,
+                          style: Theme.of(context).textTheme.headlineMedium,
+                          textAlign: TextAlign.center,
+                        ),
+                        GGap.s(),
+                        GText(
+                          hasQuery
+                              ? l10n.timerSearchEmptySubtitle
+                              : l10n.timerEmptySubtitle,
+                          style: Theme.of(context).textTheme.bodyMedium,
+                          color: AppTheme.onSurfaceMuted,
+                          textAlign: TextAlign.center,
+                        ),
+                      ],
+                    ),
+                  ),
+                )
+              : ListView(
+                  padding: const EdgeInsets.fromLTRB(16, 0, 16, 120),
+                  children: [
+                    if (mostUsedApps.isNotEmpty) ...[
+                      _AppSectionCard(
+                        header: l10n.todaySectionHeader,
+                        apps: mostUsedApps,
+                        limits: limits,
+                        blocked: blocked,
+                        onSelect: onSelect,
+                      ),
+                      if (otherApps.isNotEmpty) GGap.m(),
+                    ],
+                    if (otherApps.isNotEmpty)
+                      _AppSectionCard(
+                        header: mostUsedApps.isEmpty
+                            ? null
+                            : l10n.timerOtherAppsHeader,
+                        apps: otherApps,
+                        limits: limits,
+                        blocked: blocked,
+                        onSelect: onSelect,
+                      ),
+                  ],
                 ),
-            ],
-          ),
         ),
       ],
+    );
+  }
+}
+
+/// One titled card of apps for the Timer picker.
+class _AppSectionCard extends StatelessWidget {
+  const _AppSectionCard({
+    required this.apps,
+    required this.limits,
+    required this.blocked,
+    required this.onSelect,
+    this.header,
+  });
+
+  final String? header;
+  final List<AppUsageEntity> apps;
+  final Map<String, AppTimerLimit> limits;
+  final Set<String> blocked;
+  final ValueChanged<AppUsageEntity> onSelect;
+
+  @override
+  Widget build(BuildContext context) {
+    return GCard(
+      header: header,
+      child: Column(
+        children: [
+          for (var i = 0; i < apps.length; i++)
+            _AppLimitTile(
+              app: apps[i],
+              limit: limits[apps[i].packageName],
+              blocked: blocked.contains(apps[i].packageName),
+              showDivider: i < apps.length - 1,
+              onTap: () => onSelect(apps[i]),
+            ),
+        ],
+      ),
+    );
+  }
+}
+
+/// Soft search field matching the card / settings visual language.
+class _AppSearchField extends StatefulWidget {
+  const _AppSearchField({
+    required this.hintText,
+    required this.onChanged,
+  });
+
+  final String hintText;
+  final ValueChanged<String> onChanged;
+
+  @override
+  State<_AppSearchField> createState() => _AppSearchFieldState();
+}
+
+class _AppSearchFieldState extends State<_AppSearchField> {
+  late final TextEditingController _controller;
+
+  @override
+  void initState() {
+    super.initState();
+    _controller = TextEditingController();
+  }
+
+  @override
+  void dispose() {
+    _controller.dispose();
+    super.dispose();
+  }
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      controller: _controller,
+      onChanged: widget.onChanged,
+      textInputAction: TextInputAction.search,
+      style: Theme.of(context).textTheme.bodyLarge,
+      cursorColor: AppTheme.primary,
+      decoration: InputDecoration(
+        hintText: widget.hintText,
+        hintStyle: Theme.of(context).textTheme.bodyLarge?.copyWith(
+              color: AppTheme.onSurfaceMuted,
+            ),
+        prefixIcon: const Icon(
+          Icons.search_rounded,
+          color: AppTheme.onSurfaceMuted,
+        ),
+        suffixIcon: ValueListenableBuilder<TextEditingValue>(
+          valueListenable: _controller,
+          builder: (context, value, _) {
+            if (value.text.isEmpty) return const SizedBox.shrink();
+            return IconButton(
+              tooltip: MaterialLocalizations.of(context).deleteButtonTooltip,
+              onPressed: () {
+                _controller.clear();
+                widget.onChanged('');
+              },
+              icon: const Icon(
+                Icons.close_rounded,
+                color: AppTheme.onSurfaceMuted,
+              ),
+            );
+          },
+        ),
+        filled: true,
+        fillColor: AppTheme.surfaceOf(context),
+        contentPadding: const EdgeInsets.symmetric(
+          horizontal: 16,
+          vertical: 14,
+        ),
+        border: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard / 2),
+          borderSide: BorderSide(color: AppTheme.dividerOf(context)),
+        ),
+        enabledBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard / 2),
+          borderSide: BorderSide(color: AppTheme.dividerOf(context)),
+        ),
+        focusedBorder: OutlineInputBorder(
+          borderRadius: BorderRadius.circular(AppTheme.radiusCard / 2),
+          borderSide: const BorderSide(
+            color: AppTheme.primary,
+            width: 1.5,
+          ),
+        ),
+      ),
     );
   }
 }
@@ -339,8 +518,10 @@ class _AppLimitTile extends StatelessWidget {
       subtitle = l10n.timerBlockedLabel;
     } else if (limit != null) {
       subtitle = l10n.timerLimitSummary(limit!.hours, limit!.minutes);
-    } else {
+    } else if (app.todaySeconds > 0) {
       subtitle = formatUsageDuration(app.todaySeconds);
+    } else {
+      subtitle = l10n.timerNoLimitSet;
     }
 
     final accent = limit != null || blocked;

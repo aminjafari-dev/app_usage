@@ -647,14 +647,44 @@ abstract class AppLocalizations {
   /// No description provided for @timerEmptyTitle.
   ///
   /// In en, this message translates to:
-  /// **'No apps yet'**
+  /// **'No apps found'**
   String get timerEmptyTitle;
 
   /// No description provided for @timerEmptySubtitle.
   ///
   /// In en, this message translates to:
-  /// **'Use some apps today, then come back to set a limit.'**
+  /// **'Installed apps will appear here once they are visible to the app.'**
   String get timerEmptySubtitle;
+
+  /// No description provided for @timerSearchHint.
+  ///
+  /// In en, this message translates to:
+  /// **'Search apps'**
+  String get timerSearchHint;
+
+  /// No description provided for @timerSearchEmptyTitle.
+  ///
+  /// In en, this message translates to:
+  /// **'No matching apps'**
+  String get timerSearchEmptyTitle;
+
+  /// No description provided for @timerSearchEmptySubtitle.
+  ///
+  /// In en, this message translates to:
+  /// **'Try a different name or package.'**
+  String get timerSearchEmptySubtitle;
+
+  /// No description provided for @timerNoLimitSet.
+  ///
+  /// In en, this message translates to:
+  /// **'No limit set'**
+  String get timerNoLimitSet;
+
+  /// No description provided for @timerOtherAppsHeader.
+  ///
+  /// In en, this message translates to:
+  /// **'Other apps'**
+  String get timerOtherAppsHeader;
 
   /// No description provided for @timerLimitSummary.
   ///

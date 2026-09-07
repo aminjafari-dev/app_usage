@@ -302,11 +302,26 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timerInvalidLimit => 'Choose a time greater than zero.';
 
   @override
-  String get timerEmptyTitle => 'No apps yet';
+  String get timerEmptyTitle => 'No apps found';
 
   @override
   String get timerEmptySubtitle =>
-      'Use some apps today, then come back to set a limit.';
+      'Installed apps will appear here once they are visible to the app.';
+
+  @override
+  String get timerSearchHint => 'Search apps';
+
+  @override
+  String get timerSearchEmptyTitle => 'No matching apps';
+
+  @override
+  String get timerSearchEmptySubtitle => 'Try a different name or package.';
+
+  @override
+  String get timerNoLimitSet => 'No limit set';
+
+  @override
+  String get timerOtherAppsHeader => 'Other apps';
 
   @override
   String timerLimitSummary(int hours, int minutes) {

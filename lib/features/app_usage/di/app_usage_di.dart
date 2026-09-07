@@ -8,6 +8,7 @@ import 'package:app_usage/features/app_usage/data/repositories/app_usage_reposit
 import 'package:app_usage/features/app_usage/domain/repositories/app_usage_repository.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/check_permissions_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/ensure_auto_tracking_usecase.dart';
+import 'package:app_usage/features/app_usage/domain/usecases/get_installed_apps_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/get_period_usage_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/get_today_usage_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/request_battery_unrestricted_usecase.dart';
@@ -16,6 +17,7 @@ import 'package:app_usage/features/app_usage/domain/usecases/request_usage_permi
 import 'package:app_usage/features/app_usage/domain/usecases/start_live_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/domain/usecases/stop_live_tracking_usecase.dart';
 import 'package:app_usage/features/app_usage/presentation/bloc/analytics_cubit.dart';
+import 'package:app_usage/features/app_usage/presentation/bloc/timer_cubit.dart';
 import 'package:app_usage/features/app_usage/presentation/bloc/usage_bloc.dart';
 
 /// Registers app_usage feature dependencies into [locator].
@@ -47,6 +49,9 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
   // Use cases
   locator.registerLazySingleton(
     () => GetTodayUsageUseCase(locator()),
+  );
+  locator.registerLazySingleton(
+    () => GetInstalledAppsUseCase(locator()),
   );
   locator.registerLazySingleton(
     () => GetPeriodUsageUseCase(locator()),
@@ -89,5 +94,8 @@ Future<void> setupAppUsageLocator(GetIt locator) async {
   );
   locator.registerFactory(
     () => AnalyticsCubit(locator()),
+  );
+  locator.registerFactory(
+    () => TimerCubit(locator(), locator()),
   );
 }

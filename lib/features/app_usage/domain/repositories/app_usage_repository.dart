@@ -17,6 +17,11 @@ abstract class AppUsageRepository {
   /// Returns today's usage list sorted by descending seconds.
   Future<Either<Failure, List<AppUsageEntity>>> getTodayUsage();
 
+  /// Returns installed user apps sorted by name (for Timer app picker).
+  ///
+  /// Includes apps with zero usage today so limits/blocks can be set ahead.
+  Future<Either<Failure, List<AppUsageEntity>>> getInstalledApps();
+
   /// Returns per-app + daily totals for [period] (3 days / week / 10 days).
   Future<Either<Failure, PeriodUsageSnapshot>> getUsageForPeriod(
     AnalyticsPeriod period,

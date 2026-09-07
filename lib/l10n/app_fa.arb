@@ -122,8 +122,13 @@
   "timerSetButton": "تنظیم تایمر",
   "timerSaved": "محدودیت روزانه ذخیره شد.",
   "timerInvalidLimit": "زمانی بیشتر از صفر انتخاب کنید.",
-  "timerEmptyTitle": "هنوز برنامه‌ای نیست",
-  "timerEmptySubtitle": "امروز از برنامه‌ها استفاده کنید، سپس برای تنظیم محدودیت برگردید.",
+  "timerEmptyTitle": "برنامه‌ای پیدا نشد",
+  "timerEmptySubtitle": "برنامه‌های نصب‌شده پس از قابل‌مشاهده شدن اینجا نمایش داده می‌شوند.",
+  "timerSearchHint": "جستجوی برنامه‌ها",
+  "timerSearchEmptyTitle": "برنامه‌ای پیدا نشد",
+  "timerSearchEmptySubtitle": "نام یا بسته دیگری را امتحان کنید.",
+  "timerNoLimitSet": "بدون محدودیت",
+  "timerOtherAppsHeader": "سایر برنامه‌ها",
   "timerLimitSummary": "محدودیت {hours}س {minutes}د",
   "@timerLimitSummary": {
     "placeholders": {

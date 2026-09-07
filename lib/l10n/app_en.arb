@@ -122,8 +122,13 @@
   "timerSetButton": "Set Timer",
   "timerSaved": "Daily limit saved.",
   "timerInvalidLimit": "Choose a time greater than zero.",
-  "timerEmptyTitle": "No apps yet",
-  "timerEmptySubtitle": "Use some apps today, then come back to set a limit.",
+  "timerEmptyTitle": "No apps found",
+  "timerEmptySubtitle": "Installed apps will appear here once they are visible to the app.",
+  "timerSearchHint": "Search apps",
+  "timerSearchEmptyTitle": "No matching apps",
+  "timerSearchEmptySubtitle": "Try a different name or package.",
+  "timerNoLimitSet": "No limit set",
+  "timerOtherAppsHeader": "Other apps",
   "timerLimitSummary": "Limit {hours}h {minutes}m",
   "@timerLimitSummary": {
     "placeholders": {

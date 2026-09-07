@@ -302,11 +302,26 @@ class AppLocalizationsFa extends AppLocalizations {
   String get timerInvalidLimit => 'زمانی بیشتر از صفر انتخاب کنید.';
 
   @override
-  String get timerEmptyTitle => 'هنوز برنامه‌ای نیست';
+  String get timerEmptyTitle => 'برنامه‌ای پیدا نشد';
 
   @override
   String get timerEmptySubtitle =>
-      'امروز از برنامه‌ها استفاده کنید، سپس برای تنظیم محدودیت برگردید.';
+      'برنامه‌های نصب‌شده پس از قابل‌مشاهده شدن اینجا نمایش داده می‌شوند.';
+
+  @override
+  String get timerSearchHint => 'جستجوی برنامه‌ها';
+
+  @override
+  String get timerSearchEmptyTitle => 'برنامه‌ای پیدا نشد';
+
+  @override
+  String get timerSearchEmptySubtitle => 'نام یا بسته دیگری را امتحان کنید.';
+
+  @override
+  String get timerNoLimitSet => 'بدون محدودیت';
+
+  @override
+  String get timerOtherAppsHeader => 'سایر برنامه‌ها';
 
   @override
   String timerLimitSummary(int hours, int minutes) {

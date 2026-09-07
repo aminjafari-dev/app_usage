@@ -303,6 +303,52 @@ class UsageStatsDataSource {
   bool _isTransientSystemPackage(String packageName) =>
       _transientSystemPackages.contains(packageName);
 
+  /// Returns every installed user app the host is allowed to see.
+  ///
+  /// How to use: Timer tab — pick any app for a daily limit / block, not only
+  /// packages that already have usage today.
+  ///
+  /// System apps are excluded. Icons load in parallel; [todaySeconds] is 0
+  /// because this is a catalog, not a usage snapshot.
+  Future<List<UsageInfoModel>> queryInstalledApps() async {
+    final installed = await UsageStats.queryInstalledApps(includeSystem: false);
+    final filtered = installed.where((app) {
+      if (!app.enabled) return false;
+      if (app.packageName.isEmpty) return false;
+      if (_isIgnoredPackage(app.packageName)) return false;
+      return true;
+    }).toList();
+
+    filtered.sort((a, b) {
+      final left = (a.appName?.isNotEmpty == true
+              ? a.appName!
+              : humanizePackageName(a.packageName))
+          .toLowerCase();
+      final right = (b.appName?.isNotEmpty == true
+              ? b.appName!
+              : humanizePackageName(b.packageName))
+          .toLowerCase();
+      return left.compareTo(right);
+    });
+
+    return Future.wait(
+      filtered.map((app) async {
+        final packageName = app.packageName;
+        final label = app.appName;
+        final appName = (label != null && label.isNotEmpty)
+            ? label
+            : humanizePackageName(packageName);
+        final icon = await resolveIcon(packageName);
+        return UsageInfoModel(
+          packageName: packageName,
+          appName: appName,
+          todaySeconds: 0,
+          iconBytes: icon,
+        );
+      }),
+    );
+  }
+
   /// Resolves a human-readable label for [packageName].
   Future<String> resolveAppName(String packageName) async {
     try {
