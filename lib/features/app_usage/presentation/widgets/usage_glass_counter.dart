@@ -4,12 +4,14 @@ import 'dart:ui' show lerpDouble;
 import 'package:flutter/material.dart';
 import 'package:flutter/rendering.dart';
 
+import 'package:app_usage/core/settings/app_timer_cubit.dart';
 import 'package:app_usage/core/settings/badge_appearance_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
 import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart';
+import 'package:app_usage/l10n/app_localizations.dart';
 
 /// Minimal timer chip — foreground app logo + bold mm:ss (or h:mm:ss).
 ///
@@ -759,24 +761,56 @@ class _ChipAppLogo extends StatelessWidget {
   }
 }
 
-/// List tile for one app — avatar + name + duration pill.
+/// List tile for one app — avatar + name + today's usage, with optional
+/// blocked / daily-limit status under the name.
 ///
 /// How to use inside a ListView / card with [AppUsageEntity] items.
 class UsageAppTile extends StatelessWidget {
-  /// Creates a row showing icon, name, and today's time.
+  /// Creates a row showing icon, name, usage, and restriction status.
   const UsageAppTile({
     super.key,
     required this.entity,
     this.isActive = false,
     this.showDivider = true,
+    this.limit,
+    this.blocked = false,
   });
 
   final AppUsageEntity entity;
   final bool isActive;
   final bool showDivider;
 
+  /// Daily limit configured on the Timer tab, if any.
+  final AppTimerLimit? limit;
+
+  /// Whether this app is hard-blocked when opened.
+  final bool blocked;
+
   @override
   Widget build(BuildContext context) {
+    final l10n = AppLocalizations.of(context);
+    final hasRestriction = limit != null || blocked;
+
+    final String subtitle;
+    if (limit != null && blocked) {
+      subtitle = l10n.timerLimitAndBlockedSummary(limit!.hours, limit!.minutes);
+    } else if (blocked) {
+      subtitle = l10n.timerBlockedLabel;
+    } else if (limit != null) {
+      subtitle = l10n.timerLimitSummary(limit!.hours, limit!.minutes);
+    } else {
+      subtitle = entity.packageName;
+    }
+
+    final Color subtitleColor;
+    if (blocked) {
+      subtitleColor = AppTheme.error;
+    } else if (limit != null) {
+      subtitleColor = AppTheme.primary;
+    } else {
+      subtitleColor = AppTheme.onSurfaceMuted;
+    }
+
     return Column(
       mainAxisSize: MainAxisSize.min,
       children: [
@@ -800,9 +834,9 @@ class UsageAppTile extends StatelessWidget {
                       ),
                       const SizedBox(height: 2),
                       GText(
-                        entity.packageName,
+                        subtitle,
                         style: Theme.of(context).textTheme.bodySmall,
-                        color: AppTheme.onSurfaceMuted,
+                        color: subtitleColor,
                         maxLines: 1,
                         overflow: TextOverflow.ellipsis,
                       ),
@@ -810,14 +844,32 @@ class UsageAppTile extends StatelessWidget {
                   ),
                 ),
                 const SizedBox(width: 8),
-                 GText(
-                    formatUsageDuration(entity.todaySeconds),
-                    style: Theme.of(context).textTheme.bodySmall?.copyWith(
-                          fontWeight: FontWeight.w600,
-                        ),
-                    color: isActive ? AppTheme.surface : AppTheme.onSurfaceMuted,
+                if (blocked) ...[
+                  const Icon(
+                    Icons.block_rounded,
+                    size: 18,
+                    color: AppTheme.error,
                   ),
-                
+                  const SizedBox(width: 6),
+                ] else if (limit != null) ...[
+                  const Icon(
+                    Icons.timer_outlined,
+                    size: 18,
+                    color: AppTheme.primary,
+                  ),
+                  const SizedBox(width: 6),
+                ],
+                GText(
+                  formatUsageDuration(entity.todaySeconds),
+                  style: Theme.of(context).textTheme.bodySmall?.copyWith(
+                        fontWeight: FontWeight.w600,
+                      ),
+                  color: isActive
+                      ? AppTheme.surface
+                      : (hasRestriction
+                          ? subtitleColor
+                          : AppTheme.onSurfaceMuted),
+                ),
               ],
             ),
           ),

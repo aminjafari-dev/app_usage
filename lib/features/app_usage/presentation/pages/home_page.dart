@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/locator/locator.dart';
 import 'package:app_usage/core/router/page_name.dart';
+import 'package:app_usage/core/settings/app_timer_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
@@ -40,8 +42,6 @@ class _HomeView extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    final l10n = AppLocalizations.of(context);
-
     return GScaffold(
       body: BlocConsumer<UsageBloc, UsageState>(
         listener: (context, state) {
@@ -181,6 +181,8 @@ class _TodayUsageCard extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
+    final limits = context.watch<AppTimerCubit>().state;
+    final blocked = context.watch<BlockedAppsCubit>().state;
 
     if (apps.isEmpty) {
       return GCard(
@@ -213,6 +215,8 @@ class _TodayUsageCard extends StatelessWidget {
               entity: app,
               isActive: currentPackage == app.packageName,
               showDivider: false,
+              limit: limits[app.packageName],
+              blocked: blocked.contains(app.packageName),
             ),
         ],
       ),
