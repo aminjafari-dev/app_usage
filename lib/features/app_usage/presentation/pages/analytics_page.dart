@@ -223,7 +223,9 @@ class _UsageBarChart extends StatelessWidget {
         .map((p) => p.totalSeconds)
         .fold<int>(0, (a, b) => a > b ? a : b);
     final peak = maxSeconds <= 0 ? 1 : maxSeconds;
+    final scale = _hourAxisScale(peak);
     final locale = Localizations.localeOf(context).toString();
+    final isFa = Localizations.localeOf(context).languageCode == 'fa';
     final labelFormat = points.length > 14
         ? DateFormat.Md(locale)
         : DateFormat.E(locale);
@@ -236,58 +238,213 @@ class _UsageBarChart extends StatelessWidget {
 
     return LayoutBuilder(
       builder: (context, constraints) {
-        final barMaxHeight = constraints.maxHeight - 28;
+        const dayLabelHeight = 14.0;
+        const dayLabelGap = 6.0;
+        final barMaxHeight =
+            constraints.maxHeight - dayLabelHeight - dayLabelGap;
+        final tickLabelStyle =
+            Theme.of(context).textTheme.labelSmall?.copyWith(fontSize: 9);
+
         return Row(
-          crossAxisAlignment: CrossAxisAlignment.end,
+          crossAxisAlignment: CrossAxisAlignment.stretch,
           children: [
-            for (var i = 0; i < points.length; i++) ...[
-              if (i > 0) const SizedBox(width: 3),
-              Expanded(
-                child: Column(
-                  mainAxisAlignment: MainAxisAlignment.end,
+            SizedBox(
+              width: 28,
+              child: Padding(
+                padding: const EdgeInsets.only(bottom: dayLabelHeight + dayLabelGap),
+                child: Stack(
+                  clipBehavior: Clip.none,
                   children: [
-                    SizedBox(
-                      height: barMaxHeight,
-                      child: Align(
-                        alignment: Alignment.bottomCenter,
-                        child: AnimatedContainer(
-                          duration: const Duration(milliseconds: 280),
-                          curve: Curves.easeOutCubic,
-                          width: double.infinity,
-                          height: ((points[i].totalSeconds / peak) * barMaxHeight)
-                              .clamp(2.0, barMaxHeight),
-                          decoration: BoxDecoration(
-                            color: AppTheme.primary.withValues(
-                              alpha: points[i].totalSeconds > 0 ? 0.9 : 0.2,
-                            ),
-                            borderRadius: BorderRadius.circular(6),
-                          ),
+                    for (final tickSeconds in scale.ticks)
+                      Positioned(
+                        top: barMaxHeight *
+                                (1 - tickSeconds / scale.ceilingSeconds) -
+                            6,
+                        right: 0,
+                        left: 0,
+                        child: GText(
+                          _hourTickLabel(tickSeconds, isFa: isFa),
+                          style: tickLabelStyle,
+                          color: AppTheme.onSurfaceMuted,
+                          textAlign: TextAlign.right,
+                          maxLines: 1,
                         ),
                       ),
-                    ),
-                    const SizedBox(height: 6),
-                    SizedBox(
-                      height: 14,
-                      child: GText(
-                        i % labelStep == 0 || i == points.length - 1
-                            ? labelFormat.format(points[i].labelDay)
-                            : '',
-                        style: Theme.of(context).textTheme.labelSmall?.copyWith(
-                              fontSize: 9,
-                            ),
-                        color: AppTheme.onSurfaceMuted,
-                        maxLines: 1,
-                        overflow: TextOverflow.clip,
-                        textAlign: TextAlign.center,
-                      ),
-                    ),
                   ],
                 ),
               ),
-            ],
+            ),
+            const SizedBox(width: 6),
+            Expanded(
+              child: Stack(
+                children: [
+                  Positioned(
+                    left: 0,
+                    right: 0,
+                    top: 0,
+                    height: barMaxHeight,
+                    child: CustomPaint(
+                      painter: _HourGridPainter(
+                        ticks: scale.ticks,
+                        ceilingSeconds: scale.ceilingSeconds,
+                        color: AppTheme.divider,
+                      ),
+                    ),
+                  ),
+                  Row(
+                    crossAxisAlignment: CrossAxisAlignment.end,
+                    children: [
+                      for (var i = 0; i < points.length; i++) ...[
+                        if (i > 0) const SizedBox(width: 3),
+                        Expanded(
+                          child: Column(
+                            mainAxisAlignment: MainAxisAlignment.end,
+                            children: [
+                              SizedBox(
+                                height: barMaxHeight,
+                                child: Align(
+                                  alignment: Alignment.bottomCenter,
+                                  child: AnimatedContainer(
+                                    duration:
+                                        const Duration(milliseconds: 280),
+                                    curve: Curves.easeOutCubic,
+                                    width: double.infinity,
+                                    height: ((points[i].totalSeconds /
+                                                scale.ceilingSeconds) *
+                                            barMaxHeight)
+                                        .clamp(2.0, barMaxHeight),
+                                    decoration: BoxDecoration(
+                                      color: AppTheme.primary.withValues(
+                                        alpha: points[i].totalSeconds > 0
+                                            ? 0.9
+                                            : 0.2,
+                                      ),
+                                      borderRadius: BorderRadius.circular(6),
+                                    ),
+                                  ),
+                                ),
+                              ),
+                              const SizedBox(height: dayLabelGap),
+                              SizedBox(
+                                height: dayLabelHeight,
+                                child: GText(
+                                  i % labelStep == 0 ||
+                                          i == points.length - 1
+                                      ? labelFormat.format(points[i].labelDay)
+                                      : '',
+                                  style: tickLabelStyle,
+                                  color: AppTheme.onSurfaceMuted,
+                                  maxLines: 1,
+                                  overflow: TextOverflow.clip,
+                                  textAlign: TextAlign.center,
+                                ),
+                              ),
+                            ],
+                          ),
+                        ),
+                      ],
+                    ],
+                  ),
+                ],
+              ),
+            ),
           ],
         );
       },
     );
+  }
+}
+
+/// Nice hour-based Y-axis ceiling and tick marks for the usage chart.
+class _HourAxisScale {
+  const _HourAxisScale({
+    required this.ceilingSeconds,
+    required this.ticks,
+  });
+
+  final int ceilingSeconds;
+  final List<int> ticks;
+}
+
+/// Builds a readable hour scale that sits at or above [peakSeconds].
+_HourAxisScale _hourAxisScale(int peakSeconds) {
+  const hour = 3600;
+  final peakHours = peakSeconds / hour;
+  final double ceilingHours;
+  if (peakHours <= 0.5) {
+    ceilingHours = 0.5;
+  } else if (peakHours <= 1) {
+    ceilingHours = 1;
+  } else if (peakHours <= 2) {
+    ceilingHours = 2;
+  } else if (peakHours <= 3) {
+    ceilingHours = 3;
+  } else if (peakHours <= 4) {
+    ceilingHours = 4;
+  } else if (peakHours <= 6) {
+    ceilingHours = 6;
+  } else if (peakHours <= 8) {
+    ceilingHours = 8;
+  } else if (peakHours <= 12) {
+    ceilingHours = 12;
+  } else {
+    ceilingHours = ((peakHours / 4).ceil() * 4).toDouble();
+  }
+
+  final ceilingSeconds = (ceilingHours * hour).round();
+  final stepHours = ceilingHours <= 1
+      ? ceilingHours / 2
+      : ceilingHours <= 4
+          ? 1.0
+          : ceilingHours / 4;
+  final ticks = <int>[];
+  for (var h = stepHours; h <= ceilingHours + 1e-9; h += stepHours) {
+    ticks.add((h * hour).round());
+  }
+  return _HourAxisScale(ceilingSeconds: ceilingSeconds, ticks: ticks);
+}
+
+String _hourTickLabel(int seconds, {required bool isFa}) {
+  final hours = seconds / 3600;
+  final suffix = isFa ? 'س' : 'h';
+  if (hours == hours.roundToDouble()) {
+    return '${hours.round()}$suffix';
+  }
+  if ((hours * 2).roundToDouble() == hours * 2) {
+    // Half-hours: 0.5h / 1.5h
+    return '${hours.toStringAsFixed(1)}$suffix';
+  }
+  final minutes = (seconds / 60).round();
+  return isFa ? '$minutesد' : '${minutes}m';
+}
+
+/// Draws horizontal guide lines at each hour tick across the plot area.
+class _HourGridPainter extends CustomPainter {
+  const _HourGridPainter({
+    required this.ticks,
+    required this.ceilingSeconds,
+    required this.color,
+  });
+
+  final List<int> ticks;
+  final int ceilingSeconds;
+  final Color color;
+
+  @override
+  void paint(Canvas canvas, Size size) {
+    final paint = Paint()
+      ..color = color
+      ..strokeWidth = 1;
+    for (final tick in ticks) {
+      final y = size.height * (1 - tick / ceilingSeconds);
+      canvas.drawLine(Offset(0, y), Offset(size.width, y), paint);
+    }
+  }
+
+  @override
+  bool shouldRepaint(covariant _HourGridPainter oldDelegate) {
+    return oldDelegate.ceilingSeconds != ceilingSeconds ||
+        oldDelegate.color != color ||
+        oldDelegate.ticks.length != ticks.length;
   }
 }
