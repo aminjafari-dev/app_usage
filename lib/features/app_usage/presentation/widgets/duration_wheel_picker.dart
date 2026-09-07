@@ -1,4 +1,5 @@
 import 'package:flutter/material.dart';
+import 'package:flutter/services.dart';
 
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
@@ -173,7 +174,10 @@ class _DurationWheelPickerState extends State<DurationWheelPicker> {
                             widget.hours.clamp(0, widget.maxHours),
                         itemExtent: _itemExtent,
                         labelBuilder: (i) => i.toString().padLeft(2, '0'),
-                        onSelectedItemChanged: widget.onHoursChanged,
+                        onSelectedItemChanged: (index) {
+                          HapticFeedback.selectionClick();
+                          widget.onHoursChanged(index);
+                        },
                       ),
                     ),
                     Expanded(
@@ -185,6 +189,7 @@ class _DurationWheelPickerState extends State<DurationWheelPicker> {
                         labelBuilder: (i) =>
                             _minuteValues[i].toString().padLeft(2, '0'),
                         onSelectedItemChanged: (index) {
+                          HapticFeedback.selectionClick();
                           widget.onMinutesChanged(_minuteValues[index]);
                         },
                       ),
