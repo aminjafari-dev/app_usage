@@ -12,6 +12,7 @@
 .swiftpm/
 migrate_working_dir/
 backend/node_modules/
+backend/secrets/
 # IntelliJ related
 *.iml
 *.ipr
