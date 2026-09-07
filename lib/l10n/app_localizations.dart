@@ -713,7 +713,7 @@ abstract class AppLocalizations {
   /// No description provided for @timerBlockWhenOpened.
   ///
   /// In en, this message translates to:
-  /// **'Block this app when opened'**
+  /// **'Block this app'**
   String get timerBlockWhenOpened;
 
   /// No description provided for @timerBlockWhenOpenedHint.

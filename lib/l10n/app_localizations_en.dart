@@ -340,7 +340,7 @@ class AppLocalizationsEn extends AppLocalizations {
   String get timerLimitCleared => 'Daily limit removed.';
 
   @override
-  String get timerBlockWhenOpened => 'Block this app when opened';
+  String get timerBlockWhenOpened => 'Block this app';
 
   @override
   String get timerBlockWhenOpenedHint =>

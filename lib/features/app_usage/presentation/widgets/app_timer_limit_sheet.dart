@@ -2,9 +2,11 @@ import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
 import 'package:app_usage/core/settings/app_timer_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/widgets/g_blur_sheet.dart';
 import 'package:app_usage/core/widgets/g_button.dart';
+import 'package:app_usage/core/widgets/g_card.dart';
 import 'package:app_usage/core/widgets/g_gap.dart';
 import 'package:app_usage/core/widgets/g_text.dart';
 import 'package:app_usage/features/app_usage/domain/entities/app_usage_entity.dart';
@@ -12,7 +14,7 @@ import 'package:app_usage/features/app_usage/presentation/widgets/app_logo.dart'
 import 'package:app_usage/features/app_usage/presentation/widgets/duration_wheel_picker.dart';
 import 'package:app_usage/l10n/app_localizations.dart';
 
-/// Opens a sheet to set (or clear) a daily usage limit for [app].
+/// Opens a sheet to set a daily limit and/or block [app] when opened.
 ///
 /// How to use:
 /// ```dart
@@ -25,17 +27,20 @@ Future<void> showAppTimerLimitSheet(
   return showGBlurredBottomSheet<void>(
     context: context,
     builder: (sheetContext) {
-      return BlocProvider.value(
-        value: context.read<AppTimerCubit>(),
+      return MultiBlocProvider(
+        providers: [
+          BlocProvider.value(value: context.read<AppTimerCubit>()),
+          BlocProvider.value(value: context.read<BlockedAppsCubit>()),
+        ],
         child: AppTimerLimitSheet(app: app),
       );
     },
   );
 }
 
-/// Bottom sheet body: wheel picker + save / clear actions for one app.
+/// Bottom sheet body: wheel picker, block toggle, and save / clear actions.
 class AppTimerLimitSheet extends StatefulWidget {
-  /// Creates the per-app daily-limit sheet.
+  /// Creates the per-app daily-limit / block sheet.
   const AppTimerLimitSheet({super.key, required this.app});
 
   final AppUsageEntity app;
@@ -47,14 +52,16 @@ class AppTimerLimitSheet extends StatefulWidget {
 class _AppTimerLimitSheetState extends State<AppTimerLimitSheet> {
   late int _hours;
   late int _minutes;
+  late bool _blocked;
   late bool _hadLimit;
   bool _saving = false;
 
   @override
   void initState() {
     super.initState();
-    final saved =
-        context.read<AppTimerCubit>().limitFor(widget.app.packageName);
+    final packageName = widget.app.packageName;
+    final saved = context.read<AppTimerCubit>().limitFor(packageName);
+    _blocked = context.read<BlockedAppsCubit>().isBlocked(packageName);
     _hadLimit = saved != null;
     if (saved != null) {
       _hours = saved.hours.clamp(0, 23);
@@ -68,7 +75,7 @@ class _AppTimerLimitSheetState extends State<AppTimerLimitSheet> {
   Future<void> _save() async {
     if (_saving) return;
     final totalMinutes = _hours * 60 + _minutes;
-    if (totalMinutes <= 0) {
+    if (totalMinutes <= 0 && !_blocked) {
       ScaffoldMessenger.of(context).showSnackBar(
         SnackBar(content: Text(AppLocalizations.of(context).timerInvalidLimit)),
       );
@@ -78,26 +85,36 @@ class _AppTimerLimitSheetState extends State<AppTimerLimitSheet> {
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
     final l10n = AppLocalizations.of(context);
-    final notify = context
-            .read<AppTimerCubit>()
-            .limitFor(widget.app.packageName)
-            ?.notify ??
-        true;
+    final packageName = widget.app.packageName;
+    final timerCubit = context.read<AppTimerCubit>();
+    final blockedCubit = context.read<BlockedAppsCubit>();
+    final notify = timerCubit.limitFor(packageName)?.notify ?? true;
+    final blocked = _blocked;
 
-    await context.read<AppTimerCubit>().setLimit(
-          AppTimerLimit(
-            packageName: widget.app.packageName,
-            limitMinutes: totalMinutes,
-            notify: notify,
-          ),
-        );
+    if (totalMinutes > 0) {
+      await timerCubit.setLimit(
+        AppTimerLimit(
+          packageName: packageName,
+          limitMinutes: totalMinutes,
+          notify: notify,
+        ),
+      );
+    } else if (_hadLimit) {
+      await timerCubit.clearLimit(packageName);
+    }
+
+    await blockedCubit.setBlocked(packageName, blocked);
 
     if (!mounted) return;
-    messenger.showSnackBar(SnackBar(content: Text(l10n.timerSaved)));
+    messenger.showSnackBar(
+      SnackBar(
+        content: Text(blocked ? l10n.timerBlockSaved : l10n.timerSaved),
+      ),
+    );
     Navigator.of(context).pop();
   }
 
-  Future<void> _clear() async {
+  Future<void> _clearLimit() async {
     if (_saving) return;
     setState(() => _saving = true);
     final messenger = ScaffoldMessenger.of(context);
@@ -128,7 +145,7 @@ class _AppTimerLimitSheetState extends State<AppTimerLimitSheet> {
         child: SafeArea(
           top: false,
           bottom: false,
-          child: Padding(
+          child: SingleChildScrollView(
             padding: const EdgeInsets.fromLTRB(24, 12, 24, 20),
             child: Column(
               mainAxisSize: MainAxisSize.min,
@@ -168,16 +185,39 @@ class _AppTimerLimitSheetState extends State<AppTimerLimitSheet> {
                   onMinutesChanged: (v) => setState(() => _minutes = v),
                 ),
                 GGap.m(),
+                DecoratedBox(
+                  decoration: BoxDecoration(
+                    color: Theme.of(context).brightness == Brightness.dark
+                        ? AppTheme.rowStripeDark
+                        : AppTheme.rowStripe,
+                    borderRadius:
+                        BorderRadius.circular(AppTheme.radiusCard / 2),
+                  ),
+                  child: GSettingsTile(
+                    icon: Icons.block_rounded,
+                    iconColor: AppTheme.iconRed,
+                    title: l10n.timerBlockWhenOpened,
+                    subtitle: l10n.timerBlockWhenOpenedHint,
+                    trailing: Switch.adaptive(
+                      value: _blocked,
+                      activeTrackColor: AppTheme.error,
+                      onChanged: (v) => setState(() => _blocked = v),
+                    ),
+                  ),
+                ),
+                GGap.m(),
                 GButton(
                   label: l10n.timerSetButton,
-                  icon: Icons.hourglass_top_rounded,
+                  icon: _blocked
+                      ? Icons.block_rounded
+                      : Icons.hourglass_top_rounded,
                   isLoading: _saving,
                   onPressed: _saving ? null : _save,
                 ),
                 if (_hadLimit) ...[
                   GGap.s(),
                   TextButton(
-                    onPressed: _saving ? null : _clear,
+                    onPressed: _saving ? null : _clearLimit,
                     child: GText(
                       l10n.timerClearLimit,
                       style: Theme.of(context).textTheme.labelLarge,

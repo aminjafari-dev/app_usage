@@ -153,7 +153,7 @@
   },
   "timerClearLimit": "Remove limit",
   "timerLimitCleared": "Daily limit removed.",
-  "timerBlockWhenOpened": "Block this app when opened",
+  "timerBlockWhenOpened": "Block this app",
   "timerBlockWhenOpenedHint": "Shows a full-screen lock so the app cannot be used.",
   "timerBlockedLabel": "Blocked",
   "timerLimitAndBlockedSummary": "Limit {hours}h {minutes}m · Blocked",

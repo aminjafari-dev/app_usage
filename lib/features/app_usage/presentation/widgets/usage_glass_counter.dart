@@ -791,12 +791,19 @@ class UsageAppTile extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final hasLimit = limit != null;
-    final accent = hasLimit
-        ? (blocked ? AppTheme.error : AppTheme.primary)
-        : AppTheme.onSurfaceMuted;
+    final Color accent;
+    if (blocked) {
+      accent = AppTheme.error;
+    } else if (hasLimit) {
+      accent = AppTheme.primary;
+    } else {
+      accent = AppTheme.onSurfaceMuted;
+    }
 
     final String subtitle;
-    if (blocked) {
+    if (blocked && hasLimit) {
+      subtitle = l10n.timerLimitAndBlockedSummary(limit!.hours, limit!.minutes);
+    } else if (blocked) {
       subtitle = l10n.timerBlockedLabel;
     } else {
       subtitle = formatUsageDuration(entity.todaySeconds);
@@ -849,7 +856,7 @@ class UsageAppTile extends StatelessWidget {
                   hasLimit: hasLimit,
                   blocked: blocked,
                   accent: accent,
-                  limitLabel: hasLimit
+                  limitLabel: hasLimit && !blocked
                       ? l10n.timerLimitCompact(limit!.hours, limit!.minutes)
                       : null,
                   onTap: () => showAppTimerLimitSheet(context, app: entity),
@@ -872,7 +879,7 @@ class UsageAppTile extends StatelessWidget {
   }
 }
 
-/// Right-side hourglass control: outline when empty, filled + label when set.
+/// Right-side control: hourglass for limits, banned icon when blocked.
 class _HourglassLimitButton extends StatelessWidget {
   const _HourglassLimitButton({
     required this.hasLimit,
@@ -890,11 +897,14 @@ class _HourglassLimitButton extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
-    // Always keep the hourglass affordance for setting a daily limit; blocked
-    // state is already reflected under the app name.
-    final icon = hasLimit
-        ? Icons.hourglass_bottom_rounded
-        : Icons.hourglass_empty_rounded;
+    final IconData icon;
+    if (blocked) {
+      icon = Icons.block_rounded;
+    } else if (hasLimit) {
+      icon = Icons.hourglass_bottom_rounded;
+    } else {
+      icon = Icons.hourglass_empty_rounded;
+    }
 
     return Material(
       color: Colors.transparent,
@@ -921,13 +931,6 @@ class _HourglassLimitButton extends StatelessWidget {
                     color: accent,
                     textAlign: TextAlign.center,
                     maxLines: 1,
-                  ),
-                ] else if (blocked) ...[
-                  const SizedBox(height: 2),
-                  const Icon(
-                    Icons.block_rounded,
-                    size: 12,
-                    color: AppTheme.error,
                   ),
                 ],
               ],
