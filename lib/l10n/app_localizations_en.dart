@@ -329,6 +329,17 @@ class AppLocalizationsEn extends AppLocalizations {
   }
 
   @override
+  String timerLimitCompact(int hours, int minutes) {
+    return '${hours}h ${minutes}m';
+  }
+
+  @override
+  String get timerClearLimit => 'Remove limit';
+
+  @override
+  String get timerLimitCleared => 'Daily limit removed.';
+
+  @override
   String get timerBlockWhenOpened => 'Block this app when opened';
 
   @override

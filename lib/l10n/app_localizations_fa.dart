@@ -329,6 +329,17 @@ class AppLocalizationsFa extends AppLocalizations {
   }
 
   @override
+  String timerLimitCompact(int hours, int minutes) {
+    return '$hoursس $minutesد';
+  }
+
+  @override
+  String get timerClearLimit => 'حذف محدودیت';
+
+  @override
+  String get timerLimitCleared => 'محدودیت روزانه حذف شد.';
+
+  @override
   String get timerBlockWhenOpened => 'مسدود کردن این برنامه هنگام باز شدن';
 
   @override

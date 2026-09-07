@@ -3,6 +3,8 @@ import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:intl/intl.dart';
 
 import 'package:app_usage/core/locator/locator.dart';
+import 'package:app_usage/core/settings/app_timer_cubit.dart';
+import 'package:app_usage/core/settings/blocked_apps_cubit.dart';
 import 'package:app_usage/core/theme/app_theme.dart';
 import 'package:app_usage/core/utils/duration_format.dart';
 import 'package:app_usage/core/widgets/g_card.dart';
@@ -108,6 +110,8 @@ class _LoadedBody extends StatelessWidget {
   Widget build(BuildContext context) {
     final l10n = AppLocalizations.of(context);
     final chartPoints = chartPointsFor(snapshot);
+    final limits = context.watch<AppTimerCubit>().state;
+    final blocked = context.watch<BlockedAppsCubit>().state;
 
     return Column(
       crossAxisAlignment: CrossAxisAlignment.stretch,
@@ -175,6 +179,8 @@ class _LoadedBody extends StatelessWidget {
                   UsageAppTile(
                     entity: app,
                     showDivider: false,
+                    limit: limits[app.packageName],
+                    blocked: blocked.contains(app.packageName),
                   ),
               ],
             ),

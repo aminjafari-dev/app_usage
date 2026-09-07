@@ -692,6 +692,24 @@ abstract class AppLocalizations {
   /// **'Limit {hours}h {minutes}m'**
   String timerLimitSummary(int hours, int minutes);
 
+  /// No description provided for @timerLimitCompact.
+  ///
+  /// In en, this message translates to:
+  /// **'{hours}h {minutes}m'**
+  String timerLimitCompact(int hours, int minutes);
+
+  /// No description provided for @timerClearLimit.
+  ///
+  /// In en, this message translates to:
+  /// **'Remove limit'**
+  String get timerClearLimit;
+
+  /// No description provided for @timerLimitCleared.
+  ///
+  /// In en, this message translates to:
+  /// **'Daily limit removed.'**
+  String get timerLimitCleared;
+
   /// No description provided for @timerBlockWhenOpened.
   ///
   /// In en, this message translates to:
